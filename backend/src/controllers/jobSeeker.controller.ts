@@ -27,8 +27,6 @@ export const createJobSeeker = async (req: Request, res: Response) => {
     await jobSeeker.save();
 
     const jobSeekerDto = await jobSeeker.populate("user_id");
-
-    console.log(jobSeekerDto);
     return res
       .status(201)
       .json({ error: null, data: toJobSeekerDTO(jobSeekerDto) });

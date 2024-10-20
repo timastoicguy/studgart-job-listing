@@ -11,7 +11,12 @@ import userRoutes from "./routes/user.routes";
 import fileUploadRoutes from "./routes/fileUpload.routes";
 import recruiterRoutes from "./routes/recruiter.routes";
 import jobSeekerRoutes from "./routes/jobSeeker.routes";
-
+import jobsRoutes from "./routes/job.routes";
+import jobTypeRoutes from "./routes/jobTypeRoutes.routes";
+import jobLevelRoutes from "./routes/jobLevelRoutes.routes";
+import jobPositionRoutes from "./routes/jobPositionRoutes.routes";
+import locationRoutes from "./routes/locationRoutes.routes";
+import mainTechnologyRoutes from "./routes/mainTechnologyRoutes.routes";
 // Load environment variables
 dotenv.config();
 
@@ -43,6 +48,13 @@ app.use("/api", userRoutes);
 app.use("/api/upload", fileUploadRoutes);
 app.use("/api", recruiterRoutes);
 app.use("/api", jobSeekerRoutes);
+app.use("/api", jobsRoutes);
+//filters routes
+app.use("/api/filters", jobTypeRoutes);
+app.use("/api/filters", jobLevelRoutes);
+app.use("/api/filters", jobPositionRoutes);
+app.use("/api/filters", locationRoutes);
+app.use("/api/filters", mainTechnologyRoutes);
 
 connectDB().then((res) => {
   app.listen(process.env.PORT || 3000, () => {
