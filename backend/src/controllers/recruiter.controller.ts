@@ -16,6 +16,8 @@ export const toRecruiterDTO = (recruiter: IRecruiter): IRecruiterDTO => ({
   created_at: recruiter.created_at,
   user: toUserDTO(recruiter.user_id as any),
   company: toCompanyDTO(recruiter.company_id as any),
+  user: toUserDTO(recruiter.user),
+  company: toCompanyDTO(recruiter.company),
 });
 
 /**

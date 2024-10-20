@@ -43,6 +43,7 @@ app.use("/api", userRoutes);
 app.use("/api/upload", fileUploadRoutes);
 app.use("/api", recruiterRoutes);
 app.use("/api", jobSeekerRoutes);
+
 connectDB().then((res) => {
   app.listen(process.env.PORT || 3000, () => {
     console.log(`Server running on port ${process.env.PORT || 3000}`);
