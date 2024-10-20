@@ -37,6 +37,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
       page = 1,
       limit = 10,
       sort = "-postedDate",
+      urgent,
       search,
       company,
       category,
@@ -213,12 +214,29 @@ export const getAllJobs = async (req: Request, res: Response) => {
       }
     }
 
+    // Check for urgent jobs filtering
+    if (urgent) {
+      filter.isUrgent = true; // Only include urgent jobs if this parameter is provided
+    }
+
+    // Modify sort criteria based on user input
+    const sortCriteria: any = {};
+    if (sort === "newest") {
+      sortCriteria.postedDate = -1; // Sort by newest first
+    } else if (sort === "urgent") {
+      sortCriteria.isUrgent = -1; // Prioritize urgent jobs
+    } else if (sort === "highestSalary") {
+      sortCriteria.salaryRange = -1; // Sort by highest salary
+    } else {
+      sortCriteria.postedDate = -1; // Default to newest if no specific sort is chosen
+    }
+
     // @ts-ignore
     // Cuối cùng, gọi paginate
     const paginatedJobs = await Job.paginate(filter, {
       page: Number(page),
       limit: Number(limit),
-      sort: String(sort),
+      sort: sortCriteria,
       populate: [
         { path: "company" },
         { path: "jobCategory" },
@@ -297,5 +315,169 @@ export const deleteJobById = async (req: Request, res: Response) => {
     return res.status(200).json({ error: null, data: deletedJob });
   } catch (error: any) {
     return res.status(500).json({ error: error.message, data: null });
+  }
+};
+
+export const suggestJobs = async (req: Request, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      technologies,
+      company,
+      location,
+      experienceLevel,
+      employmentType,
+      skills,
+    }: any = req.query;
+
+    const filter: any = {};
+
+    // Tạo điều kiện lọc cho technologies
+    if (technologies) {
+      const technologyList = technologies
+        .split(",")
+        .map((tech: string) => tech.trim());
+      filter.technologies = { $elemMatch: { code: { $in: technologyList } } };
+    }
+
+    // Lọc theo công ty
+    if (company && mongoose.Types.ObjectId.isValid(company)) {
+      filter.company = company;
+    }
+
+    // Lọc theo địa điểm
+    if (location) {
+      const locationCodes = location
+        .split(",")
+        .map((code: string) => code.trim());
+      filter.location = { $elemMatch: { code: { $in: locationCodes } } };
+    }
+
+    // Lọc theo cấp độ kinh nghiệm
+    if (experienceLevel) {
+      const experienceCodes = experienceLevel
+        .split(",")
+        .map((code: string) => code.trim());
+      filter.experienceLevel = {
+        $elemMatch: { code: { $in: experienceCodes } },
+      };
+    }
+
+    // Lọc theo loại hình công việc
+    if (employmentType) {
+      const employmentTypeCodes = employmentType
+        .split(",")
+        .map((code: string) => code.trim());
+      filter.employmentType = {
+        $elemMatch: { code: { $in: employmentTypeCodes } },
+      };
+    }
+
+    // Lọc theo kỹ năng
+    if (skills) {
+      const skillCodes = skills.split(",").map((skill: string) => skill.trim());
+      filter.skills = { $elemMatch: { $in: skillCodes } };
+    }
+
+    // Tìm kiếm công việc dựa trên bộ lọc
+
+    // @ts-ignore
+    const {
+      docs: jobs,
+      totalDocs,
+      totalPages,
+    }: // @ts-ignore
+    any = await Job.paginate(filter, {
+      page: Number(page),
+      limit: Number(limit),
+      populate: "company jobCategory recruiter",
+    });
+
+    // Ưu tiên các công việc dựa trên tiêu chí khớp
+    const prioritizedJobs = jobs.map((job: any) => {
+      let score = 0;
+
+      // Tính điểm cho technologies
+      if (technologies) {
+        const techList = technologies
+          .split(",")
+          .map((tech: string) => tech.trim());
+        score += job.technologies.filter((tech: any) =>
+          techList.includes(tech.code)
+        ).length;
+      }
+
+      // Tính điểm cho công ty
+      if (company && job.company.equals(company)) score += 1;
+
+      // Tính điểm cho địa điểm
+      if (location) {
+        const locationCodes = location
+          .split(",")
+          .map((code: string) => code.trim());
+        score += job.location.filter((loc: any) =>
+          locationCodes.includes(loc.code)
+        ).length;
+      }
+
+      // Tính điểm cho cấp độ kinh nghiệm
+      if (experienceLevel) {
+        const experienceCodes = experienceLevel
+          .split(",")
+          .map((code: string) => code.trim());
+        score += job.experienceLevel.filter((exp: any) =>
+          experienceCodes.includes(exp.code)
+        ).length;
+      }
+
+      // Tính điểm cho loại hình công việc
+      if (employmentType) {
+        const employmentTypeCodes = employmentType
+          .split(",")
+          .map((code: string) => code.trim());
+        score += job.employmentType.filter((emp: any) =>
+          employmentTypeCodes.includes(emp.code)
+        ).length;
+      }
+
+      return { job, score };
+    });
+
+    // Sắp xếp công việc theo điểm số
+    prioritizedJobs.sort((a: any, b: any) => b.score - a.score);
+
+    // Kiểm tra nếu không có công việc nào và trả về danh sách mặc định
+    if (totalDocs === 0) {
+      const defaultJobs = await Job.find({}) // Hoặc một truy vấn khác để lấy công việc mặc định
+        .limit(limit) // Giới hạn số lượng công việc trả về
+        .populate("company jobCategory recruiter")
+        .exec();
+
+      return res.status(200).json({
+        error: null,
+        message: "No matching jobs found, returning default jobs.",
+        data: {
+          jobs: defaultJobs,
+          total: defaultJobs.length,
+          currentPage: page,
+          totalPages: 1,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      error: null,
+      data: {
+        jobs: prioritizedJobs.map((item: any) => item.job),
+        total: totalDocs,
+        currentPage: page,
+        totalPages,
+      },
+    });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ error: error.message || "Server Error", data: null });
   }
 };

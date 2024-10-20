@@ -27,6 +27,7 @@ export interface IJob extends Document {
   applicationDeadline: Date;
   status: "pending" | "accepted" | "rejected" | "canncel";
   numberOfVacancies: number;
+  isUrgent: boolean;
 }
 
 const jobSchema = new Schema<IJob>({
@@ -110,6 +111,7 @@ const jobSchema = new Schema<IJob>({
     default: "pending",
   },
   numberOfVacancies: { type: Number, default: 1 },
+  isUrgent: { type: Boolean, default: false },
 });
 
 // Add pagination plugin
