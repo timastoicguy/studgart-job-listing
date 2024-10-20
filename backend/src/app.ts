@@ -10,6 +10,7 @@ import jobCategoryMappingRoutes from "./routes/jobCategoryMapping.routes";
 import userRoutes from "./routes/user.routes";
 import fileUploadRoutes from "./routes/fileUpload.routes";
 import recruiterRoutes from "./routes/recruiter.routes";
+import jobSeekerRoutes from "./routes/jobSeeker.routes";
 
 // Load environment variables
 dotenv.config();
@@ -41,6 +42,8 @@ app.use("/api", jobCategoryMappingRoutes);
 app.use("/api", userRoutes);
 app.use("/api/upload", fileUploadRoutes);
 app.use("/api", recruiterRoutes);
+app.use("/api", jobSeekerRoutes);
+
 connectDB().then((res) => {
   app.listen(process.env.PORT || 3000, () => {
     console.log(`Server running on port ${process.env.PORT || 3000}`);

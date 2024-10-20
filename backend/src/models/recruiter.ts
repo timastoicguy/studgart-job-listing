@@ -26,7 +26,7 @@ const recruiterSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["lock", "unlock", "pending"],
-    default: "pending",
+    default: "unlock",
   },
   created_at: { type: Date, default: Date.now },
 });
