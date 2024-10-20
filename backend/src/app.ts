@@ -49,7 +49,6 @@ app.use("/api/upload", fileUploadRoutes);
 app.use("/api", recruiterRoutes);
 app.use("/api", jobSeekerRoutes);
 app.use("/api", jobsRoutes);
-
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);
