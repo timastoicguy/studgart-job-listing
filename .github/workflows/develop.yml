@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - develop
+      - features/cicd
 
 jobs:
+
   tag-version:
     runs-on: ubuntu-latest
     permissions:
@@ -71,3 +73,23 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       environment: ${{ steps.determine-environment.outputs.env }}
       infrastructure: ${{ steps.filter.outputs.infrastructure }}
+  
+  frontend:
+    permissions:
+      contents: read
+      id-token: write
+    needs: determine-actions
+    if: ${{ needs.determine-actions.outputs.frontend == 'true' }}
+    uses: ./.github/workflows/rw-build-deploy.yml
+    with:
+      working-dir: frontend
+
+  backend:
+    permissions:
+      contents: read
+      id-token: write
+    needs: determine-actions
+    if: ${{ needs.determine-actions.outputs.backend == 'true' }}
+    uses: ./.github/workflows/rw-build-deploy.yml
+    with:
+      working-dir: backend
