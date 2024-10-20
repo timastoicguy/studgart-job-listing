@@ -51,7 +51,6 @@ app.use("/api", recruiterRoutes);
 app.use("/api", jobSeekerRoutes);
 app.use("/api", jobsRoutes);
 app.use("/api", applicationRoutes);
-
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);
