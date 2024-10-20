@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-interface ICompany extends Document {
+export interface ICompany extends Document {
   user_id: mongoose.Types.ObjectId;
   company_size: string;
   profile_summary: string;
