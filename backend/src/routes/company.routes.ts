@@ -12,6 +12,7 @@ import {
   getCompanyById,
   updateCompany,
 } from "../controllers/company.controller";
+import Job from "../models/jobs.models";
 
 const router = express.Router();
 
@@ -217,4 +218,87 @@ router.patch("/companies/:id", companyValidation, updateCompany);
  */
 router.delete("/companies/:id", deleteCompany);
 
+/**
+ * @swagger
+ * /companies-top/top:
+ *   get:
+ *     tags: [Company]
+ *     summary: get top company
+ *     parameters:
+ *       - name: size
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           example: 5
+ *     responses:
+ *       200:
+ *         description: get successfully
+ *       404:
+ *         description: Job not found
+ */
+router.get(
+  "/companies-top/top",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { size = 5 } = req.query;
+
+    try {
+      // Tính số lượng công việc của từng công ty
+      const topCompanies = await Job.aggregate([
+        {
+          $group: {
+            _id: "$company", // Nhóm theo trường company
+            jobCount: { $sum: 1 }, // Tính tổng số lượng công việc
+          },
+        },
+        {
+          $sort: { jobCount: -1 }, // Sắp xếp theo số lượng công việc giảm dần
+        },
+        {
+          $limit: Number(size), // Giới hạn số lượng công ty
+        },
+        {
+          $lookup: {
+            from: "companies", // Tên collection của công ty (phải viết đúng theo tên đã định nghĩa trong MongoDB)
+            localField: "_id", // Trường ID trong nhóm
+            foreignField: "_id", // Trường ID trong collection công ty
+            as: "companyDetails", // Tên trường kết quả
+          },
+        },
+        {
+          $unwind: "$companyDetails", // Giải nén thông tin công ty
+        },
+        {
+          $project: {
+            _id: 0,
+            company: "$companyDetails", // Trả về thông tin chi tiết của công ty
+            jobCount: 1, // Trả về số lượng công việc
+          },
+        },
+      ]);
+
+      console.log(topCompanies);
+      // Kiểm tra xem có công ty nào không
+      if (topCompanies.length === 0) {
+        return res.status(404).json({
+          error: "Không tìm thấy công ty nào có công việc.",
+          data: null,
+        });
+      }
+
+      // Trả về thông tin các công ty và số lượng công việc
+      res.status(200).json({
+        error: null,
+        data: {
+          topCompanies: topCompanies.map((company) => ({
+            company: company.company,
+            jobCount: company.jobCount,
+          })),
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching top companies: ", error);
+      next(error);
+    }
+  }
+);
 export default router;

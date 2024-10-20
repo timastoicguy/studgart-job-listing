@@ -18,6 +18,7 @@ import jobPositionRoutes from "./routes/jobPositionRoutes.routes";
 import locationRoutes from "./routes/locationRoutes.routes";
 import mainTechnologyRoutes from "./routes/mainTechnologyRoutes.routes";
 import applicationRoutes from "./routes/application.routes";
+import favoriteRoutes from "./routes/favoriteRoutes.routes";
 // Load environment variables
 dotenv.config();
 
@@ -51,6 +52,8 @@ app.use("/api", recruiterRoutes);
 app.use("/api", jobSeekerRoutes);
 app.use("/api", jobsRoutes);
 app.use("/api", applicationRoutes);
+app.use("/api", favoriteRoutes);
+
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);
