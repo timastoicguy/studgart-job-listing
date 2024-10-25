@@ -40,17 +40,17 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
   return (
     <div
       className={clsx(
-        "fixed flex flex-col w-[250px] h-screen top-[80px] z-50 bg-white shadow-md transition-all duration-300",
+        "fixed flex flex-col w-[250px] h-[calc(100vh)] top-[60px] z-40 bg-white shadow-md transition-all duration-300",
         {
           "-left-[250px] lg:left-0 pl-3 pr-3": !showSidebar,
           "left-0 shadow-black shadow-lg lg:shadow-none pl-3 pr-3": showSidebar,
         }
       )}
     >
-      <h2 className="font-semibold text-lg mb-4">Bộ lọc</h2>
-
+      <h2 className="font-semibold text-lg mb-4 mt-6">Bộ lọc</h2>
+      <label className="block text-sm font-medium mb-1 text-slate-400">Ưu tiên hiển thị</label>
       {/* Radio Group */}
-      <RadioGroup className="space-y-3 mb-6" defaultValue="all">
+      <RadioGroup className="space-y-0 mb-4" defaultValue="all">
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="all" id="all" />
           <label htmlFor="all">Tất cả công việc</label>
@@ -71,7 +71,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Job Position Select */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Vị trí công việc</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Vị trí công việc</label>
         <Select>
           <SelectTrigger>
             <SelectValue placeholder="Chọn vị trí" />
@@ -86,7 +86,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Rank Select */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Cấp bậc</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Cấp bậc</label>
         <Select>
           <SelectTrigger>
             <SelectValue placeholder="Chọn cấp bậc" />
@@ -101,7 +101,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Location Input */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Địa điểm</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Địa điểm</label>
         <input
           type="text"
           placeholder="Nhập địa điểm"
@@ -112,7 +112,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Job Type Select */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Kiểu công việc</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Kiểu công việc</label>
         <Select>
           <SelectTrigger>
             <SelectValue placeholder="Chọn kiểu công việc" />
@@ -126,7 +126,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Main Technology Select */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Công nghệ chính</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Công nghệ chính</label>
         {technologies.map((tech, index) => (
           <div key={index} className="flex items-center mb-2">
             <Select onValueChange={(value) => handleTechnologyChange(index, value)}>
@@ -168,7 +168,7 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Apply Switch */}
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">Áp dụng</label>
+        <label className="text-sm font-medium text-slate-400">Áp dụng</label>
         <Switch defaultChecked />
       </div>
     </div>

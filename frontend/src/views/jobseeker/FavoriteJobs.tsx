@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
-import { FiHeart, FiMapPin } from 'react-icons/fi';
+import { FiHeart, FiMapPin,FiTrash  } from 'react-icons/fi';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import {
   Pagination,
@@ -11,17 +11,17 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const Jobs: React.FC = () => {
+const FavoriteJobs: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
 
   return (
     <TooltipProvider>
-      <div className=" lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
+      <div className=" lg:pl-[250px] flex flex-col md:flex-row bg-gray-100">
         {/* Main Content */}
         <main className="flex-1 p-6">
           <div className="bg-white p-6 rounded-md shadow-md">
           <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-          Danh sách công việc
+          Danh sách công việc đã lưu
         </div>
             
   
@@ -34,21 +34,22 @@ const Jobs: React.FC = () => {
                 placeholder="Tìm kiếm theo tên công ty, công việc"
               />
               <div className="flex items-center w-full sm:w-auto">
-                <span className="mr-2">Sort by:</span>
+                <span className="mr-2">Trạng thái:</span>
                 <select className="border rounded-md p-2 w-full sm:w-auto">
-                  <option value="newest">Mới nhất</option>
-                  <option value="oldest">Cũ nhất</option>
+                <option value="newest">Tất cả</option>
+                  <option value="newest">Đã ứng tuyển</option>
+                  <option value="oldest">Chưa ứng tuyển</option>
                 </select>
               </div>
             </div>
   
             {/* Job Listings */}
-            <div className="space-y-4 overflow-y-auto   ">
+            <div className="space-y-4 overflow-y-auto h-[65vh]   ">
 
               {jobListings.slice(0, itemsPerPage).map((job, index) => (
                 <div
                   key={index}
-                  className="p-4   border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
+                  className="p-4   border rounded-md flex flex-col sm:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex space-x-4 flex-1 ">
                     <img
@@ -91,17 +92,23 @@ const Jobs: React.FC = () => {
                       <div className="text-red-500 font-semibold mt-1">
                         {job.salary}
                       </div>
+                      <hr className="col-span-3 border-t border-gray-300 my-1" />
+                      <div className={`font-semibold mt-1 ${job.status === "Đã ứng tuyển" ? "text-blue-500" : "text-gray-500"}`}>
+  {job.status}
+</div>
+
                     </div>
                   </div>
-                  <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
-  <button className="bg-green-500 text-white px-4 py-2 rounded-md">
-    Ứng tuyển
-  </button>
+                  <div className="flex flex-row sm:flex-col items-center max-sm:w-full space-x-2 sm:space-y-2 mt-4 sm:mt-0 justify-end">
+  
   <Tooltip>
-    <TooltipTrigger>
-      <FiHeart className="text-gray-500 hover:text-red-500 cursor-pointer" />
-    </TooltipTrigger>
-    <TooltipContent>Yêu thích</TooltipContent>
+  <TooltipTrigger>
+  <button className="bg-slate-300 text-black px-4 py-2 rounded-md flex items-center">
+    <FiTrash className="mr-2" /> {/* Icon sọt rác */}
+    Bỏ lưu
+  </button>
+</TooltipTrigger>
+    <TooltipContent>Bỏ lưu</TooltipContent>
   </Tooltip>
 </div>
 
@@ -133,8 +140,7 @@ const Jobs: React.FC = () => {
         </main>
   
         {/* Right Sidebar */}
-        <aside className="space-y-6">
-        <div className="bg-white p-6 rounded-md shadow-md border">
+        <aside className="w-full sm:w-1/4 bg-white p-6 shadow-md">
           <h2 className="text-lg font-bold mb-4">Các công việc có thể bạn quan tâm</h2>
           <div className="space-y-4">
             {recommendedJobs.map((job, index) => (
@@ -184,7 +190,6 @@ const Jobs: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
         </aside>
       </div>
     </TooltipProvider>
@@ -202,6 +207,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48', // Placeholder for avatar image
+    status:'Đã ứng tuyển',
   },
   {
     title: 'Frontend Developer (Junior)',
@@ -212,6 +218,7 @@ const jobListings = [
     isHot: false,
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48',
+    status:'Đã ứng tuyển',
   },
   {
     title: 'Web Developer',
@@ -222,6 +229,7 @@ const jobListings = [
     isHot: false,
     isNew: false,
     avatar: 'https://via.placeholder.com/48',
+    status:'Đã ứng tuyển',
   },
   {
     title: 'Python Developer',
@@ -232,6 +240,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48',
+    status:'Chưa ứng tuyển',
   },
   {
     title: 'Senior Front-End Developer (ReactJS)',
@@ -242,6 +251,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: false,
     avatar: 'https://via.placeholder.com/48',
+    status:'Chưa ứng tuyển',
   },
   {
     title: 'Fresher Frontend Developer (ReactJS)',
@@ -252,6 +262,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48', // Placeholder for avatar image
+    status:'Chưa ứng tuyển',
   },
   {
     title: 'Frontend Developer (Junior)',
@@ -262,6 +273,7 @@ const jobListings = [
     isHot: false,
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48',
+    status:'Đã ứng tuyển',
   },
   {
     title: 'Web Developer',
@@ -272,6 +284,7 @@ const jobListings = [
     isHot: false,
     isNew: false,
     avatar: 'https://via.placeholder.com/48',
+    status:'Chưa ứng tuyển',
   },
   {
     title: 'Python Developer',
@@ -282,6 +295,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: true,  // This job is "Mới"
     avatar: 'https://via.placeholder.com/48',
+    status:'Chưa ứng tuyển',
   },
   {
     title: 'Senior Front-End Developer (ReactJS)',
@@ -292,6 +306,7 @@ const jobListings = [
     isHot: true,  // This job is "Tuyển gấp"
     isNew: false,
     avatar: 'https://via.placeholder.com/48',
+    status:'Chưa ứng tuyển',
   },
 ];
 
@@ -341,4 +356,4 @@ const topCompanies = [
   },
 ];
 
-export default Jobs;
+export default FavoriteJobs;

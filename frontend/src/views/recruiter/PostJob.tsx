@@ -3,7 +3,6 @@ import { useState } from "react";
 import { FiSend, FiHeart, FiMapPin } from "react-icons/fi";
 
 export default function JobListing() {
-  const [language, setLanguage] = useState<'vi' | 'en'>('vi'); // State for language selection
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);
   const [salaryMax, setSalaryMax] = useState(1200);

@@ -24,7 +24,7 @@ export default function Header({ showSideBar, setShowSideBar, userData }: Header
   const menuItems = roleOptions[userData.role] || [];
 
   return (
-    <div className="sticky w-full left-0 top-0 z-30">
+    <div className="sticky w-full left-0 top-0 z-50">
       <div className="flex flex-row px-2 py-2.5 ml-0 bg-header justify-between items-center shadow-md">
         {/* Logo Section */}
         <div className="flex items-center gap-4">
@@ -38,7 +38,7 @@ export default function Header({ showSideBar, setShowSideBar, userData }: Header
           </button>
           <div className="flex items-center">
             <img
-              src="..\public\images\Logo.svg" // Thay thế bằng đường dẫn logo của bạn
+              src="..\public\images\logo.png" // Thay thế bằng đường dẫn logo của bạn
               alt="Logo"
               className="h-8"
             />

@@ -29,7 +29,7 @@ export default function MainLayout() {
 
   // Determine if sidebar should be shown
   // Show sidebar on specific routes like /jobs, /about, etc.
-  const shouldShowSidebar = location.pathname === "/about" || location.pathname.startsWith("/jobs");
+  const shouldShowSidebar = location.pathname === "/about" || location.pathname.startsWith("/jobseeker/jobs");
 
   return (
     <div className="w-full min-h-screen bg-custom">
@@ -46,7 +46,7 @@ export default function MainLayout() {
       <div
         onClick={() => setShowSidebar(false)} // Close sidebar on background click
         className={clsx(
-          "fixed lg:hidden w-screen h-screen top-9 left-0 z-40 duration-200 bg-gray-500/80",
+          "fixed lg:hidden w-screen h-screen top-[6] left-0 z-30 duration-200 bg-gray-500/80",
           {
             invisible: !showSidebar,
             visible: showSidebar,
