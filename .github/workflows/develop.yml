@@ -23,6 +23,9 @@ jobs:
     uses: ./.github/workflows/rw-build-deploy.yml
     with:
       working-dir: frontend
+      PROJECT_VARIABLES: ${{ vars.FRONTEND_VARIABLES_DEV }}
+    secrets:
+      PROJECT_SECRETS: ${{ secrets.FRONTEND_SECRETS_DEV }}
 
   backend:
     permissions:
@@ -33,3 +36,6 @@ jobs:
     uses: ./.github/workflows/rw-build-deploy.yml
     with:
       working-dir: backend
+      PROJECT_VARIABLES: ${{ vars.BACKEND_VARIABLES_DEV }}
+    secrets:
+      PROJECT_SECRETS: ${{ secrets.BACKEND_SECRETS_DEV }}
