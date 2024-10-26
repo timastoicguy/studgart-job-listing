@@ -6,9 +6,6 @@ on:
       working-dir:
         required: true
         type: string
-      environment:
-        required: true
-        type: string
       PROJECT_VARIABLES:
         required: true
         type: string
