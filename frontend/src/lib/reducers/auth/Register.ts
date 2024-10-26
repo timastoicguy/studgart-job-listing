@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 
-// Định nghĩa kiểu dữ liệu cho đăng ký người dùng
+// Define data types for user registration
 interface RegisterData {
   email: string;
   password: string;
@@ -11,11 +10,19 @@ interface RegisterData {
   phone: string;
   address: string;
   role: string;
-  profilePicture?: string; // Thay đổi kiểu thành string
-  bio: string;
+  profilePicture?: File; // Keep this as optional
+  bio?: string;          // Mark as optional since it may not be provided
 }
 
-// Hàm xử lý upload ảnh hồ sơ
+// Define the expected structure of the registration response
+interface RegistrationResponse {
+  success: boolean;
+  message: string;
+  // Add other fields based on your API response
+  // e.g., user: User; (if applicable)
+}
+
+// Function to handle profile picture upload
 export const uploadProfilePicture = async (profilePicture: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', profilePicture);
@@ -28,7 +35,7 @@ export const uploadProfilePicture = async (profilePicture: File): Promise<string
     });
 
     console.log("Uploaded Profile Picture URL:", response.data.url);
-    return response.data.url; // Trả về URL của file đã upload
+    return response.data.url; // Return the uploaded file's URL
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('File upload error:', error.response?.data || error.message);
@@ -39,26 +46,21 @@ export const uploadProfilePicture = async (profilePicture: File): Promise<string
   }
 };
 
-// Hàm xử lý đăng ký
-export const register = async (registerData: RegisterData): Promise<any> => {
-  let profilePictureUrl = '';
+// Function to handle registration
+export const register = async (registerData: RegisterData): Promise<RegistrationResponse> => {
+  let profilePictureUrl: string | undefined; // Make this undefined by default
 
-  // Upload ảnh hồ sơ nếu có
+  // Upload profile picture if provided
   if (registerData.profilePicture) {
     try {
-      // Gọi hàm upload và nhận URL của ảnh hồ sơ đã upload
-      profilePictureUrl = await uploadProfilePicture(registerData.profilePicture as unknown as File);
+      profilePictureUrl = await uploadProfilePicture(registerData.profilePicture);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message); // Log lỗi nếu upload không thành công
-      } else {
-        console.error('Unexpected error during profile picture upload:', error);
-      }
+      console.error(error instanceof Error ? error.message : 'Unexpected error during profile picture upload');
       throw new Error('Error uploading profile picture');
     }
   }
 
-  // Chuẩn bị payload cho đăng ký
+  // Prepare the payload for registration
   const registrationPayload = {
     email: registerData.email,
     password: registerData.password,
@@ -67,18 +69,18 @@ export const register = async (registerData: RegisterData): Promise<any> => {
     phone: registerData.phone,
     address: registerData.address,
     role: registerData.role,
-    bio: registerData.bio,
-    profilePicture: profilePictureUrl || undefined, // Thêm URL ảnh hồ sơ đã upload hoặc undefined nếu không có
+    bio: registerData.bio || '',  // Use an empty string if bio is not provided
+    profilePicture: profilePictureUrl || undefined, // Add the uploaded profile picture URL or undefined if not available
   };
 
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/register', registrationPayload, {
+    const response = await axios.post<RegistrationResponse>('http://localhost:3000/api/auth/register', registrationPayload, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    return response.data; // Trả về dữ liệu phản hồi
+    return response.data; // Return response data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Registration error:', error.response?.data || error.message);

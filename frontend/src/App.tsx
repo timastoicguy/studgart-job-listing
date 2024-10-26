@@ -53,6 +53,7 @@ function App() {
           <Route path="/jobseeker/detailjob" element={<DetailJob />} />
           <Route path="/jobseeker/detailCompany" element={<DetailCompany />} />
           <Route path="/jobseeker/favoritejobs" element={<FavoriteJobs />} />
+          
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />
         </Route>

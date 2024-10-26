@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React from 'react';
 import { FiHeart, FiMapPin } from 'react-icons/fi';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import {
@@ -11,8 +11,21 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+import { useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
+
 const Jobs: React.FC = () => {
-  const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
+
+  const formatSalary = (salary: string) => {
+    const salaryNumber = Number(salary); // Convert to number if it's a string
+    return salaryNumber.toLocaleString(); // Format with commas
+  };
+ const { jobs: jobListings, loading } = useFetchJobs(); // Use jobs fetched from useFetchJobs
+  const itemsPerPage = 5; // Set items per page as a constant
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
 
   return (
     <TooltipProvider>
@@ -86,8 +99,8 @@ const Jobs: React.FC = () => {
                       <div className="text-sm text-gray-500 flex items-center space-x-2">
                         <FiMapPin className="text-gray-500" />
                         <span>{job.location}</span>
-                        <span>- {job.timePosted}</span>
                       </div>
+                      <span> {job.timePosted}</span>
                       <div className="text-red-500 font-semibold mt-1">
                         {job.salary}
                       </div>

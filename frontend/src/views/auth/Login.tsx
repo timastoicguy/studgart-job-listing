@@ -31,13 +31,16 @@ function Login() {
         // Set default role to admin
         const userData = {
           name: data.data.name || "Default User", // or whatever name you receive
-          role: "admin" // Set the role as admin
+          role: "jobseeker" // Set the role as admin
         };
         localStorage.setItem('userData', JSON.stringify(userData)); // Save user data
   
         toast.success("Login successful!");
+              // Delay navigation by 2 seconds
+      setTimeout(() => {
         dispatch(setPage('about'));
         navigate('/about');
+      }, 5000);
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
