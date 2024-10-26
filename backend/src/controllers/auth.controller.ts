@@ -12,10 +12,12 @@ import {
   generateVerificationToken,
   verifyToken,
 } from "../utils/token.util";
+import { toUserDTO } from "./user.controller";
+import { IUserDTO } from "../dto/user.dto";
 
 export const register = async (
   req: Request,
-  res: Response<ApiResponse<string>>
+  res: Response<ApiResponse<any>>
 ) => {
   const {
     email,
@@ -115,7 +117,7 @@ export const register = async (
 
     res.status(201).json({
       error: null,
-      data: "User registered. Please check your email for verification.",
+      data: { user: toUserDTO(user) },
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message, data: null });
@@ -203,7 +205,7 @@ export const resendVerificationEmail = async (
 
 export const verifyEmail = async (
   req: Request,
-  res: Response<ApiResponse<string>>
+  res: Response<ApiResponse<any>>
 ) => {
   const { token } = req.params;
   try {
@@ -225,7 +227,9 @@ export const verifyEmail = async (
 
 export const login = async (
   req: Request,
-  res: Response<ApiResponse<{ accessToken: string; refreshToken: string }>>
+  res: Response<
+    ApiResponse<{ accessToken: string; refreshToken: string; user: IUserDTO }>
+  >
 ) => {
   const { email, password } = req.body;
   try {
@@ -241,7 +245,10 @@ export const login = async (
     const accessToken = generateAccessToken(user._id as string, user.role); // Use the token generator function
     const refreshToken = generateRefreshToken(user._id as string);
 
-    res.status(200).json({ error: null, data: { accessToken, refreshToken } });
+    res.status(200).json({
+      error: null,
+      data: { accessToken, refreshToken, user: toUserDTO(user) },
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message, data: null });
   }
