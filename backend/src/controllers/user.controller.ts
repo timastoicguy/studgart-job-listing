@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import User, { IUser } from "../models/User";
 import { IUserDTO } from "../dto/user.dto";
 import { PaginateResult } from "mongoose";
-
+import bcrypt from "bcryptjs";
 // Convert User Document to UserDTO
 export const toUserDTO = (user: IUser): IUserDTO => ({
   _id: user._id as string,
@@ -22,6 +22,10 @@ export const toUserDTO = (user: IUser): IUserDTO => ({
 // Create User
 export const createUser = async (req: Request, res: Response) => {
   try {
+    if (!!req.body.password) {
+      req.body.passwordHash = await bcrypt.hash(req.body.password, 12);
+    }
+
     const user = new User(req.body);
     await user.save();
     return res.status(201).json({ error: null, data: toUserDTO(user) });

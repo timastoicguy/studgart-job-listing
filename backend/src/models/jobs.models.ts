@@ -45,8 +45,9 @@ const jobSchema = new Schema<IJob>({
   location: {
     type: [
       {
-        name: { type: String, required: true },
-        code: { type: String, required: true, unique: true },
+        _id: false,
+        name: { type: String },
+        code: { type: String },
       },
     ],
     default: [],
@@ -67,8 +68,9 @@ const jobSchema = new Schema<IJob>({
   technologies: {
     type: [
       {
-        name: { type: String, required: true }, // Technology name
-        code: { type: String, required: true, unique: true }, // Technology code
+        _id: false,
+        name: { type: String }, // Technology name
+        code: { type: String },
       },
     ],
     default: [],
@@ -76,8 +78,9 @@ const jobSchema = new Schema<IJob>({
   employmentType: {
     type: [
       {
-        name: { type: String, required: true }, // Technology name
-        code: { type: String, required: true, unique: true }, // Technology code
+        _id: false,
+        name: { type: String }, // Technology name
+        code: { type: String }, // Technology code
       },
     ],
     default: [],
@@ -85,8 +88,9 @@ const jobSchema = new Schema<IJob>({
   experienceLevel: {
     type: [
       {
-        name: { type: String, required: true }, // Technology name
-        code: { type: String, required: true, unique: true }, // Technology code
+        _id: false,
+        name: { type: String }, // Technology name
+        code: { type: String }, // Technology code
       },
     ],
     default: [],
@@ -94,8 +98,9 @@ const jobSchema = new Schema<IJob>({
   employmentPosions: {
     type: [
       {
-        name: { type: String, required: true }, // Technology name
-        code: { type: String, required: true, unique: true }, // Technology code
+        _id: false,
+        name: { type: String }, // Technology name
+        code: { type: String }, // Technology code
       },
     ],
     default: [],
