@@ -32,7 +32,7 @@ jobs:
         run: |
           touch .env
           echo ${{ inputs.PROJECT_VARIABLES }} > .env
-          echo ${{ secrets.PROJECT_SECRETS }} > .env
+          echo ${{ secrets.PROJECT_SECRETS }} >> .env
         working-directory: ${{ inputs.working-dir }}
       
       - name: Install dependencies
