@@ -16,6 +16,7 @@ export const createJob = async (req: Request, res: Response) => {
     }
 
     const newJob = new Job(req.body);
+
     await newJob.save();
 
     const jobDto = await newJob.populate([

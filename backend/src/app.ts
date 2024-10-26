@@ -19,6 +19,7 @@ import locationRoutes from "./routes/locationRoutes.routes";
 import mainTechnologyRoutes from "./routes/mainTechnologyRoutes.routes";
 import applicationRoutes from "./routes/application.routes";
 import favoriteRoutes from "./routes/favoriteRoutes.routes";
+import chatbotApitRoutes from "./routes/chatbotApi.routes";
 // Load environment variables
 dotenv.config();
 
@@ -53,13 +54,15 @@ app.use("/api", jobSeekerRoutes);
 app.use("/api", jobsRoutes);
 app.use("/api", applicationRoutes);
 app.use("/api", favoriteRoutes);
-
+app.use("/api", chatbotApitRoutes);
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);
 app.use("/api/filters", jobPositionRoutes);
 app.use("/api/filters", locationRoutes);
 app.use("/api/filters", mainTechnologyRoutes);
+
+// chatbot api
 
 connectDB().then((res) => {
   app.listen(process.env.PORT || 3000, () => {
