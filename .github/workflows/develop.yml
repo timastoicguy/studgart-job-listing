@@ -8,78 +8,18 @@ on:
 
 jobs:
 
-  tag-version:
-    runs-on: ubuntu-latest
+  pre-workflow:
     permissions:
       contents: write
       id-token: write
-    steps:
+    uses: ./.github/workflows/rw-pre-workflow.yml
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3.0.0
-        with:
-          versionSpec: '6.x'
-
-      - name: Show GitVersion
-        id: show-gitversion
-        uses: gittools/actions/gitversion/execute@v3.0.0
-      
-      - name: Tag commit fullSemVer
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "GitHub Actions Bot"
-          git tag -a ${{ steps.show-gitversion.outputs.fullSemVer }} -m "${{ github.event.head_commit.message }}"
-          git push origin ${{ steps.show-gitversion.outputs.fullSemVer }}
-        
-  determine-actions:
-    needs: tag-version
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Determine folder changes
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          base: ${{ github.ref }}
-          filters: |
-            infrastructure:
-              - 'infrastructure/**'
-            backend:
-              - 'backend/**'
-            frontend:
-              - 'frontend/**'
-
-      - name: Determine environment based on branches
-        id: determine-environment
-        run: |
-          if [[ ${{ github.ref }} == 'refs/heads/develop' ]]; then
-            echo "env=dev" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "env=prod" >> $GITHUB_OUTPUT
-          fi
-
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-      environment: ${{ steps.determine-environment.outputs.env }}
-      infrastructure: ${{ steps.filter.outputs.infrastructure }}
-  
   frontend:
     permissions:
       contents: read
       id-token: write
-    needs: determine-actions
-    if: ${{ needs.determine-actions.outputs.frontend == 'true' }}
+    needs: pre-workflow
+    if: ${{ needs.pre-workflow.outputs.frontend == 'true' }}
     uses: ./.github/workflows/rw-build-deploy.yml
     with:
       working-dir: frontend
@@ -88,8 +28,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    needs: determine-actions
-    if: ${{ needs.determine-actions.outputs.backend == 'true' }}
+    needs: pre-workflow
+    if: ${{ needs.pre-workflow.outputs.backend == 'true' }}
     uses: ./.github/workflows/rw-build-deploy.yml
     with:
       working-dir: backend
