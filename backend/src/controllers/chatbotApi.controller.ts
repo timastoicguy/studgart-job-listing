@@ -1,6 +1,7 @@
 // src/controllers/ChatController.ts
 import { Request, Response } from "express";
 import ChatGPTService from "../services/ChatGPTService";
+import pdfParse from "pdf-parse";
 import mongoose from "mongoose";
 
 const chatGPTService = new ChatGPTService();
@@ -34,5 +35,21 @@ export const getInitialQuestion = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message, data: null });
+  }
+};
+
+export const evaluateSingleCV = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    // Extract text from the PDF
+    const pdfText = await pdfParse(req.file.buffer);
+    // Send the extracted text to the OpenAI API
+    const response = await chatGPTService.evaluateSingleCV(pdfText.text);
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to process the file" });
   }
 };

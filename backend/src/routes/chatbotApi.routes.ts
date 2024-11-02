@@ -2,7 +2,9 @@ import express from "express";
 import {
   chatWithGPT,
   getInitialQuestion,
+  evaluateSingleCV,
 } from "../controllers/chatbotApi.controller";
+import { upload } from "../utils/multer";
 
 const router = express.Router();
 
@@ -69,5 +71,62 @@ router.post("/chatbot-api", chatWithGPT);
  *         description: Invalid input
  */
 router.get("/chatbot-api", getInitialQuestion);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Evaluation
+ *   description: File upload and evaluate CV using OpenAI
+ */
+
+/**
+ * @swagger
+ * /evaluate-cv-api:
+ *   post:
+ *     tags: [Evaluation]
+ *     summary: Upload and evaluate CV
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: CV uploaded and evaluated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       example: "https://your-storage-url/imgs/yourfile.jpg"
+ *       400:
+ *         description: CV not uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "CV not uploaded"
+ *                 data:
+ *                   type: object
+ *                   nullable: true
+ */
+router.post("/evaluate-cv-api", upload.single("file"), evaluateSingleCV);
 
 export default router;

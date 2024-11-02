@@ -195,7 +195,7 @@ export const resendVerificationEmail = async (
 
     await sendEmail(email, "Verify Your Email", emailContent);
 
-    await sendEmail(email, "Verify Your Email", emailContent);
+    //  await sendEmail(email, "Verify Your Email", emailContent);
 
     res.status(200).json({ error: null, data: "Verification email resent." });
   } catch (error: any) {
