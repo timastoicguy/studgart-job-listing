@@ -4,7 +4,7 @@ import { config } from "../config/dotenv.config";
 
 import mongoose from "mongoose";
 import { Conversation } from "../models/conversation.model";
-
+import { getPromtForEvalutedCVAI } from "../utils/constant";
 class ChatGPTService {
   private openai: OpenAI;
 
@@ -12,8 +12,6 @@ class ChatGPTService {
   constructor() {
     this.openai = new OpenAI({
       apiKey: config.openAiApiKey,
-      organization: "org-jooppE9TmRCkvfCm4bB2Bbv6",
-      project: "proj_wpeLMZyS8VktVEgqeg9TYhO2",
     });
   }
 
@@ -73,6 +71,15 @@ class ChatGPTService {
       console.error("ChatGPT API Error:", error);
       throw new Error("ChatGPT API error");
     }
+  }
+
+  async evaluateSingleCV(cvText: string) {
+    const prompt = getPromtForEvalutedCVAI(); // Insert the prompt here
+    const responseContent = await this.getChatGPTReply([
+      { role: "system", content: prompt },
+      { role: "user", content: cvText },
+    ]);
+    return { error: null, data: JSON.parse(responseContent) };
   }
 }
 

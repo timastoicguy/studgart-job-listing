@@ -30,6 +30,7 @@ export const authenticate = async (
     }
     // Add user to request object
     req.user = user;
+
     next();
   } catch (error) {
     res.status(401).json({ error: "Invalid token", data: null });

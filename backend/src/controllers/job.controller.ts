@@ -191,8 +191,8 @@ export const getAllJobs = async (req: Request, res: Response) => {
     // Lọc theo khoảng lương
     if (minSalary || maxSalary) {
       filter.salaryRange = {};
-      if (minSalary) filter.salaryRange.min = { $gte: Number(minSalary) };
-      if (maxSalary) filter.salaryRange.max = { $lte: Number(maxSalary) };
+      if (minSalary) filter.salaryRange.min = { $lte: Number(minSalary) };
+      if (maxSalary) filter.salaryRange.max = { $gte: Number(maxSalary) };
     }
 
     // Tìm kiếm theo tên công ty, loại công việc, và nhà tuyển dụng
@@ -232,7 +232,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
       sortCriteria.postedDate = -1; // Default to newest if no specific sort is chosen
     }
 
-    // @ts-ignore
+    // @ts-ignoreW
     // Cuối cùng, gọi paginate
     const paginatedJobs = await Job.paginate(filter, {
       page: Number(page),
