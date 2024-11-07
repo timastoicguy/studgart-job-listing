@@ -150,7 +150,6 @@ router.get(
  *         description: Job seeker ID
  *         schema:
  *           type: string
- *           format: uuid
  *     responses:
  *       200:
  *         description: Job seeker found
@@ -174,7 +173,6 @@ router.get("/job_seekers/:id", getJobSeekerById);
  *         description: Job seeker ID
  *         schema:
  *           type: string
- *           format: uuid
  *     requestBody:
  *       required: true
  *       content:
@@ -228,7 +226,6 @@ router.get("/job_seekers/:id", getJobSeekerById);
  */
 router.put(
   "/job_seekers/:id",
-  jobSeekerValidation,
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -252,7 +249,6 @@ router.put(
  *         description: Job seeker ID
  *         schema:
  *           type: string
- *           format: uuid
  *     responses:
  *       200:
  *         description: Job seeker deleted successfully
