@@ -9,6 +9,7 @@ import {
   resetPassword,
   googleCallback,
   resendVerificationEmail,
+  getCurrentUser,
 } from "../controllers/auth.controller";
 import { body } from "express-validator";
 import { OAuth2Client } from "google-auth-library";
@@ -16,6 +17,8 @@ import User from "../models/User";
 import bcrypt from "bcryptjs";
 import { registerValidation } from "../validators/auth.validation";
 import { generateAccessToken } from "../utils/token.util";
+import { authenticate } from "../middlewares/auth.middleware";
+
 const router = Router();
 
 /**
@@ -235,6 +238,7 @@ router.post(
   login
 );
 
+router.get("/current-user", authenticate, getCurrentUser);
 /**
  * @swagger
  * /auth/refresh-token:

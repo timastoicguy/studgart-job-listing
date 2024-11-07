@@ -4,7 +4,13 @@ import { config } from "../config/dotenv.config";
 
 import mongoose from "mongoose";
 import { Conversation } from "../models/conversation.model";
-import { getPromtForEvalutedCVAI } from "../utils/constant";
+import {
+  getPromtForEvalutedCVAI,
+  getPromtForSummaryAI,
+  getPromtForExperienceDetailAI,
+  promtForChatBotAI,
+  getPromtForGenInfoFromCvAI,
+} from "../utils/constant";
 class ChatGPTService {
   private openai: OpenAI;
 
@@ -15,7 +21,11 @@ class ChatGPTService {
     });
   }
 
-  async getResponse(user_id: mongoose.Types.ObjectId, userMessage: string) {
+  async getResponse(
+    user_id: mongoose.Types.ObjectId,
+    userMessage: string,
+    url?: string
+  ) {
     let conversation = await Conversation.findOne({ user_id });
 
     if (!conversation) {
@@ -27,16 +37,31 @@ class ChatGPTService {
 
     conversation.conversationHistory.push({
       role: "system",
-      content:
-        "Bạn là một chatbot hỗ trợ các câu hỏi về trang web tuyển dụng. Hãy tập trung vào các câu hỏi liên quan đến quy trình ứng tuyển, đăng tuyển, và các vấn đề liên quan.",
+      content: promtForChatBotAI,
       timestamp: new Date(),
     });
 
-    conversation.conversationHistory.push({
-      role: "user",
-      content: userMessage,
-      timestamp: new Date(),
-    });
+    if (url) {
+      conversation.conversationHistory.push({
+        role: "user",
+        content: [
+          { type: "text", text: userMessage },
+          {
+            type: "image_url",
+            image_url: {
+              url: url,
+            },
+          },
+        ],
+        timestamp: new Date(),
+      });
+    } else {
+      conversation.conversationHistory.push({
+        role: "user",
+        content: userMessage,
+        timestamp: new Date(),
+      });
+    }
 
     if (conversation.conversationHistory.length > config.maxMessageCount) {
       conversation.conversationHistory = conversation.conversationHistory.slice(
@@ -79,6 +104,49 @@ class ChatGPTService {
       { role: "system", content: prompt },
       { role: "user", content: cvText },
     ]);
+    return { error: null, data: JSON.parse(responseContent) };
+  }
+  async genSumaryAIForCV(info: any) {
+    const prompt = getPromtForSummaryAI(info); // Insert the prompt here
+    const responseContent = await this.getChatGPTReply([
+      { role: "user", content: prompt },
+    ]);
+    return { error: null, data: JSON.parse(responseContent) };
+  }
+
+  async genExperienceDetailAIForCV(info: any) {
+    const prompt = getPromtForExperienceDetailAI(info); // Insert the prompt here
+    const responseContent = await this.getChatGPTReply([
+      { role: "user", content: prompt },
+    ]);
+    return { error: null, data: JSON.parse(responseContent) };
+  }
+
+  async genInfoFromCVUsingGPT(info: any, url?: string) {
+    const prompt = getPromtForGenInfoFromCvAI(); // Insert the prompt here
+    let responseContent: string;
+    if (url) {
+      responseContent = await this.getChatGPTReply([
+        { role: "system", content: prompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "" },
+            {
+              type: "image_url",
+              image_url: {
+                url: url,
+              },
+            },
+          ],
+        },
+      ]);
+    } else {
+      responseContent = await this.getChatGPTReply([
+        { role: "system", content: prompt },
+        { role: "user", content: prompt },
+      ]);
+    }
     return { error: null, data: JSON.parse(responseContent) };
   }
 }
