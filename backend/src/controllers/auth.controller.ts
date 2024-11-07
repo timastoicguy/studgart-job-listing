@@ -254,6 +254,19 @@ export const login = async (
   }
 };
 
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const user = toUserDTO(req.user as IUser);
+    res.status(200).json({
+      error: null,
+      data: {
+        user: user,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, data: null });
+  }
+};
 export const refreshToken = async (
   req: Request,
   res: Response<ApiResponse<{ accessToken: string }>>

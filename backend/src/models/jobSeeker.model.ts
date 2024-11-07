@@ -15,6 +15,8 @@ export interface IJobSeeker extends Document {
   languages?: string[];
   certifications?: string[];
   created_at: Date;
+  phone?: string;
+  address?: string;
 }
 
 const jobSeekerSchema = new Schema<IJobSeeker>({
@@ -30,6 +32,8 @@ const jobSeekerSchema = new Schema<IJobSeeker>({
   languages: { type: [String] },
   certifications: { type: [String] },
   created_at: { type: Date, default: Date.now },
+  phone: { type: String },
+  address: { type: String },
 });
 
 // Add pagination plugin

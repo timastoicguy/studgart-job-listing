@@ -1,10 +1,16 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import {
   chatWithGPT,
   getInitialQuestion,
   evaluateSingleCV,
+  genSumaryAIForCV,
+  genExperienceDetailAIForCV,
+  chatWithGPTUsingPDFFIle,
+  genInfoFromCVUsingGPTByPDF,
+  genInfoFromCVUsingGPTByImage,
 } from "../controllers/chatbotApi.controller";
 import { upload } from "../utils/multer";
+import Chat from "../models/chat.model";
 
 const router = express.Router();
 
@@ -128,5 +134,26 @@ router.get("/chatbot-api", getInitialQuestion);
  *                   nullable: true
  */
 router.post("/evaluate-cv-api", upload.single("file"), evaluateSingleCV);
+router.post("/chatbot-api-pdf", upload.single("file"), chatWithGPTUsingPDFFIle);
+
+router.post("/gen-info-pdf", upload.single("file"), genInfoFromCVUsingGPTByPDF);
+
+router.post("/gen-info-image", genInfoFromCVUsingGPTByImage);
+router.post("/gen-summary-api", genSumaryAIForCV);
+
+router.post("/gen-experience-api", genExperienceDetailAIForCV);
+
+router.get("/chat-history", async (req: Request, res: Response) => {
+  const { userId } = req.query;
+  const chat = await Chat.findOne({ userId });
+  if (chat) {
+    res.json({
+      messages: chat.messages,
+      activeResponder: chat.activeResponder,
+    });
+  } else {
+    res.status(404).send("Chat history not found");
+  }
+});
 
 export default router;
