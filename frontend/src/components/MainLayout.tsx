@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Fillter";
 import { Suspense, useState, useEffect } from "react";
 import clsx from "clsx";
 

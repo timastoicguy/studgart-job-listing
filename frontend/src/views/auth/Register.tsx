@@ -18,7 +18,7 @@ const Register: React.FC = () => {
   const [phone, setPhone] = useState<string>("");
   const [address, setAddress] = useState<string>("");  // New state for address
   const [bio, setBio] = useState<string>("");          // New state for bio
-  const [role, setRole] = useState<string>("job_seeker");
+  const [role, setRole] = useState<string>("job_seeker"); // Default to job_seeker
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -67,15 +67,15 @@ const Register: React.FC = () => {
           <h2 className="text-2xl font-bold">STUDGART</h2>
         </div>
 
-        <Tabs defaultValue="job_seeker">
+        <Tabs defaultValue="job_seeker" onValueChange={setRole}>
           <TabsList>
-            <TabsTrigger value="job_seeker" onClick={() => setRole("job_seeker")}>
+            <TabsTrigger value="job_seeker">
               Người tìm việc
             </TabsTrigger>
-            <TabsTrigger value="company" onClick={() => setRole("company")}>
+            <TabsTrigger value="company">
               Công ty
             </TabsTrigger>
-            <TabsTrigger value="job_poster" onClick={() => setRole("job_poster")}>
+            <TabsTrigger value="recruiter">
               Nhà Tuyển Dụng
             </TabsTrigger>
           </TabsList>
@@ -88,10 +88,6 @@ const Register: React.FC = () => {
               setPassword={setPassword}
               rePassword={rePassword}
               setRePassword={setRePassword}
-              address={address}           // Pass address
-              setAddress={setAddress}     // Pass setter for address
-              bio={bio}                   // Pass bio
-              setBio={setBio}             // Pass setter for bio
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               loading={loading}
@@ -120,7 +116,7 @@ const Register: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="job_poster">
+          <TabsContent value="recruiter">
             <JobPosterRegistrationFields 
               email={email}
               setEmail={setEmail}

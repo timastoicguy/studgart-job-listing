@@ -1,33 +1,94 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { postJob } from "@/lib/reducers/recruiter/jobService";
+import axios from "axios";
 import { useState } from "react";
-import { FiSend, FiHeart, FiMapPin } from "react-icons/fi";
+import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
 
 export default function JobListing() {
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);
   const [salaryMax, setSalaryMax] = useState(1200);
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("VNĐ");
   const [deadline, setDeadline] = useState("2025-12-14");
   const [jobDescription, setJobDescription] = useState(`
-  - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
-  - Participate in the maintenance and upgrade of the website's features.
-  - Write well designed, testable, efficient code; Create website layout/user interface by using standard HTML/CSS/JS practices.
-  - Perform work as requested by the manager.`);
+    - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
+    - Participate in the maintenance and upgrade of the website's features.
+    - Write well designed, testable, efficient code; Create website layout/user interface by using standard HTML/CSS/JS practices.
+    - Perform work as requested by the manager.`);
   const [requirements, setRequirements] = useState(`
-  - Good command in English
-  - Bachelor's degree in related field
-  - Experience with PHP (Laravel, WordPress, CodeIgniter), knowledge of Bootstrap, Sass, ReactJS / NodeJS...is an advantage
-  - Proficient in using MySQL/PostgreSQL/MariaDB for database administration
-  - Master the knowledge and experience of HTML 5, CSS 3, JS`);
+    - Good command in English
+    - Bachelor's degree in related field
+    - Experience with PHP (Laravel, WordPress, CodeIgniter), knowledge of Bootstrap, Sass, ReactJS / NodeJS...is an advantage
+    - Proficient in using MySQL/PostgreSQL/MariaDB for database administration
+    - Master the knowledge and experience of HTML 5, CSS 3, JS`);
   const [benefits, setBenefits] = useState(`
-  - Salary: Negotiable based on experience and track records
-  - A friendly, dynamic and professional environment with great chances to learn new skills and gain valuable experience
-  - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
-  - Periodic and regular evaluations for salary raises in accordance with performances.`);
-  const [location, setLocation] = useState("");
+    - Salary: Negotiable based on experience and track records
+    - A friendly, dynamic and professional environment with great chances to learn new skills and gain valuable experience
+    - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
+    - Periodic and regular evaluations for salary raises in accordance with performances.`);
+  const [location, setLocation] = useState("HCM");
+  const [companyId, setCompanyId] = useState("60df7992fc13ae1af000006c"); // Update with actual ObjectId
+  const [jobCategoryId, setJobCategoryId] = useState("60df7992fc13ae1af000006d"); // Update with actual ObjectId
+  const [recruiterId, setRecruiterId] = useState("60df7992fc13ae1af000006e"); // Update with actual ObjectId
   const [companyName, setCompanyName] = useState("CA Advance");
   const [companyLogo, setCompanyLogo] = useState("/path/to/company-logo.png");
   const [companyAddress, setCompanyAddress] = useState("Lầu 21, Centec Tower, 72-74 đường Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [selectedSkill, setSelectedSkill] = useState("");
+  const availableSkills = ["JavaScript", "React", "Node.js", "CSS", "HTML"];
+
+  const handleSubmit = async () => {
+    const skillsToSend = skills.length > 0 ? skills.map(skill => ({ name: skill, code: skill.toUpperCase() })) : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
+    
+    const jobData = {
+      title: title.trim(),
+      salaryRange: { min: salaryMin, max: salaryMax },
+      currency,
+      deadline,
+      description: jobDescription,
+      responsibilities: jobDescription.split("\n").filter(line => line.trim() !== ""),
+      requirements: requirements.split("\n").filter(line => line.trim() !== ""),
+      benefits: benefits.split("\n").filter(line => line.trim() !== ""),
+      location: [{ name: location, code: "HCM" }],
+      skills: ["skillsToSend"],
+      employmentType: [{ name: "full-time", code: "FT" }],
+      experienceLevel: [{ name: "entry", code: "JR" }],
+      company: companyId, // Ensure this is a valid ObjectId
+      jobCategory: jobCategoryId, // Ensure this is a valid ObjectId
+      recruiter: recruiterId, // Ensure this is a valid ObjectId
+      technologies: skillsToSend,
+    };
+  
+    console.log("Job Data:", JSON.stringify(jobData, null, 2)); // Log the job data
+  
+    try {
+      const result = await postJob(jobData);
+      console.log("Job posted successfully:", result);
+      alert("Job posted successfully!");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log("Response:", error.response); // Log full response
+        console.error("Error message:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+      alert("Failed to post job!");
+    }
+  };
+  
+  
+  const addSkill = () => {
+    if (selectedSkill && !skills.includes(selectedSkill.toUpperCase())) {
+      setSkills((prevSkills) => [...prevSkills, selectedSkill.toUpperCase()]);
+      setSelectedSkill(""); // Clear selection
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setSkills((prevSkills) => prevSkills.filter((s) => s !== skill));
+  };
+    const [employeeType, setEmployeeType] = useState("");
+    const [experienceLevel, setExperienceLevel] = useState("");
 
   return (
     <div className="flex flex-col gap-8 p-8 md:flex-row justify-center">
@@ -76,7 +137,7 @@ export default function JobListing() {
               className="w-full p-3 border rounded-md"
             >
               <option value="USD">USD</option>
-              <option value="VND">VND</option>
+              <option value="VNĐ">VNĐ</option>
             </select>
           </div>
         </div>
@@ -124,6 +185,80 @@ export default function JobListing() {
             rows={4}
           />
         </div>
+        <div className="mb-6">
+      <label className="block text-sm font-semibold mb-1">Kỹ năng</label>
+      
+      <div className="flex items-center gap-2">
+        <select
+          value={selectedSkill}
+          onChange={(e) => setSelectedSkill(e.target.value)}
+          className="flex-1 p-3 border rounded-md"
+        >
+          <option value="">Chọn kỹ năng</option>
+          {availableSkills.map((skill) => (
+            <option key={skill} value={skill}>
+              {skill}
+            </option>
+          ))}
+        </select>
+        
+        <button
+          onClick={addSkill}
+          className="bg-green-500 text-white py-2 px-4 rounded-md"
+        >
+          Thêm
+        </button>
+      </div>
+
+      <h4 className="font-bold mt-4">Danh sách kỹ năng</h4>
+      <div className="flex flex-wrap gap-2">
+        {skills.map((skill) => (
+          <div
+            key={skill}
+            className="flex items-center px-3 py-1 bg-gray-200 rounded-full text-gray-700"
+          >
+            <span className="mr-2">{skill}</span>
+            <button
+              onClick={() => removeSkill(skill)}
+              className="text-gray-500 hover:text-red-300 transition" // Light red on hover
+            >
+              <FiTrash2 className="w-4 h-4" /> {/* Trash Icon */}
+            </button>
+          </div>
+        ))}
+      </div>
+
+    </div>
+        {/* New Field: Employee Type */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold mb-1">Loại nhân viên</label>
+          <select
+            value={employeeType}
+            onChange={(e) => setEmployeeType(e.target.value)}
+            className="w-full p-3 border rounded-md"
+          >
+            <option value="">Chọn loại nhân viên</option>
+            <option value="full-time">Full-time</option>
+            <option value="part-time">Part-time</option>
+            <option value="contract">Contract</option>
+            <option value="internship">Internship</option>
+          </select>
+        </div>
+
+        {/* New Field: Experience Level */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold mb-1">Kinh nghiệm</label>
+          <select
+            value={experienceLevel}
+            onChange={(e) => setExperienceLevel(e.target.value)}
+            className="w-full p-3 border rounded-md"
+          >
+            <option value="">Chọn kinh nghiệm</option>
+            <option value="entry">Entry Level</option>
+            <option value="mid">Mid Level</option>
+            <option value="senior">Senior Level</option>
+          </select>
+        </div>
 
         {/* Job Location */}
         <div className="mb-6">
@@ -135,6 +270,8 @@ export default function JobListing() {
             className="w-full p-3 border rounded-md"
           />
         </div>
+        <button  onClick={handleSubmit} 
+        className="bg-green-500 text-white py-2 px-4 rounded-md">Đăng</button>
       </div>
 
       {/* Right Side - Job Preview */}
@@ -183,9 +320,24 @@ export default function JobListing() {
 
           <h4 className="font-bold mt-4">Quyền lợi</h4>
           <p className="text-sm text-gray-600 whitespace-pre-line">{benefits}</p>
+            {/* Display New Fields */}
+        {/* Job Info... */}
+          <h3 className="font-bold">Kỹ năng</h3>
+          <ul className="text-gray-700">
+            {skills.map((skill) => (
+              <li key={skill}>{skill}</li>
+            ))}
+          </ul>
+
+          <h4 className="font-bold mt-4">Loại nhân viên</h4>
+          <p className="text-sm text-gray-600">{employeeType}</p>
+
+          <h4 className="font-bold mt-4">Kinh nghiệm</h4>
+          <p className="text-sm text-gray-600">{experienceLevel}</p>
 
           <h4 className="font-bold mt-4">Địa điểm làm việc</h4>
           <p className="text-sm text-gray-600 whitespace-pre-line">{location}</p>
+          
         </div>
       </div>
     </div>

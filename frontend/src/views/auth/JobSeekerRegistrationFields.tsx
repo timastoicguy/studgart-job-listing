@@ -8,10 +8,6 @@ interface JobSeekerRegistrationFieldsProps {
   setPassword: React.Dispatch<React.SetStateAction<string>>;
   rePassword: string;
   setRePassword: React.Dispatch<React.SetStateAction<string>>;
-  address: string; // Add address prop
-  setAddress: React.Dispatch<React.SetStateAction<string>>; // Add setAddress prop
-  bio: string; // Add bio prop
-  setBio: React.Dispatch<React.SetStateAction<string>>; // Add setBio prop
   showPassword: boolean;
   setShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
   loading: boolean;
@@ -24,10 +20,6 @@ const JobSeekerRegistrationFields: React.FC<JobSeekerRegistrationFieldsProps> = 
   setPassword,
   rePassword,
   setRePassword,
-  address,
-  setAddress,
-  bio,
-  setBio,
   showPassword,
   setShowPassword,
   loading,
@@ -101,36 +93,6 @@ const JobSeekerRegistrationFields: React.FC<JobSeekerRegistrationFieldsProps> = 
         </div>
       </div>
 
-      {/* New address field */}
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="address">
-          Address
-        </label>
-        <input
-          type="text"
-          id="address"
-          placeholder="Your address"
-          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          disabled={loading}
-        />
-      </div>
-
-      {/* New bio field */}
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="bio">
-          Bio
-        </label>
-        <textarea
-          id="bio"
-          placeholder="Tell us about yourself"
-          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          disabled={loading}
-        />
-      </div>
     </>
   );
 };

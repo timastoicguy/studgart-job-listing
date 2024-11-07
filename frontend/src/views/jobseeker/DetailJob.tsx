@@ -1,83 +1,159 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
-import { FiMapPin, FiHeart, FiUsers, FiFlag, FiBriefcase } from "react-icons/fi"; // Import các icon cần thiết
+import React, { useEffect, useState } from "react";
+import { FiMapPin, FiHeart, FiUsers, FiFlag, FiBriefcase } from "react-icons/fi";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'; // Importing Dialog components
+import { fetchDetailJobData } from "@/lib/reducers/jobseeker/jobDetail";
+import { useNavigate, useParams } from "react-router-dom";
+import { Upload, Button, UploadFile, UploadProps, message } from 'antd'; // Importing UploadFile
+import { UploadOutlined } from "@ant-design/icons";
+import axios from "axios";
+
+
 const DetailJob: React.FC = () => {
-  const [title, setTitle] = useState("FRONT-END DEVELOPER");
-  const [salaryMin, setSalaryMin] = useState(750);
-  const [salaryMax, setSalaryMax] = useState(1200);
-  const [currency, setCurrency] = useState("USD");
-  const [deadline, setDeadline] = useState("2025-12-14");
-  const [jobDescription, setJobDescription] = useState(`
-  - Understand requirements, analyze, design, build and optimize E-commerce products for the company.
-  - Participate in the maintenance and upgrade of the website's features.
-  - Write well designed, testable, efficient code; Create website layout/user interface by using standard HTML/CSS/JS practices.
-  - Perform work as requested by the manager.`);
-  const [requirements, setRequirements] = useState(`
-  - Good command in English
-  - Bachelor's degree in related field
-  - Experience with PHP (Laravel, WordPress, CodeIgniter), knowledge of Bootstrap, Sass, ReactJS / NodeJS...is an advantage
-  - Proficient in using MySQL/PostgreSQL/MariaDB for database administration
-  - Master the knowledge and experience of HTML 5, CSS 3, JS`);
-  const [benefits, setBenefits] = useState(`
-  - Salary: Negotiable based on experience and track records
-  - A friendly, dynamic and professional environment with great chances to learn new skills and gain valuable experience
-  - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
-  - Periodic and regular evaluations for salary raises in accordance with performances.`);
-  const [location, setLocation] = useState("Lầu 21, Centec Tower, 72-74 Nguyễn Thị Minh Khai, Quận 3, Hồ Chí Minh");
-  const [companyName, setCompanyName] = useState("CA Advance");
-  const [companyLogo, setCompanyLogo] = useState("https://via.placeholder.com/48");
-  const [companyAddress, setCompanyAddress] = useState("Lầu 21, Centec Tower, 72-74 Nguyễn Thị Minh Khai, Quận 3, Thành phố Hồ Chí Minh");
-  const [industry, setIndustry] = useState("Quảng cáo truyền thông");
+  const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
+  const [title, setTitle] = useState("");
+  const [salaryMin, setSalaryMin] = useState(0);
+  const [salaryMax, setSalaryMax] = useState(0);
+  const [currency, setCurrency] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [jobDescription, setJobDescription] = useState(``);
+  const [requirements, setRequirements] = useState(``);
+  const [benefits, setBenefits] = useState(``);
+  const [location, setLocation] = useState("");
+
+const [companyId, setCompanyId] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [companyLogo, setCompanyLogo] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [industry, setIndustry] = useState("");
 const [companySize, setCompanySize] = useState("100-499 nhân viên");
 const [nationality, setNationality] = useState("Japan");
 
-  // Sample data for related jobs
-  const relatedJobs = [
-    {
-      title: "Software Engineer",
-      company: "WATA Solutions",
-      salary: "8,000,000 - 35,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    {
-      title: "Backend Developer",
-      company: "Tech Innovators",
-      salary: "10,000,000 - 40,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    {
-      title: "UI/UX Designer",
-      company: "Design Hub",
-      salary: "9,000,000 - 30,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    {
-      title: "Backend Developer",
-      company: "Tech Innovators",
-      salary: "10,000,000 - 40,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    {
-      title: "UI/UX Designer",
-      company: "Design Hub",
-      salary: "9,000,000 - 30,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    {
-      title: "UI/UX Designer",
-      company: "Design Hub",
-      salary: "9,000,000 - 30,000,000 VND",
-      logo: "https://via.placeholder.com/48",
-    },
-    // Add more jobs as needed
-  ];
+const [coverLetter, setCoverLetter] = useState(""); // Đã thêm biến trạng thái cho coverLetter
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Function to handle application button click
   const handleApplyClick = () => {
-    alert("Đã gửi đơn ứng tuyển cho vị trí " + title);
+    setIsDialogOpen(true);
   };
 
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setFileList([]); // Reset file list khi đóng dialog
+    setCoverLetter(""); // Reset cover letter khi đóng dialog
+  };
+
+  const handleSubmitApplication = async () => {
+    try {
+        const formData = new FormData();
+        if (fileList.length > 0) {
+            formData.append('file', fileList[0].originFileObj); // Lấy tệp
+        } else {
+            throw new Error("No files selected.");
+        }
+        
+        // Gửi yêu cầu upload tệp
+        const uploadResponse = await axios.post('http://localhost:3000/api/upload/upload-single', formData, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Giả sử đường dẫn tệp trả về từ uploadResponse
+        const resumeUrl = uploadResponse.data.data.url; // Cập nhật với thuộc tính chính xác từ phản hồi
+
+        // Gửi yêu cầu ứng tuyển
+        const applicationData = {
+            job_id: "672786a596599e898e7bbdab",
+            job_seeker_id: "67273fea96599e898e7bbd6c",
+            cover_letter: coverLetter, // Lấy giá trị từ textarea
+            resume: resumeUrl, // Đường dẫn đã upload
+            job_reviewer_id: "67273fea96599e898e7bbd6c",
+            application_status: "reviewed",
+        };
+
+        const applicationResponse = await axios.post('http://localhost:3000/api/applications', applicationData, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log("Application submitted successfully:", applicationResponse.data);
+        message.success("Bạn đã ứng tuyển thành công");
+        handleCloseDialog();
+
+    } catch (error) {
+        console.error("Error submitting application:", error);
+        message.error(`Bạn ứng tuyển không thành công! ${error}`);
+    }
+};
+
+const navigate = useNavigate();
+
+const handleCompanyClick = (companyId: any) => {
+  console.log("Company clicked:", companyId);
+  // Navigate to the job detail page, passing the job data as state
+  navigate(`/jobseeker/detailCompany/${companyId}`, { state: { companyId } });
+};
+
+useEffect(() => {
+  const loadJobData = async () => {
+    console.log(jobId);
+    if (!jobId) return; // Check if jobId is available
+    const response = await fetchDetailJobData(jobId);
+    
+    // Check if response contains data
+    if (response) {
+      console.log("Test: ", response.company); // Log company details for testing
+
+      // Set state with values from fetched data
+      setTitle(response.title || "N/A");
+      setSalaryMin(response.salaryRange?.min ?? 0);
+      setSalaryMax(response.salaryRange?.max ?? 0);
+      setCurrency(response.currency || "VNĐ"); // Ensure currency is set correctly
+      setDeadline(response.deadline || "N/A"); // Ensure deadline is set correctly
+      setJobDescription(response.description || "");
+
+      // Process `requirements` and `benefits`
+      setRequirements(Array.isArray(response.requirements) ? response.requirements.join("\n") : "");
+      setBenefits(Array.isArray(response.benefits) ? response.benefits.join("\n") : "");
+
+      // For `location`, which is now an array, access the first element
+      setLocation(response.location?.[0]?.name || "N/A");
+      setCompanyId(response.company._id || "N/A"); // Match the API structure
+      // Check and set company details
+      console.log(response.company._id || "N/A"); // Match the API structure
+
+      setCompanyName(response.company.company_name || "N/A"); // Match the API structure
+      setCompanyLogo(response.company?.logo || "https://via.placeholder.com/48"); // Ensure logo is handled properly
+      setCompanyAddress(response.company.company_address || "N/A");
+      setIndustry(response.company.industry || "N/A"); // Ensure to match the API field if exists
+      setCompanySize(response.company.company_size || "N/A");
+      setNationality(response.company.nationality || "N/A"); // Ensure to match the API field if exists
+    }
+  };
+
+  loadJobData();
+}, [jobId]); // Add jobId to dependencies
+
+
+
+const [fileList, setFileList] = useState<any[]>([]); // Thay đổi kiểu dữ liệu nếu cần
+
+const uploadProps = {
+    onChange: (info: any) => {
+        // Cập nhật fileList khi có thay đổi
+        setFileList(info.fileList);
+    },
+    beforeUpload: (file: any) => {
+        // Ngăn không cho tệp tự động upload
+        return false; 
+    },
+};
+  // Function to handle application button click
   return (
     <TooltipProvider>
     <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -125,17 +201,17 @@ const [nationality, setNationality] = useState("Japan");
             </div>
           
 
-          {/* Apply Button in Job Info Section */}
-          <div className="mt-4 flex justify-end">
-  <button 
-    onClick={handleApplyClick} 
-    className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
-  >
-    Ứng tuyển
-  </button>
-</div>
+            <div className="mt-4 flex justify-end">
+      <button
+        onClick={handleApplyClick}
+        className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+      >
+        Ứng tuyển
+      </button>
+    </div>
+    
 
-        </div>
+          </div>
 
         {/* Section 2: Job Details */}
         <div className="p-4 bg-white shadow rounded-md border">
@@ -170,8 +246,48 @@ const [nationality, setNationality] = useState("Japan");
           </button>
         </div>
       </div>
+         {/* Application Dialog */}
+         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+                <button className="hidden" />
+            </DialogTrigger>
+            <DialogContent>
+                <DialogTitle>Đơn Ứng Tuyển</DialogTitle>
+                <DialogDescription>
+                    <label className="block text-sm font-medium text-gray-700">Thư xin việc</label>
+                    <textarea
+                        value={coverLetter}
+                        onChange={(e) => setCoverLetter(e.target.value)}
+                        placeholder="Viết thư xin việc của bạn ở đây"
+                        className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    />
 
-      {/* Right Column: Company Info and Related Jobs */}
+                    <label className="block text-sm font-medium text-gray-700 mt-4">Tải lên tài liệu</label>
+                    <div>
+                    <Upload
+                      {...uploadProps}
+                      accept=".pdf" // Chỉ cho phép chọn tệp PDF
+                      onChange={({ fileList }) => setFileList(fileList)} // Cập nhật danh sách tệp
+                  >
+                      <Button icon={<UploadOutlined />}>Tải lên CV</Button>
+                  </Upload>
+                  {fileList.length > 0 && (
+                      <div className="mt-2">
+                          <p className="text-sm text-gray-500">Tệp đã chọn:</p>
+                          <p>{fileList[0].name}</p>
+                      </div>
+                  )}
+
+                    </div>
+                </DialogDescription>
+                <div className="mt-4 flex justify-end">
+                    <DialogClose asChild>
+                        <button className="mr-2 bg-gray-300 py-2 px-4 rounded-md">Thoát</button>
+                    </DialogClose>
+                    <button onClick={handleSubmitApplication} className="bg-green-500 text-white py-2 px-4 rounded-md">Gửi</button>
+                </div>
+            </DialogContent>
+        </Dialog>
       {/* Right Column: Company Info and Related Jobs */}
 <aside className="space-y-6">
   {/* Company Info */}
@@ -209,9 +325,15 @@ const [nationality, setNationality] = useState("Japan");
       </div>
     </div>
 
-    <a href="#" className="text-green-500 text-center block font-semibold">
-      Xem trang công ty
-    </a>
+    <a
+            className="text-green-500 text-center block font-semibold cursor-pointer"
+            onClick={(e) => {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ a
+                handleCompanyClick(companyId); // Điều hướng khi click
+            }}
+        >
+            Xem trang công ty
+        </a>
   </div>
 
 {/* Related Jobs */}
@@ -247,3 +369,43 @@ const [nationality, setNationality] = useState("Japan");
 };
 
 export default DetailJob;
+ // Sample data for related jobs
+ const relatedJobs = [
+  {
+    title: "Software Engineer",
+    company: "WATA Solutions",
+    salary: "8,000,000 - 35,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  {
+    title: "Backend Developer",
+    company: "Tech Innovators",
+    salary: "10,000,000 - 40,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  {
+    title: "UI/UX Designer",
+    company: "Design Hub",
+    salary: "9,000,000 - 30,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  {
+    title: "Backend Developer",
+    company: "Tech Innovators",
+    salary: "10,000,000 - 40,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  {
+    title: "UI/UX Designer",
+    company: "Design Hub",
+    salary: "9,000,000 - 30,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  {
+    title: "UI/UX Designer",
+    company: "Design Hub",
+    salary: "9,000,000 - 30,000,000 VND",
+    logo: "https://via.placeholder.com/48",
+  },
+  // Add more jobs as needed
+];

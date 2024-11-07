@@ -18,6 +18,8 @@ import Job from "./views/jobseeker/Jobs";
 import DetailJob from "./views/jobseeker/DetailJob";
 import DetailCompany from "./views/jobseeker/DetailCompany";
 import FavoriteJobs from "./views/jobseeker/FavoriteJobs";
+import JobseekerInfoForm from "./views/jobseeker/JobseekerInfoForm";
+
 
 import CompanyInfoForm from "./views/company/CompanyInfoForm";
 import LogoUpload  from "./views/company/LogoUpload";
@@ -50,9 +52,11 @@ function App() {
           <Route path="/recruiter/jobseekerpending" element={<JobseekerPending />} />
 
           <Route path="jobseeker/jobs" element={<Job />} />
-          <Route path="/jobseeker/detailjob" element={<DetailJob />} />
-          <Route path="/jobseeker/detailCompany" element={<DetailCompany />} />
+          <Route path="/jobseeker/detailjob/:jobId" element={<DetailJob />} />
+          <Route path="/jobseeker/detailCompany/:companyId" element={<DetailCompany />} />
           <Route path="/jobseeker/favoritejobs" element={<FavoriteJobs />} />
+          <Route path="/jobseeker/profile/:userId" element={<JobseekerInfoForm />} />
+
           
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />

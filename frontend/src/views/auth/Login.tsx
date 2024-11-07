@@ -27,11 +27,14 @@ function Login() {
         // Lưu accessToken và refreshToken vào local storage
         localStorage.setItem('accessToken', data.data.accessToken);
         localStorage.setItem('refreshToken', data.data.refreshToken);
+        localStorage.setItem('user_id', data.data.user._id);
+        console.log("Login successful:", data.data);
         
         // Set default role to admin
         const userData = {
-          name: data.data.name || "Default User", // or whatever name you receive
-          role: "jobseeker" // Set the role as admin
+          name: data.data.user.username || "Default User", // or whatever name you receive
+          role: data.data.user.role || "jobseeker" ,// Set the role as jobseeker
+          id: data.data.user._id || "null" // Set the role as admin
         };
         localStorage.setItem('userData', JSON.stringify(userData)); // Save user data
   
