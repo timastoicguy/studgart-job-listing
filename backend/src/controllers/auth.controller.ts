@@ -298,7 +298,7 @@ export const forgotPassword = async (
       return res.status(404).json({ error: "User not found", data: null });
 
     const resetToken = generatePasswordResetToken(user._id as string);
-    const resetLink = `${process.env.BASE_URL}/auth/reset-password/${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password/${resetToken}`;
 
     await sendEmail(
       email,

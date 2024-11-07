@@ -11,7 +11,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@components/*": ["./src/components/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@views/*": ["./src/views/*"],
+      "@reducers/*": ["lib/redux/reducers/*"],
     }
   }
 }

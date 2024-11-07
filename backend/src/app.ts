@@ -27,7 +27,6 @@ import initSocket from "./config/socket";
 dotenv.config();
 
 // Connect to MongoDB
-
 const app = express();
 const server = http.createServer(app);
 initSocket(server);
