@@ -135,7 +135,8 @@ const AvatarDropdownMenu = ({ userData, onLogout }: { userData: any; onLogout: (
           <DropdownMenuSeparator />
 
           <DropdownMenuItem>
-            <NavLink to="/profile">Thông tin cá nhân</NavLink>
+          <NavLink to={`/jobseeker/profile/${userData?.id}`}>Thông tin cá nhân</NavLink>
+
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
