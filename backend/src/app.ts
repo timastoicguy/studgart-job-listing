@@ -24,7 +24,6 @@ import chatbotApitRoutes from "./routes/chatbotApi.routes";
 dotenv.config();
 
 // Connect to MongoDB
-
 const app = express();
 
 // Middleware
@@ -32,7 +31,7 @@ const app = express();
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     credentials: true,
   })
 );
