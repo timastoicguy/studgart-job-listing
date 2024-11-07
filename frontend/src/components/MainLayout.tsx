@@ -27,8 +27,13 @@ export default function MainLayout() {
     return null; // or a loading spinner, depending on your preference
   }
 
+  // Handle logout
+  const onLogout = () => {
+    localStorage.removeItem("userData");
+    navigate("/login"); // Redirect to login page after logout
+  };
+
   // Determine if sidebar should be shown
-  // Show sidebar on specific routes like /jobs, /about, etc.
   const shouldShowSidebar = location.pathname === "/about" || location.pathname.startsWith("/jobseeker/jobs");
 
   return (
@@ -37,6 +42,7 @@ export default function MainLayout() {
         showSideBar={showSidebar}
         setShowSideBar={setShowSidebar}
         userData={userData} // Pass userData to Header
+        onLogout={onLogout} // Pass onLogout function to Header
       />
 
       {/* Only render Sidebar when on specified pages like About or Jobs */}

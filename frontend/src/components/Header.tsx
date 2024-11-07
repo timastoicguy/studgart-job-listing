@@ -16,7 +16,8 @@ import { NavLink } from "react-router-dom";
 interface HeaderProps {
   showSideBar: boolean;
   setShowSideBar: (showSideBar: boolean) => void;
-  onLogout: () => void;  // Callback for logout functionality
+  userData: { name: string; role: string } | null;
+  onLogout: () => void;
 }
 
 export default function Header({ showSideBar, setShowSideBar, onLogout }: HeaderProps) {
