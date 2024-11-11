@@ -32,7 +32,7 @@ export function AcceptedChart() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="approved" fill="hsl(var(--chart-approved))" />
+
                         <Bar dataKey="paid" fill="hsl(var(--chart-paid))" />
                     </BarChart>
                 </ChartContainer>

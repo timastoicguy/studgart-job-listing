@@ -54,7 +54,7 @@ const AdminDashboard = () => {
           <div className="lg:col-span-6 md:col-span-4 col-span-2">
             <div className="bg-white rounded-md">
               <div className="flex items-center justify-between px-3 border-b">
-                <h3 className="text-black text-2xl font-bold px-2">CLAIMS</h3>
+                <h3 className="text-black text-2xl font-bold px-2">Revenue</h3>
                 <div className="flex items-center w-full justify-end">
                   <div className="flex gap-2 py-1 items-center">
                     <button
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
             </div>
             <div className="flex flex-col items-center">
               <div className="text-5xl font-bold">{dashboardData.totalWaiting}</div>
-              <div className="text-sm text-gray-500">Claims pending action</div>
+              <div className="text-sm text-gray-500">Jobs pending action</div>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ const AdminDashboard = () => {
             </div>
             <div className="flex flex-col items-center">
               <div className="text-5xl font-bold">{dashboardData.totalAccepted}</div>
-              <div className="text-sm text-gray-500">Claims accepted</div>
+              <div className="text-sm text-gray-500">Jobs accepted</div>
             </div>
           </div>
 
@@ -147,24 +147,24 @@ const AdminDashboard = () => {
           <div className="bg-white shadow-lg p-4 lg:col-span-1 md:col-span-2 col-span-1 rounded-md">
             <div>
               <h3 className="w-full border-b text-left mb-4 text-lg font-bold">
-                STAFFS
+                ACCOUNTS
               </h3>
             </div>
             <div className="flex flex-col items-center">
               <div className="text-5xl font-bold">{dashboardData.totalStaff}</div>
-              <div className="text-sm text-gray-500">Total Staffs</div>
+              <div className="text-sm text-gray-500">Total Acconts</div>
             </div>
           </div>
 
           <div className="bg-white shadow-lg p-4 lg:col-span-1 col-span-2 rounded-md">
             <div>
               <h3 className="w-full border-b text-left mb-4 text-lg font-bold">
-                PROJECTS
+                JOBS
               </h3>
             </div>
             <div className="flex flex-col items-center">
               <div className="text-5xl font-bold">{dashboardData.totalProjects}</div>
-              <div className="text-sm text-gray-500">Total Projects</div>
+              <div className="text-sm text-gray-500">Total Jobs</div>
             </div>
           </div>
 

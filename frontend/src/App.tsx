@@ -23,6 +23,8 @@ import JobseekerInfoForm from "./views/jobseeker/JobseekerInfoForm";
 
 import CompanyInfoForm from "./views/company/CompanyInfoForm";
 import LogoUpload  from "./views/company/LogoUpload";
+import PaymentForm  from "./views/company/PaymentForm";
+
 import AdminDashboard from "./views/admin/Dashboard"; // Adjusted import for AdminDashboard
 import AccountAll from "./views/admin/AccountAll"; // Adjusted import for AccountAll
 
@@ -60,6 +62,7 @@ function App() {
           
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />
+          <Route path="/company/payment" element={<PaymentForm />} />
         </Route>
       </Routes>
     </div>

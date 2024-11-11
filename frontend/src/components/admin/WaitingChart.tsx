@@ -23,7 +23,7 @@ export function WaitingChart() {
 
     return (
         <div className="bg-white shadow-lg p-4 pt-6 rounded-md">
-            <h3 className="text-center mb-4">DRAFTING AND PENDING</h3>
+            <h3 className="text-center mb-4">PENDING</h3>
             <ResponsiveContainer width="100%" aspect={getAspect()}>
                 <ChartContainer config={{ waitingForm: { color: "#82ca9d" } }}>
                     <BarChart width={900} height={450} data={mockBarChartData}>
@@ -32,7 +32,6 @@ export function WaitingChart() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="draft" fill="hsl(var(--chart-draft))" />
                         <Bar dataKey="pending" fill="hsl(var(--chart-pending))" />
                     </BarChart>
                 </ChartContainer>
