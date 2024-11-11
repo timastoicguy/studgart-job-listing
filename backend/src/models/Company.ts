@@ -20,7 +20,12 @@ export interface ICompany extends Document {
 }
 
 const CompanySchema: Schema = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  user_id: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    unique: true,
+  },
   company_size: { type: String },
   profile_summary: { type: String },
   company_history: { type: String },

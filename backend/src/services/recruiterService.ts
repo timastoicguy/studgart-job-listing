@@ -36,7 +36,8 @@ export const getRecruiters = async (
   };
   // @ts-ignore
   const result = await Recruiter.paginate(query, options);
-
+  const t = result.docs.map((recruiter: any) => recruiter.company_id);
+  console.log(t);
   return {
     recruiters: result.docs.map((recruiter: any) => toRecruiterDTO(recruiter)),
     totalPages: result.totalPages,
