@@ -2,23 +2,28 @@ import { Request, Response } from "express";
 import Company, { ICompany } from "../models/Company";
 import { ICompanyDTO } from "../dto/ICompanyDTO";
 
-export const toCompanyDTO = (company: ICompany): ICompanyDTO => ({
-  _id: company._id as string,
-  company_size: company.company_size,
-  profile_summary: company.profile_summary,
-  company_history: company.company_history,
-  company_name: company.company_name,
-  company_description: company.company_description,
-  company_website: company.company_website,
-  company_logo: company.company_logo,
-  contact_email: company.contact_email,
-  contact_phone: company.contact_phone,
-  company_address: company.company_address,
-  industry: company.industry,
-  established_year: company.established_year,
-  social_links: company.social_links,
-  tax_number: company.tax_number,
-});
+export const toCompanyDTO = (company: ICompany): ICompanyDTO | null => {
+  if (company === null) {
+    return null;
+  }
+  return {
+    _id: company._id as string,
+    company_size: company.company_size,
+    profile_summary: company.profile_summary,
+    company_history: company.company_history,
+    company_name: company.company_name,
+    company_description: company.company_description,
+    company_website: company.company_website,
+    company_logo: company.company_logo,
+    contact_email: company.contact_email,
+    contact_phone: company.contact_phone,
+    company_address: company.company_address,
+    industry: company.industry,
+    established_year: company.established_year,
+    social_links: company.social_links,
+    tax_number: company.tax_number,
+  };
+};
 
 // Create a new company
 export const createCompany = async (req: Request, res: Response) => {

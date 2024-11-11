@@ -295,12 +295,7 @@ router.get("/applications/:id", getApplicationById);
  *                 data:
  *                   nullable: true
  */
-router.put(
-  "/applications/:id",
-  createApplicationValidation,
-  handleValidation,
-  updateApplication
-);
+router.put("/applications/:id", updateApplication);
 
 /**
  * @swagger

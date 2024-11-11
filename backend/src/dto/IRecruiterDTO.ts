@@ -6,5 +6,5 @@ export interface IRecruiterDTO {
   status: string;
   created_at: Date;
   user: IUserDTO;
-  company: ICompanyDTO;
+  company?: ICompanyDTO | null;
 }
