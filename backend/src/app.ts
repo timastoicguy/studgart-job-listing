@@ -22,7 +22,8 @@ import favoriteRoutes from "./routes/favoriteRoutes.routes";
 import chatbotApitRoutes from "./routes/chatbotApi.routes";
 import resumeRoutes from "./routes/resume.routes";
 import http from "http";
-import initSocket from "./config/socket";
+import { initSocket } from "./config/socket"; // initSocket from "./config/socket";
+import notificationRoutes from "./routes/notifications.routes";
 // Load environment variables
 dotenv.config();
 
@@ -59,6 +60,8 @@ app.use("/api", applicationRoutes);
 app.use("/api", favoriteRoutes);
 app.use("/api", chatbotApitRoutes);
 app.use("/api", resumeRoutes);
+app.use("/api", notificationRoutes);
+
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);

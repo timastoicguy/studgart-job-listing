@@ -1,15 +1,14 @@
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import http from "http";
-import mongoose from "mongoose";
 import { Conversation, Message } from "../models/conversation.model";
 import ChatGPTService from "../services/ChatGPTService";
 dotenv.config();
 
 const chatGPTService = new ChatGPTService();
-
+let io: Server;
 const initSocket = (server: http.Server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: process.env.FRONTEND_URL || "http://localhost:5173",
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -78,7 +77,11 @@ const initSocket = (server: http.Server) => {
       // Optional: Remove specific listeners if necessary
       socket.removeAllListeners(); // Remove all listeners to prevent memory leaks
     });
+
+    socket.on("joinNotification", (userId) => {
+      socket.join(userId); // Tham gia phòng của user
+    });
   });
 };
 
-export default initSocket;
+export { io, initSocket }; // Export io and initSocket;
