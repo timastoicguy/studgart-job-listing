@@ -11,7 +11,7 @@ import { toCompanyDTO } from "./company.controller";
 import { toUserDTO } from "./user.controller";
 import { Request, Response } from "express";
 export const toRecruiterDTO = (recruiter: IRecruiter): IRecruiterDTO => ({
-  _id: recruiter._id as string,
+  _id: "1",
   status: recruiter.status,
   created_at: recruiter.created_at,
   user: toUserDTO(recruiter.user_id as any),

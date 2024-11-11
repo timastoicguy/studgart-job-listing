@@ -2,7 +2,6 @@ import { body, query, param } from "express-validator";
 
 export const recruiterValidation = [
   body("user_id").isMongoId().withMessage("Invalid user ID format"),
-  body("company_id").isMongoId().withMessage("Invalid company ID format"),
   body("status")
     .isIn(["lock", "unlock", "pending"])
     .withMessage("Status must be one of 'lock', 'unlock', or 'pending'"),

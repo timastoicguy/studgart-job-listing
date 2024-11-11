@@ -103,18 +103,7 @@ router.post(
  *       400:
  *         description: Invalid query parameters
  */
-router.get(
-  "/recruiters",
-  recruiterQueryValidation,
-  (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array(), data: null });
-    }
-    next();
-  },
-  getRecruitersController
-);
+router.get("/recruiters", getRecruitersController);
 
 /**
  * @swagger
@@ -175,7 +164,7 @@ router.get("/recruiters/:id", getRecruiterByIdController);
  *       404:
  *         description: Recruiter not found
  */
-router.patch("/recruiters/:id", recruiterValidation, updateRecruiterController);
+router.patch("/recruiters/:id", updateRecruiterController);
 
 /**
  * @swagger
