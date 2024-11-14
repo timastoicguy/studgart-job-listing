@@ -21,6 +21,7 @@ import applicationRoutes from "./routes/application.routes";
 import favoriteRoutes from "./routes/favoriteRoutes.routes";
 import chatbotApitRoutes from "./routes/chatbotApi.routes";
 import resumeRoutes from "./routes/resume.routes";
+import paymentRoutes from "./routes/payment.routes";
 import http from "http";
 import { initSocket } from "./config/socket"; // initSocket from "./config/socket";
 import notificationRoutes from "./routes/notifications.routes";
@@ -61,6 +62,8 @@ app.use("/api", favoriteRoutes);
 app.use("/api", chatbotApitRoutes);
 app.use("/api", resumeRoutes);
 app.use("/api", notificationRoutes);
+// ko có swagger
+app.use("/api/payment", paymentRoutes);
 
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
