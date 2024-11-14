@@ -59,12 +59,15 @@ const TableRow = React.forwardRef<
     ref={ref}
     className={cn(
       "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "even:bg-gray-50", // Adds a background color for even rows
+      "odd:bg-white bode", // Adds a background color for odd rows
       className
     )}
     {...props}
   />
 ))
 TableRow.displayName = "TableRow"
+
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,

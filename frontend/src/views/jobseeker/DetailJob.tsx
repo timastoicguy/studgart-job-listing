@@ -24,16 +24,18 @@ const DetailJob: React.FC = () => {
   const [location, setLocation] = useState("");
 
 const [companyId, setCompanyId] = useState("");
-  const [companyName, setCompanyName] = useState("");
+  const [companyName, setCompanyName] = useState("Null");
   const [companyLogo, setCompanyLogo] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
-  const [industry, setIndustry] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("Null");
+  const [industry, setIndustry] = useState("Null");
 const [companySize, setCompanySize] = useState("100-499 nhân viên");
 const [nationality, setNationality] = useState("Japan");
 
 const [coverLetter, setCoverLetter] = useState(""); // Đã thêm biến trạng thái cho coverLetter
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const [isApplied, setIsApplied] = useState(false);
+  const [lastAppliedTime, setLastAppliedTime] = useState("");
   const handleApplyClick = () => {
     setIsDialogOpen(true);
   };
@@ -43,6 +45,12 @@ const [coverLetter, setCoverLetter] = useState(""); // Đã thêm biến trạng
     setFileList([]); // Reset file list khi đóng dialog
     setCoverLetter(""); // Reset cover letter khi đóng dialog
   };
+  
+  const handleJobClick = (job: any) => {
+    console.log("Job clicked:", job);
+    // Navigate to the job detail page, passing the job data as state
+    navigate(`/jobseeker/detailjob/${job._id}`, { state: { job } });
+};
 
   const handleSubmitApplication = async () => {
     try {
@@ -123,7 +131,8 @@ useEffect(() => {
 
       // For `location`, which is now an array, access the first element
       setLocation(response.location?.[0]?.name || "N/A");
-      setCompanyId(response.company._id || "N/A"); // Match the API structure
+      setCompanyId(response.company?.['_id'] || "N/A");
+
       // Check and set company details
       console.log(response.company._id || "N/A"); // Match the API structure
 
@@ -139,7 +148,53 @@ useEffect(() => {
   loadJobData();
 }, [jobId]); // Add jobId to dependencies
 
+useEffect(() => {
+  const checkApplicationStatus = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/applications?page=1&job_id=${jobId}&job_seeker_id=67273fea96599e898e7bbd6c`
+      );
+      
+      // Log full response to check structure
+      console.log("Application status response:", response.data);
+      
+      // Kiểm tra trong trường 'docs' thay vì toàn bộ 'response.data'
+      if (response.data.data.docs && response.data.data.docs.length > 0) {
+        setIsApplied(true);
+        setLastAppliedTime(new Date(response.data.data.docs[0].applied_at).toLocaleString()); // Sử dụng docs[0]
+      } else {
+        setIsApplied(false);
+      }
+    } catch (error) {
+      console.error("Error checking application status:", error);
+    }
+  };
 
+  if (jobId) {
+    checkApplicationStatus();
+  }
+}, [jobId]);
+
+  const [relatedJobs, setRelatedJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    const fetchRelatedJobs = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/group/jobs/suggestions/?page=1&limit=3");
+        const jobs = response.data.data.jobs;
+        console.log(jobs);
+        setRelatedJobs(jobs); // Store the job data in state
+        setLoading(false); // Set loading to false when data is fetched
+      } catch (err) {
+        setError("Error fetching related jobs.");
+        setLoading(false);
+      }
+    };
+
+    fetchRelatedJobs();
+  }, []);
 
 const [fileList, setFileList] = useState<any[]>([]); // Thay đổi kiểu dữ liệu nếu cần
 
@@ -169,7 +224,7 @@ const uploadProps = {
             {/* Company Logo and Info */}
             <div className="flex items-center">
               <img
-                src={companyLogo} // Use the company logo from state
+                src={companyLogo|| 'https://via.placeholder.com/48'} // Use the company logo from state
                 alt="Company Logo"
                 className="w-20 h-20 mr-4"
               />
@@ -194,8 +249,9 @@ const uploadProps = {
           </div>
             <div className="pl-24">
             <p className="text-red-500 text-lg font-bold">
-            {salaryMin} {currency} - {salaryMax} {currency}
-          </p>
+  {salaryMin.toLocaleString()} {currency} - {salaryMax.toLocaleString()} {currency}
+</p>
+
           <p className="text-gray-400 mt-1">10 minutes ago</p>
           <p className="text-gray-500 mt-2">Hết hạn: {new Date(deadline).toLocaleDateString()}</p>
             </div>
@@ -206,9 +262,12 @@ const uploadProps = {
         onClick={handleApplyClick}
         className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
       >
-        Ứng tuyển
+         {isApplied ? `Ứng tuyển lại ` : "Ứng tuyển"}
       </button>
+      
     </div>
+    {isApplied ? <span className="text-sm text-gray-600">Thời gian đã ứng tuyển: {lastAppliedTime}</span> : null}
+    
     
 
           </div>
@@ -242,7 +301,7 @@ const uploadProps = {
             onClick={handleApplyClick} 
             className="mt-4 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
           >
-            Ứng tuyển
+           {isApplied ? `Ứng tuyển lại ` : "Ứng tuyển"}
           </button>
         </div>
       </div>
@@ -317,7 +376,7 @@ const uploadProps = {
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
             <FiMapPin className="text-green-500" /> {/* Icon địa chỉ */}
-            <span>Địa chỉ:</span> <span className="font-semibold">{companyAddress}</span>
+            <span>Địa chỉ:</span> <span className="font-semibold">{location}</span>
         </div>
 
 
@@ -344,16 +403,32 @@ const uploadProps = {
       <li 
         key={index} 
         className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md shadow-sm"
+        onClick={() => handleJobClick(job)} // Navigate on click
       >
-        <img
-          src={job.logo}
-          alt={`${job.company} logo`}
-          className="w-12 h-12 object-cover"
-        />
+<img
+  src={job.logo || 'https://via.placeholder.com/48'}
+  alt={`${job.company} logo`}
+  className="w-12 h-12 object-cover"
+/>
+
+
         <div>
           <h3 className="font-bold">{job.title}</h3>
-          <p className="text-gray-500 text-sm">{job.company}</p>
-          <p className="text-red-500 text-sm font-semibold">{job.salary}</p>
+          <p className="text-gray-500 text-sm">{job.company_name}</p>
+          <p className="text-gray-500 text-sm">
+  {job.location.map((loc: { name: string }) => loc.name).join(', ')}
+</p>
+<p className="text-gray-500 text-sm">
+  {job.technologies
+.map((loc: { name: string }) => loc.name).join(', ')}
+</p>
+
+          <p className="text-red-500 text-sm font-medium">
+  {job.salaryRange 
+    ? `${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()} VND`
+    : "Salary not disclosed"
+  }
+</p>
         </div>
       </li>
     ))}

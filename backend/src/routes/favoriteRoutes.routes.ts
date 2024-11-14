@@ -76,7 +76,7 @@ router.post("/favorites", createFavorite);
  *       - in: query
  *         name: job_seeker_id
  *         schema:
- *           type: integer
+ *           type: string
  *           description: The ID of the job seeker.
  *       - in: query
  *         name: page
@@ -138,13 +138,13 @@ router.get("/favorites", getAllFavorites);
  *         name: job_id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *           description: The ID of the job to update.
  *       - in: path
  *         name: job_seeker_id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *           description: The ID of the job seeker.
  *     requestBody:
  *       required: true
@@ -203,13 +203,13 @@ router.put("/favorites/:job_id/:job_seeker_id", updateFavorite);
  *         name: job_id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *           description: The ID of the job to delete.
  *       - in: path
  *         name: job_seeker_id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *           description: The ID of the job seeker.
  *     responses:
  *       204:

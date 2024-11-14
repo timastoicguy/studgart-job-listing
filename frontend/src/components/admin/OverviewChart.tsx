@@ -1,13 +1,15 @@
 import { RadialBarChart, RadialBar, Legend, ResponsiveContainer } from "recharts";
 import React from 'react';
+import { FaGem, FaTrophy, FaMedal, FaStar, FaCoins } from 'react-icons/fa'; // Import icons
 
 export function OverviewChart() {
-    // Mock data với các sắc thái của màu xanh
+    // Mock data với các sắc thái của màu sắc phù hợp với từng cấp độ rank
     const mockRadialChartData = [
-        { name: 'Claim A', value: 400, fill: '#0056b3' }, // Xanh đậm
-        { name: 'Claim B', value: 300, fill: '#007bff' }, // Xanh vừa
-        { name: 'Claim C', value: 300, fill: '#66b3ff' }, // Xanh nhạt
-        { name: 'Claim D', value: 200, fill: '#99ccff' }, // Xanh rất nhạt
+        { name: 'Kim cương', value: 10, fill: '#4B0082', icon: <FaGem /> },   // Màu tím đậm
+        { name: 'Bạch kim', value: 100, fill: '#D3D3D3', icon: <FaTrophy /> },  // Màu xám sáng
+        { name: 'Vàng', value: 300, fill: '#FFD700', icon: <FaMedal /> },      // Màu vàng ánh kim
+        { name: 'Bạc', value: 200, fill: '#A9A9A9', icon: <FaStar /> },        // Màu xám đậm
+        { name: 'Đồng', value: 200, fill: '#CD7F32', icon: <FaCoins /> },      // Màu đồng
     ];
     const mockTotalClaims = mockRadialChartData.reduce((acc, item) => acc + item.value, 0);
 
@@ -54,7 +56,7 @@ export function OverviewChart() {
                             fontSize={15} 
                             fill="#666"
                         >
-                            Claims
+                            Accounts
                         </text>
                         <Legend
                             iconSize={10}
@@ -64,6 +66,16 @@ export function OverviewChart() {
                         />
                     </RadialBarChart>
                 </ResponsiveContainer>
+            </div>
+
+            {/* Rank Icons */}
+            <div className="mt-4 flex justify-center gap-4">
+                {mockRadialChartData.map((rank, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                        <div className="text-xl">{rank.icon}</div>
+                        <div>{rank.name}</div>
+                    </div>
+                ))}
             </div>
         </div>
     );

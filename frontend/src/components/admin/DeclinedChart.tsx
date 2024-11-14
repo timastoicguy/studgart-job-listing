@@ -33,7 +33,6 @@ export function DeclinedChart() {
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="rejected" fill="hsl(var(--chart-rejected))" />
-                        <Bar dataKey="cancelled" fill="hsl(var(--chart-cancelled))" />
                     </BarChart>
                 </ChartContainer>
             </ResponsiveContainer>

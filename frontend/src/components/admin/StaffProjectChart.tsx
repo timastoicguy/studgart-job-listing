@@ -7,10 +7,10 @@ import { useWindowSize } from "@/components/shared/WindowSize";
 export function StaffProjectChart() {
     // Mock data
     const mockAreaChartData = [
-        { month: "January", staff: 40, projects: 30 },
-        { month: "February", staff: 35, projects: 25 },
-        { month: "March", staff: 50, projects: 40 },
-        { month: "April", staff: 60, projects: 45 },
+        { month: "January", account: 40, jobs: 30 },
+        { month: "February", account: 35, jobs: 25 },
+        { month: "March", account: 50, jobs: 40 },
+        { month: "April", account: 60, jobs: 45 },
     ];
 
     const size = useWindowSize();
@@ -22,7 +22,7 @@ export function StaffProjectChart() {
 
     return (
         <div className="bg-white shadow-lg p-4 pt-6">
-            <h3 className="text-center mb-4">STAFFS AND PROJECTS</h3>
+            <h3 className="text-center mb-4">ACCOUNTS AND JOBS</h3>
             <ResponsiveContainer width="100%" aspect={getAspect()}>
                 <AreaChart
                     data={mockAreaChartData}
@@ -40,14 +40,14 @@ export function StaffProjectChart() {
                     <Legend />
                     <Area
                         type="monotone"
-                        dataKey="staff"
+                        dataKey="account"
                         stackId="1"
                         stroke="hsl(var(--chart-staff))"
                         fill="hsl(var(--chart-staff))"
                     />
                     <Area
                         type="monotone"
-                        dataKey="projects"
+                        dataKey="jobs"
                         stackId="1"
                         stroke="hsl(var(--chart-projects))"
                         fill="hsl(var(--chart-projects))"
