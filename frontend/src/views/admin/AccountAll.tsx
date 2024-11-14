@@ -1,54 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/tablechecked";
+import React, { useState, useEffect } from 'react';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/tablechecked";
 import { FaSort, FaSearch } from "react-icons/fa";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import axios from 'axios';
+import AccountLockConfirmationModal from './AccountLockConfirmationModal';
+import AccountActivateConfirmationModal from './AccountActivateConfirmationModal'; // New Modal for activation
 
 const AccountAll = () => {
-  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]); // Change type to string as IDs are strings
-  const [accounts, setAccounts] = useState<any[]>([]); // Change the type to store any type of accounts
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(10); // Giả sử có 10 trang
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]); // Account IDs
+  const [accounts, setAccounts] = useState<any[]>([]); // Accounts data
+  const [searchQuery, setSearchQuery] = useState(''); // Search query state
+  const [page, setPage] = useState(1); // Current page
+  const [limit, setLimit] = useState(5); // Items per page
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const [totalPages, setTotalPages] = useState(10); // Total pages
+  const [isLockModalOpen, setIsLockModalOpen] = useState(false); // Modal visibility for lock
+  const [isActivateModalOpen, setIsActivateModalOpen] = useState(false); // Modal visibility for activate
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-  // Fetch users from API
+  // Fetch accounts from API
   const fetchAccounts = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users?page=${page}&limit=${limit}`
-      );
+      const response = await axios.get(`http://localhost:3000/api/users`, {
+        params: {
+          page: page,
+          limit: limit,
+          search: searchQuery, // Include the search query here
+        },
+      });
       const data = response.data.data;
-      setAccounts(data.users); // Set users data
-      setTotalPages(data.totalPages); // Set total pages
+      setAccounts(data.users); // Set account data
+      setTotalPages(data.totalPages); // Set total pages for pagination
     } catch (error) {
       console.error("Error fetching accounts:", error);
     }
   };
 
-  // Call fetchAccounts whenever page or limit changes
+  // Call fetchAccounts whenever page, limit, or searchQuery changes
   useEffect(() => {
     fetchAccounts();
-  }, [page, limit]);
+  }, [page, limit, searchQuery]);
 
   const handleCheckboxChange = (id: string) => {
     setSelectedAccounts((prev) =>
@@ -58,18 +49,26 @@ const AccountAll = () => {
 
   const handleSelectAllChange = () => {
     if (selectedAccounts.length === accounts.length) {
-      setSelectedAccounts([]);
+      setSelectedAccounts([]); // Unselect all
     } else {
-      setSelectedAccounts(accounts.map(account => account._id)); // Use _id for each user
+      setSelectedAccounts(accounts.map(account => account._id)); // Select all accounts
     }
   };
 
+  // Lock selected accounts
   const handleLock = () => {
-    console.log("Locking accounts:", selectedAccounts);
+    setIsLockModalOpen(true); // Open the modal to confirm lock action
   };
 
+  // Activate selected accounts
   const handleActivate = () => {
-    console.log("Activating accounts:", selectedAccounts);
+    setIsActivateModalOpen(true); // Open the modal to confirm activate action
+  };
+
+  // Handle page change in pagination
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    setCurrentPage(newPage);
   };
 
   return (
@@ -83,14 +82,22 @@ const AccountAll = () => {
               Show
             </label>
             <select
-              id="itemsPerPage"
-              className="border rounded-md ml-2 w-20 h-8"
-              onChange={(e) => setLimit(Number(e.target.value))}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-            </select>
+  id="itemsPerPage"
+  className="border rounded-md ml-2 w-20 h-8"
+  onChange={(e) => {
+    const selectedValue = e.target.value;
+    if (selectedValue === "All") {
+      setLimit(accounts.length); // Show all items
+    } else {
+      setLimit(Number(selectedValue)); // Set the selected limit (5, 10, 20)
+    }
+  }}
+>
+  <option value={5}>5</option>
+  <option value={10}>10</option>
+  <option value={20}>20</option>
+</select>
+
             <label htmlFor="itemsPerPage" className="mb-2 md:mb-0 md:ml-2">
               entries
             </label>
@@ -101,6 +108,8 @@ const AccountAll = () => {
                 id="search"
                 className="border border-gray-400 hover:border-blue-500 rounded-md pl-10 pr-4 py-1 h-8"
                 placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)} // Update search query state
               />
             </div>
           </div>
@@ -109,72 +118,66 @@ const AccountAll = () => {
 
       <div className="overflow-auto">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40px] text-black">
-                  <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                    checked={selectedAccounts.length === accounts.length}
-                    onChange={handleSelectAllChange}
-                  />
-                </TableHead>
-                <TableHead className="w-[180px] text-black">
-                  <div className="flex justify-between items-center">
-                    Tên chủ tài khoản <FaSort />
-                  </div>
-                </TableHead>
-                <TableHead className="w-[180px] text-black">
-                  <div className="flex justify-between items-center">
-                    Vai trò <FaSort />
-                  </div>
-                </TableHead>
-                <TableHead className="w-[100px] text-black">
-                  <div className="flex justify-between items-center">
-                    Thời gian đăng ký <FaSort />
-                  </div>
-                </TableHead>
-                <TableHead className="w-[100px] text-black">
-                  <div className="flex justify-between items-center">
-                    Tên đăng nhập <FaSort />
-                  </div>
-                </TableHead>
-                <TableHead className="w-[60px] text-black">
-                  <div className="flex justify-between items-center">
-                    Trạng thái tài khoản <FaSort />
-                  </div>
-                </TableHead>
-                <TableHead className="w-[100px] text-black">
-                  <div className="flex justify-between items-center">
-                    Hoạt động
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {accounts.map((account) => (
-                <TableRow key={account._id}>
-                  <TableCell>
-                    <input
-                      type="checkbox"
-                      checked={selectedAccounts.includes(account._id)}
-                      onChange={() => handleCheckboxChange(account._id)}
-                      className="cursor-pointer"
-                    />
-                  </TableCell>
-                  <TableCell>{account.username || account.email}</TableCell>
-                  <TableCell>{account.role}</TableCell>
-                  <TableCell>{new Date(account.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>{account.username}</TableCell>
-                  <TableCell>{account.isActive ? "Active" : "Inactive"}</TableCell>
-                  <TableCell>
-                    <button className="text-blue-500 hover:underline">Edit</button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead className="w-[40px] text-black">
+        <input
+          type="checkbox"
+          className="cursor-pointer"
+          checked={selectedAccounts.length === accounts.length}
+          onChange={handleSelectAllChange}
+        />
+      </TableHead>
+      <TableHead className="w-[180px] text-black">
+        <div className="flex justify-between items-center">
+          Tên đăng nhập <FaSort />
+        </div>
+      </TableHead>
+      <TableHead className="w-[180px] text-black">
+        <div className="flex justify-between items-center">
+          Vai trò <FaSort />
+        </div>
+      </TableHead>
+      <TableHead className="w-[100px] text-black">
+        <div className="flex justify-between items-center">
+          Thời gian đăng ký <FaSort />
+        </div>
+      </TableHead>
+      <TableHead className="w-[100px] text-black">
+        <div className="flex justify-between items-center">
+          Tên chủ tài khoản <FaSort />
+        </div>
+      </TableHead>
+      <TableHead className="w-[60px] text-black">
+        <div className="flex justify-between items-center">
+          Trạng thái tài khoản <FaSort />
+        </div>
+      </TableHead>
+
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {accounts.map((account) => (
+      <TableRow key={account._id}>
+        <TableCell>
+          <input
+            type="checkbox"
+            checked={selectedAccounts.includes(account._id)}
+            onChange={() => handleCheckboxChange(account._id)}
+            className="cursor-pointer"
+          />
+        </TableCell>
+        <TableCell>{account.email}</TableCell>
+        <TableCell>{account.role}</TableCell>
+        <TableCell>{new Date(account.createdAt).toLocaleDateString()}</TableCell>
+        <TableCell>{account.username}</TableCell>
+        <TableCell>{account.isActive ? "Active" : "Inactive"}</TableCell>
+
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
         </div>
       </div>
 
@@ -193,9 +196,25 @@ const AccountAll = () => {
         </button>
       </div>
 
-      <div className="flex justify-center mt-4">
+      <AccountLockConfirmationModal
+        isOpen={isLockModalOpen}
+        onClose={() => setIsLockModalOpen(false)}
+        selectedAccounts={selectedAccounts}
+        fetchAccounts={fetchAccounts}
+      />
+
+      <AccountActivateConfirmationModal
+        isOpen={isActivateModalOpen}
+        onClose={() => setIsActivateModalOpen(false)}
+        selectedAccounts={selectedAccounts}
+        fetchAccounts={fetchAccounts}
+      />
+      {/* Pagination */}
       <Pagination>
-        <PaginationPrevious disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+        <PaginationPrevious
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
           Trang trước
         </PaginationPrevious>
 
@@ -214,11 +233,13 @@ const AccountAll = () => {
           ))}
         </PaginationContent>
 
-        <PaginationNext disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+        <PaginationNext
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+        >
           Trang sau
         </PaginationNext>
       </Pagination>
-        </div>
     </div>
   );
 };

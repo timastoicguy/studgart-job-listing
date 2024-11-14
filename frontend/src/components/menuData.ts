@@ -2,6 +2,7 @@
 
 // Interface for MenuItem
 export interface MenuItem {
+  name: string; // Add this line to include 'name' property
   label: string;
   action?: () => void;
   href?: string;
@@ -25,34 +26,36 @@ const userId = getUserIdFromLocalStorage();
 // Define menu options for each role
 export const roleOptions: Record<string, MenuItem[]> = {
   admin: [
-    { label: "Dashboard", href: "/admin/dashboard" },
-    { label: "Settings", href: "/admin/settings" },
+    { name: "dashboard", label: "Dashboard", href: "/admin/dashboard" },
+    { name: "settings", label: "Settings", href: "/admin/settings" },
     { 
+      name: "account", 
       label: "Account", 
       href: "/admin/accountall", 
       dropdownItems: [
-        { label: "Account Company", href: "/admin/account/company" },
-        { label: "Account Jobseeker", href: "/admin/account/jobseeker" },
+        { name: "account_company", label: "Account Company", href: "/admin/account/company" },
+        { name: "account_jobseeker", label: "Account Jobseeker", href: "/admin/account/jobseeker" },
       ],
     },
   ],
   job_seeker: [
     { 
+      name: "profile", 
       label: "Profile", 
       href: userId ? `/jobseeker/profile/${userId}` : "/jobseeker/profile",
       dropdownItems: [
-        { label: "Account Company", href: "/admin/account/company" },
-        { label: "Account Jobseeker", href: "/admin/account/jobseeker" },
+        { name: "account_company", label: "Account Company", href: "/admin/account/company" },
+        { name: "account_jobseeker", label: "Account Jobseeker", href: "/admin/account/jobseeker" },
       ],
     }, 
-    { label: "Job Listings", href: "/jobseeker/jobs" },
+    { name: "job_listings", label: "Job Listings", href: "/jobseeker/jobs" },
   ],
   recruiter: [
-    { label: "Post Job", href: "/recruiter/postjob" },
-    { label: "My Jobs", href: "/recruiter/my-jobs" },
+    { name: "post_job", label: "Post Job", href: "/recruiter/postjob" },
+    { name: "my_jobs", label: "My Jobs", href: "/recruiter/my-jobs" },
   ],
   company: [
-    { label: "Company Profile", href: "/company/profile" },
-    { label: "Job Postings", href: "/company/jobs" },
+    { name: "company_profile", label: "Company Profile", href: "/company/profile" },
+    { name: "job_postings", label: "Job Postings", href: "/company/jobs" },
   ],
 };

@@ -110,7 +110,7 @@ const FavoriteJobs: React.FC = () => {
   useEffect(() => {
     const fetchSavedJobs = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/favorites'); // Update with your actual API endpoint
+        const response = await axios.get('http://localhost:3000/api/favorites?job_seeker_id=67273fea96599e898e7bbd6c'); // Update with your actual API endpoint
         console.log(response.data.data.docs);
         setJobListings(response.data.data.docs);
       } catch (error) {

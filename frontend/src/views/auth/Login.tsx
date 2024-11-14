@@ -1,62 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useDispatch } from 'react-redux';
-import { useState } from 'react';
-import { setPage } from '../../store/navigationSlice';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaSpinner, FaGoogle } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { login } from '../../lib/reducers/auth/Login'; // Import the login API function
+import useLoginStore from '../../lib/reducers/auth/loginStore';
+import { useNavigate } from 'react-router-dom';
+import { setPage } from '../../store/navigationSlice';
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async () => {
-    setLoading(true);
-  
-    try {
-      const data = await login(email, password); // Call the login function
-  
-      if (data.error) {
-        toast.error(data.message || "Login failed. Please check your credentials.");
-      } else {
-        // Lưu accessToken và refreshToken vào local storage
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
-        localStorage.setItem('user_id', data.data.user._id);
-        console.log("Login successful:", data.data);
-        
-        // Set default role to admin
-        const userData = {
-          name: data.data.user.username || "Default User", // or whatever name you receive
-          role: data.data.user.role || "jobseeker" ,// Set the role as jobseeker
-          id: data.data.user._id || "null" // Set the role as admin
-        };
-        localStorage.setItem('userData', JSON.stringify(userData)); // Save user data
-  
-        toast.success("Login successful!");
-              // Delay navigation by 2 seconds
-      setTimeout(() => {
-        dispatch(setPage('about'));
-        navigate('/about');
-      }, 5000);
-      }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+  const {
+    email, password, loading, setEmail, setPassword, handleLogin
+  } = useLoginStore();
 
   const handleGoogleLogin = () => {
     console.log("Google Login clicked");
-    // Add Google OAuth logic here
   };
 
   return (
@@ -100,7 +60,7 @@ function Login() {
             </div>
           </div>
           <button
-            onClick={handleLogin}
+            onClick={() => handleLogin(navigate, setPage)}
             className={`bg-[#007acc] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center ${loading ? 'cursor-not-allowed' : ''}`}
             disabled={loading}
           >

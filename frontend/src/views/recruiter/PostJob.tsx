@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { postJob } from "@/lib/reducers/recruiter/jobService";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
+import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/postJobs";
+
+
+
+
 
 export default function JobListing() {
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
@@ -53,7 +59,7 @@ export default function JobListing() {
       skills: ["skillsToSend"],
       employmentType: [{ name: "full-time", code: "FT" }],
       experienceLevel: [{ name: "entry", code: "JR" }],
-      company: companyId, // Ensure this is a valid ObjectId
+      company: selectedCompany, // Gán companyId vào đây
       jobCategory: jobCategoryId, // Ensure this is a valid ObjectId
       recruiter: recruiterId, // Ensure this is a valid ObjectId
       technologies: skillsToSend,
@@ -90,6 +96,22 @@ export default function JobListing() {
     const [employeeType, setEmployeeType] = useState("");
     const [experienceLevel, setExperienceLevel] = useState("");
 
+    const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>([]); // Array of companies
+  useEffect(() => {
+    const loadRecommendedCompanies = async () => {
+      const data = await fetchRecommendedCompanies(); // Gọi API để lấy công ty
+
+      if (data && Array.isArray(data.data)) {
+        setRecommendedCompanies(data.data.map(item => item.company)); // Chỉ lấy đối tượng company
+        console.log('Recommended Companies:', data.data); // In dữ liệu các công ty
+      } else {
+        console.error('Error: Invalid data structure', data); // Log lỗi nếu dữ liệu không hợp lệ
+      }
+    };
+
+    loadRecommendedCompanies();
+  }, []);
   return (
     <div className="flex flex-col gap-8 p-8 md:flex-row justify-center">
       {/* Left Side - Language Selector and Input Fields */}
@@ -130,15 +152,23 @@ export default function JobListing() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1">Đơn vị tiền</label>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="w-full p-3 border rounded-md"
-            >
-              <option value="USD">USD</option>
-              <option value="VNĐ">VNĐ</option>
-            </select>
+          <label className="block text-sm font-semibold mb-1">Công ty</label>
+          <select
+        value={selectedCompany}
+        onChange={(e) => setSelectedCompany(e.target.value)}
+        className="w-full p-3 border rounded-md"
+      >
+        <option value="">Chọn công ty</option>
+        {recommendedCompanies.length > 0 ? (
+          recommendedCompanies.map((company) => (
+            <option key={company._id} value={company._id}>
+              {company.company_name}
+            </option>
+          ))
+        ) : (
+          <option value="">Không có công ty nào</option>
+        )}
+      </select>
           </div>
         </div>
         

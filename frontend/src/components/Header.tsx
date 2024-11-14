@@ -10,64 +10,106 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu"; // Adjust path as necessary
-import { roleOptions, MenuItem } from "./menuData"; // Import data from menuData
+import { roleOptions, MenuItem as RoleMenuItem } from "./menuData"; // Import menu data and alias MenuItem for clarity
 import { NavLink } from "react-router-dom";
-import socket from "@/store/socket";
+import socket from "@/store/socket"; // Ensure socket is configured correctly
 import axios from "axios";
+import AvatarDropdownMenu from "./AvatarDropdownMenu"; // Import AvatarDropdownMenu component
+import HoverDropdownMenu from "./HoverDropdownMenu"; // Import HoverDropdownMenu component
+
 interface HeaderProps {
   showSideBar: boolean;
   setShowSideBar: (showSideBar: boolean) => void;
-  userData: { name: string; role: string } | null;
+  userData: { name: string; role: string; id?: string } | null; // Added 'id' as optional
   onLogout: () => void;
 }
 
-export default function Header({ showSideBar, setShowSideBar, onLogout }: HeaderProps) {
-  const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
+// Define MenuItem type for the menu
+// menuData.ts
+
+export interface MenuItem {
+  name: string; // Add this line to include 'name' property
+  label: string;
+  action?: () => void;
+  href?: string;
+  dropdownItems?: MenuItem[];
+}
+
+// The rest of the code remains the same
+
+export default function Header({ showSideBar, setShowSideBar, userData, onLogout }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [badgeCount, setBadgeCount] = useState<number>(3); // Example count, replace with actual data
-  
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [badgeCount, setBadgeCount] = useState<number>(0);
+
   useEffect(() => {
-    // Get userData from localStorage
+    // Fetch user data from localStorage
     const storedUserData = localStorage.getItem("userData");
     if (storedUserData) {
       const parsedData = JSON.parse(storedUserData);
-      setUserData(parsedData);
-      console.log(parsedData.role);  // Lấy giá trị role từ userData
+      fetchNotifications(parsedData.id); // Fetch notifications for the user
     }
+
+    // Set up socket connection
+    socket.connect();
+    socket.on("joinNotification", (data) => {
+      setBadgeCount((prev) => prev + 1); // Increment badge count for new notifications
+    });
+
+    return () => {
+      socket.off("joinNotification");
+      socket.disconnect();
+    };
   }, []);
 
-//   useEffect(() => {
-//     const fetchDefaultQuestions = async () => {
-//         const response = await axios.get("http://localhost:3000/api/chatbot-api");
-//         setDefaultQuestions(response.data?.data);
-//     };
-//     fetchDefaultQuestions();
-//     socket.emit('joinNotification', { userId: user?._id });
-//     socket.on('notification', (content) => {
+  const fetchNotifications = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/notifications/${userId}?page=1&limit=10`);
+      if (response.data.success) {
+        setNotifications(response.data.notifications.docs);
+        setBadgeCount(response.data.notifications.docs.filter((n: any) => !n.isRead).length);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
 
-//         setChatMessages((prevMessages) => [...prevMessages,
-//         { text: content?.text, isUser: false, sender: content?.sender }
-//         ]);
-//         setIsTyping(false);
-//     });
+  const markAllAsRead = async () => {
+    try {
+      await axios.put(`/api/notifications/markAsRead`, { userId: userData?.id });
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) => ({ ...notification, isRead: true }))
+      );
+      setBadgeCount(0); // Reset the badge count after marking all as read
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+    }
+  };
 
-//     return () => {
-//         socket.off('newMessage');
-//         socket.off("typing")
-//     };
-
-// }, []);
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      await axios.patch(`http://localhost:3000/api/notification/${notificationId}`, {
+        isRead: true
+      });
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification._id === notificationId ? { ...notification, isRead: true } : notification
+        )
+      );
+      setBadgeCount((prev) => prev - 1); // Decrease badge count when a notification is marked as read
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   if (!userData) {
-    return null;  // You can add a loading state if needed
+    return null; // Return null if no user data is found
   }
-
-  const menuItems = roleOptions[userData?.role] || []; // Lấy các menu items dựa trên role
 
   return (
     <div className="sticky w-full left-0 top-0 z-50">
       <div className="flex flex-row px-2 py-2.5 ml-0 bg-header justify-between items-center shadow-md">
-        {/* Logo Section */}
+        {/* Logo and Sidebar Toggle */}
         <div className="flex items-center gap-4">
           <button
             className="flex w-8 h-8 lg:hidden rounded-md bg-white hover:bg-gray-100 hover:shadow-md justify-center items-center transition-all"
@@ -78,34 +120,25 @@ export default function Header({ showSideBar, setShowSideBar, onLogout }: Header
             </span>
           </button>
           <div className="flex items-center">
-            <img
-              src="..\public\images\logo.png" // Replace with your logo path
-              alt="Logo"
-              className="h-8"
-            />
-            <span className="ml-2 text-lg font-semibold text-green-500">
-              STUDGART
-            </span>
+            <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
+            <span className="ml-2 text-lg font-semibold text-green-500">STUDGART</span>
           </div>
         </div>
 
+        {/* Navigation and Menu */}
         <div className="lg:flex justify-start items-start gap-8 text-black">
-          {menuItems.length > 0 ? (
-            menuItems.map((item, index) => (
-              <HoverDropdownMenu 
-                key={index}
-                link={item}
-                dropdownItems={item.dropdownItems || []}
-              />
-            ))
-          ) : (
-            <div>No menu items available</div> // Display if menuItems is empty
-          )}
+          {/* Dynamically rendered menu items */}
+          {roleOptions[userData?.role]?.map((item, index) => (
+            <HoverDropdownMenu
+              key={index}
+              link={item}
+              dropdownItems={item.dropdownItems || []}
+            />
+          ))}
         </div>
 
-        {/* Right Section: Notification and Profile */}
-        <div className="flex items-center gap-5 ">
-          {/* Notification Bell */}
+        {/* Notification and Profile */}
+        <div className="flex items-center gap-5">
           <div className="relative">
             <button
               className="flex items-center justify-center w-8 h-8 text-black hover:text-green-500 transition-colors"
@@ -122,106 +155,40 @@ export default function Header({ showSideBar, setShowSideBar, onLogout }: Header
                 )}
               </span>
             </button>
-
-            {/* Notification Dropdown */}
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                <div className="p-4 border-b">
+                <div className="p-4 border-b flex justify-between">
                   <span className="font-semibold">Thông báo</span>
-                  <button className="text-green-500 float-right text-sm">Đánh dấu là đã đọc</button>
+                  <button
+                    className="text-green-500 text-sm "
+                    onClick={markAllAsRead}
+                  >
+                    Đánh dấu là đã đọc
+                  </button>
                 </div>
-                <div className="p-4">
-                  <div className="text-sm mb-2">NAM, Vừa xem CV của bạn</div>
-                  <div className="text-xs text-gray-500">31/10/2024</div>
-                  <hr className="my-2" />
-                  <div className="text-sm mb-2">NTD vừa đánh giá CV của bạn</div>
-                  <div className="text-xs text-gray-500">31/10/2024</div>
-                  <hr className="my-2" />
-                  <div className="text-sm mb-2">Nhà tuyển dụng vừa xem CV ứng tuyển của bạn</div>
-                  <div className="text-xs text-gray-500">31/10/2024</div>
+                <div className=" max-h-64 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        className={`p-4 ${notification.isRead ? "bg-white text-black" : "bg-gray-100 text-black"} border-b border-gray-200 text-sm`}
+                        onClick={() => !notification.isRead && markNotificationAsRead(notification._id)}
+                      >
+                        {notification.content}
+                      </div>
+                    ))
+                  ) : (
+                    <div>Không có thông báo nào</div>
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Avatar with Dropdown */}
-          <div className="relative">
-            <AvatarDropdownMenu userData={userData} onLogout={onLogout} />
-          </div>
+          {/* Avatar and Profile Dropdown */}
+          <AvatarDropdownMenu userData={userData} onLogout={onLogout} />
         </div>
       </div>
     </div>
-  );
-}
-
-// Avatar Dropdown Component
-const AvatarDropdownMenu = ({ userData, onLogout }: { userData: any; onLogout: () => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <DropdownMenu>
-      <div
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-      >
-        <DropdownMenuTrigger asChild>
-          <button className="bg-white rounded-full focus:ring-4 focus:ring-gray-300">
-            <img
-              className="w-10 h-10 rounded-full"
-              src="/images/react.svg" // Replace with user avatar if available
-              alt="avatar"
-            />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="">
-          <DropdownMenuLabel>Thông tin tài khoản</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem>
-            <NavLink to={`/jobseeker/profile/${userData?.id}`}>Thông tin cá nhân</NavLink>
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onLogout}>Đăng xuất</DropdownMenuItem>
-        </DropdownMenuContent>
-      </div>
-    </DropdownMenu>
-  );
-}
-
-// Component for Hover Dropdown Menu
-interface HoverDropdownMenuProps {
-  link: MenuItem;
-  dropdownItems: MenuItem[];
-}
-
-function HoverDropdownMenu({ link, dropdownItems }: HoverDropdownMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <div
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-      >
-        <DropdownMenuTrigger asChild>
-          <NavLink
-            to={link.href || "#"}
-            className="text-black font-medium hover:text-green-500 px-2 py-3 rounded-md"
-          >
-            {link.label}
-          </NavLink>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>{link.label}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {dropdownItems.map((item) => (
-            <DropdownMenuItem key={item.label} onClick={() => window.location.href = item.href || "#"} >
-              {item.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </div>
-    </DropdownMenu>
   );
 }
