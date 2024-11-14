@@ -39,8 +39,8 @@ const useLoginStore = create<LoginState>((set) => ({
         toast.success("Login successful!");
 
         setTimeout(() => {
-          setPage('about');
-          navigate('/about');
+          setPage('jobseeker/jobs');
+          navigate('/jobseeker/jobs');
         }, 5000);
       }
     } catch (error) {
