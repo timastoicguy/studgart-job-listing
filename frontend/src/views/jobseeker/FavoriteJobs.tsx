@@ -11,6 +11,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
 
 interface Job {
   id: string;
@@ -60,66 +61,19 @@ interface TopCompany {
 }
 
 const FavoriteJobs: React.FC = () => {
-  const [jobListings, setJobListings] = useState<Job[]>([]);
-  const [recommendedJobs] = useState<RecommendedJob[]>([
-    {
-      title: 'Front-end Developer',
-      level: 'Fresher, Junior',
-      location: 'HCM',
-      salary: '8.000.000 - 10.000.000',
-      avatar: 'https://via.placeholder.com/48',
-    },
-    {
-      title: 'Backend Developer',
-      level: 'Junior',
-      location: 'HN',
-      salary: '10.000.000 - 15.000.000',
-      avatar: 'https://via.placeholder.com/48',
-    },
-    {
-      title: 'Fullstack Developer',
-      level: 'Junior',
-      location: 'DN',
-      salary: '15.000.000 - 20.000.000',
-      avatar: 'https://via.placeholder.com/48',
-    },
-  ]);
-  const [topCompanies] = useState<TopCompany[]>([
-    {
-      name: 'Tech Company A',
-      location: 'HCM',
-      openings: 2,
-      avatar: 'https://via.placeholder.com/48',
-    },
-    {
-      name: 'Tech Company B',
-      location: 'HN',
-      openings: 3,
-      avatar: 'https://via.placeholder.com/48',
-    },
-    {
-      name: 'FPT Software',
-      location: 'HCM',
-      openings: 1,
-      avatar: 'https://via.placeholder.com/48',
-    },
-  ]);
+
+  const {
+    jobs: favertiedJobs,
+    recommendedJobs,
+    topCompanies,
+    // totalPagesJobs,
+    loading,
+  } = useFetchJobs();
+  
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Fetch saved jobs from the API
-  useEffect(() => {
-    const fetchSavedJobs = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/favorites?job_seeker_id=67273fea96599e898e7bbd6c'); // Update with your actual API endpoint
-        console.log(response.data.data.docs);
-        setJobListings(response.data.data.docs);
-      } catch (error) {
-        console.error('Error fetching saved jobs:', error);
-      }
-    };
 
-    fetchSavedJobs();
-  }, []);
 
   return (
     <TooltipProvider>
@@ -131,53 +85,53 @@ const FavoriteJobs: React.FC = () => {
             </div>
 
             <div className="space-y-4 overflow-y-auto">
-              {jobListings.slice(0, itemsPerPage).map((job) => (
+              {favertiedJobs.slice(0, itemsPerPage).map((job) => (
                 <div
                   key={job.id}
                   className="p-4 border rounded-md flex flex-col sm:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex space-x-4 flex-1">
-                    <img
-                      src={job.job_id.company}  // Assuming `company` field contains the logo or avatar URL.
-                      alt="company logo"
-                      className="w-20 h-20 object-cover rounded-full"
-                    />
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div className="flex items-center space-x-2 mb-1">
-                        {job.job_id.isUrgent && (
-                          <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
-                            Tuyển gấp
-                          </span>
-                        )}
-                        {job.job_id.status === 'New' && (
-                          <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
-                            Mới
-                          </span>
-                        )}
-                      </div>
+                        <img
+                          src={job.avatar || "https://via.placeholder.com/48"}
+                          alt="company logo"
+                          className="w-20 h-20 object-cover rounded-full"
+                        />
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div className="flex items-center space-x-2 mb-1">
+                            {job.isHot && (
+                              <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
+                                Tuyển gấp
+                              </span>
+                            )}
+                            {job.isNew && (
+                              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
+                                Mới
+                              </span>
+                            )}
+                          </div>
                       <Tooltip>
                         <TooltipTrigger>
                           <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer">
-                            {job.job_id.title}
+                            {job.title}
                           </h3>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <span>{job.job_id.title}</span>
+                          <span>{job.title}</span>
                         </TooltipContent>
                       </Tooltip>
-                      <p className="text-gray-600">{job.job_id.skills.join(', ')}</p>
+                      <p className="text-gray-600">{job.techStack}</p>
                       <div className="text-sm text-gray-500 flex items-center space-x-2">
                         <FiMapPin className="text-gray-500" />
-                        <span>{job.job_id.location[0].name}</span> {/* Assuming the first location is the main one */}
-                        <span>- {job.job_id.postedDate}</span>
+                        <span>{job.location}</span> {/* Assuming the first location is the main one */}
+                        <span>- {job.timePosted}</span>
                       </div>
                       <div className="text-red-500 font-semibold mt-1">
-                        {job.job_id.salaryRange.min} - {job.job_id.salaryRange.max} VND
-                      </div>
+                            {job.salary}
+                          </div>
                       <hr className="col-span-3 border-t border-gray-300 my-1" />
-                      <div className={`font-semibold mt-1 ${job.status === "Đã ứng tuyển" ? "text-blue-500" : "text-gray-500"}`}>
+                      {/* <div className={`font-semibold mt-1 ${job.status === "Đã ứng tuyển" ? "text-blue-500" : "text-gray-500"}`}>
                         {job.status}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   <div className="flex flex-row sm:flex-col items-center max-sm:w-full space-x-2 sm:space-y-2 mt-4 sm:mt-0 justify-end">
@@ -230,7 +184,7 @@ const FavoriteJobs: React.FC = () => {
                   />
                   <div>
                     <h3 className="font-bold text-sm">{job.title}</h3>
-                    <p className="text-gray-600">{job.level}</p>
+                    <p className="text-gray-600">{job.techStack}</p>
                     <p className="text-gray-600 flex items-center">
                       <FiMapPin className="mr-1" /> {job.location}
                     </p>

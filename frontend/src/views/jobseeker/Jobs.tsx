@@ -11,10 +11,11 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationItem,
   PaginationLink,
-  PaginationNext,
+  PaginationItem,
   PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFetchJobs } from "@/lib/reducers/jobseeker/useFetchJobs";
@@ -22,68 +23,58 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Jobs: React.FC = () => {
-  const formatSalary = (salary: string) => {
-    const salaryNumber = Number(salary);
-    return salaryNumber.toLocaleString();
-  };
+  const itemsPerPage = 10;
+  const jobSeekerId = "67273fea96599e898e7bbd6c"; // Replace with dynamic ID
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState(new Map<string, boolean>());
+  const [appliedJobs, setAppliedJobs] = useState<Map<string, boolean>>(new Map());
+  const navigate = useNavigate();
 
   const {
     jobs: jobListings,
-    recommendedJobs,
-    topCompanies,
+    recommendedJobs = [],
+    topCompanies = [],
+    totalPagesJobs,
     loading,
-  } = useFetchJobs();
-  const itemsPerPage = 10;
-  // State for search input
-  const [searchQuery, setSearchQuery] = useState("");
-  // State for filtered jobs
-  const [filteredJobs, setFilteredJobs] = useState(jobListings);
-  // State for current page
-  const [currentPage, setCurrentPage] = useState(1);
-  // State for total pages
-  const [totalPages, setTotalPages] = useState(0);
+    handlePageChange ,
+  } = useFetchJobs(currentPage);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
+  const formatSalary = (salary: string) => Number(salary).toLocaleString();
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
 
-  const navigate = useNavigate();
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value);
 
-  const handleJobClick = (job: any) => {
-    // Navigate to the job detail page, passing the job data as state
-    navigate(`/jobseeker/detailjob/${job.id}`, { state: { job } });
-  };
-  const handleCompanyClick = (company: any) => {
-    // Navigate to the job detail page, passing the job data as state
-    navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
+  const handleFavoriteJob = async (jobId: string) => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/favorites", {
+        job_id: jobId,
+        job_seeker_id: jobSeekerId,
+        status: "saved",
+      });
+
+      if (response.status === 200) {
+        setFavorites(new Map(favorites).set(jobId, true));
+      }
+    } catch (error) {
+      console.error("Error favoriting job:", error);
+    }
   };
 
-  const [appliedJobs, setAppliedJobs] = useState<Map<string, boolean>>(
-    new Map()
-  );
+  const handleJobClick = (job: any) => navigate(`/jobseeker/detailjob/${job.id}`, { state: { job } });
+  const handleCompanyClick = (company: any) => navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
 
   useEffect(() => {
-    const fetchApplicationStatus = async (jobId: string) => {
+    jobListings.forEach(async (job) => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/applications?page=1&job_id=${jobId}&job_seeker_id=67273fea96599e898e7bbd6c`
-        );
-        // Check if the job has been applied to
-        if (response.data.data.docs.length > 0) {
-          setAppliedJobs((prev) => new Map(prev).set(jobId, true));
-        } else {
-          setAppliedJobs((prev) => new Map(prev).set(jobId, false));
-        }
+        const response = await axios.get(`http://localhost:3000/api/applications?page=1&job_id=${job.id}&job_seeker_id=${jobSeekerId}`);
+        setAppliedJobs((prev) => new Map(prev).set(job.id, response.data.data.docs.length > 0));
       } catch (error) {
         console.error("Error checking application status:", error);
       }
-    };
-
-    // Fetch application status for all jobs
-    jobListings.forEach((job) => fetchApplicationStatus(job.id));
+    });
   }, [jobListings]);
 
   useEffect(() => {
@@ -95,22 +86,15 @@ const Jobs: React.FC = () => {
     setFilteredJobs(filtered);
     setCurrentPage(1);
   }, [jobListings, searchQuery]);
-
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredJobs.length / itemsPerPage));
-  }, [filteredJobs]);
-
   return (
     <TooltipProvider>
       <div className="lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
-        {/* Main Content */}
         <main className="flex-1 p-6">
           <div className="bg-white p-6 rounded-md shadow-md">
             <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
               Danh sách công việc
             </div>
 
-            {/* Search and Sort Section */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4">
               <input
                 type="text"
@@ -128,30 +112,16 @@ const Jobs: React.FC = () => {
               </div>
             </div>
 
-            {/* Job Listings */}
             <div className="space-y-4 overflow-y-auto">
               {loading
                 ? Array.from({ length: itemsPerPage }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
-                    >
+                    <div key={index} className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm">
                       <Skeleton className="w-20 h-20 rounded-full" />
-                      <div className="flex-1 flex flex-col justify-between space-y-2">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-1/3" />
-                        <Skeleton className="h-4 w-1/4" />
-                      </div>
                       <Skeleton className="w-20 h-8 rounded-md" />
                     </div>
                   ))
                 : currentJobs.map((job, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
-                      onClick={() => handleJobClick(job)} // Navigate on click
-                    >
+                    <div key={index} className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex space-x-4 flex-1">
                         <img
                           src={job.avatar || "https://via.placeholder.com/48"}
@@ -193,20 +163,15 @@ const Jobs: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
-                        <button
-                          className={`${
-                            appliedJobs.get(job.id)
-                              ? "bg-gray-400"
-                              : "bg-green-500"
-                          } text-white px-4 py-2 rounded-md`}
-                        >
-                          {appliedJobs.get(job.id)
-                            ? "Đã ứng tuyển"
-                            : "Ứng tuyển"}
+                        <button className={`${appliedJobs.get(job.id) ? "bg-gray-400" : "bg-green-500"} text-white px-4 py-2 rounded-md`}>
+                          {appliedJobs.get(job.id) ? "Đã ứng tuyển" : "Ứng tuyển"}
                         </button>
                         <Tooltip>
                           <TooltipTrigger>
-                            <FiHeart className="text-gray-500 hover:text-red-500 cursor-pointer" />
+                            <FiHeart
+                              className={`${favorites.get(job.id) ? "text-red-500" : "text-gray-500"} hover:text-red-500 cursor-pointer`}
+                              onClick={() => handleFavoriteJob(job.id)}
+                            />
                           </TooltipTrigger>
                           <TooltipContent>Yêu thích</TooltipContent>
                         </Tooltip>
@@ -215,42 +180,39 @@ const Jobs: React.FC = () => {
                   ))}
             </div>
 
-            {/* Pagination */}
             <div className="mt-6 flex justify-between items-center">
-              <Pagination>
-                <PaginationPrevious
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                >
-                  Trang trước
-                </PaginationPrevious>
-                <PaginationContent>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        isActive={currentPage === i + 1}
-                        onClick={() => setCurrentPage(i + 1)}
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                </PaginationContent>
-                <PaginationNext
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                >
-                  Trang sau
-                </PaginationNext>
-              </Pagination>
+            <Pagination>
+  <PaginationPrevious
+    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+  >
+    Trang trước
+  </PaginationPrevious>
+  <PaginationContent>
+    {Array.from({ length: totalPagesJobs }, (_, i) => (
+      <PaginationItem key={i}>
+        <PaginationLink
+          isActive={currentPage === i + 1}
+          onClick={() => handlePageChange(i + 1)}
+          className={currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-transparent text-black"} // Apply custom styles here
+        >
+          {i + 1}
+        </PaginationLink>
+      </PaginationItem>
+    ))}
+  </PaginationContent>
+  <PaginationNext
+    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPagesJobs))}
+  >
+    Trang sau
+  </PaginationNext>
+</Pagination>
+
             </div>
           </div>
         </main>
 
-        {/* Right Sidebar */}
-        <aside className="space-y-6">
+         {/* Right Sidebar */}
+         <aside className="space-y-6">
           <div className="bg-white p-6 rounded-md shadow-md border">
             <h2 className="text-lg text-green-500 font-bold mb-4">
               Các công việc có thể bạn quan tâm
