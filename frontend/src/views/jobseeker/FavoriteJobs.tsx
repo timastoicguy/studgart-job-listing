@@ -11,72 +11,115 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
+import { Favorite, useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
+import { notification } from 'antd';
+import ConfirmationDialog from './ConfirmationDialog';
 
-interface Job {
-  id: string;
-  job_id: {
-    title: string;
-    salaryRange: {
-      min: number;
-      max: number;
-    };
-    recruiter: string;
-    description: string;
-    responsibilities: string[];
-    requirements: string[];
-    skills: string[];
-    location: { name: string; code: string }[];
-    company: string;
-    jobCategory: string;
-    technologies: string[];
-    employmentType: { name: string; code: string }[];
-    experienceLevel: { name: string; code: string }[];
-    benefits: string[];
-    status: string;
-    numberOfVacancies: number;
-    isUrgent: boolean;
-    postedDate: string;
-    updatedDate: string;
-  };
-  job_seeker_id: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface RecommendedJob {
-  title: string;
-  level: string;
-  location: string;
-  salary: string;
-  avatar: string;
-}
-
-interface TopCompany {
-  name: string;
-  location: string;
-  openings: number;
-  avatar: string;
-}
+const getUserIdFromLocalStorage = (): string | null => {
+  const userData = localStorage.getItem('userData');
+  if (userData) {
+    const parsedData = JSON.parse(userData);
+    return parsedData.id || null; // Return user ID or null if not found
+  }
+  return null; // Return null if no userData in localStorage
+};
 
 const FavoriteJobs: React.FC = () => {
+  const [currentFavertiedPage, setCurrentFavertiedPage] = useState(1);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for confirmation
+  const [favorites, setFavorites] = useState<Map<string, boolean>>(new Map()); // Map for favorite jobs
+  const [updatedJobs, setUpdatedJobs] = useState<Favorite[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null); // Store selected job ID for confirmation
+
 
   const {
-    jobs: favertiedJobs,
+    favertiedJobs: jobListings,
     recommendedJobs,
     topCompanies,
-    // totalPagesJobs,
+    handleFavertiedPageChange,
+    currentFavertiedPageJobs,
+    totalFavertiedPagesJobs,
     loading,
-  } = useFetchJobs();
+  } = useFetchJobs(currentFavertiedPage);
+
+  const [itemsPerPage] = useState(10);
+
+  useEffect(() => {
+    // Update the jobs list when jobListings is updated
+    setUpdatedJobs(jobListings);
+  }, [jobListings]); // Runs when jobListings changes
+
+  useEffect(() => {
+    // Always reset to page 1 when the component is mounted
+    setCurrentFavertiedPage(1);
+  }, []);
+
+  // Handle job removal from favorites
+  const handleRemoveFavoriteJob = (jobId: string, index: string) => {
+    setSelectedJobId(jobId); // Lưu lại ID của công việc cần xóa
+    setSelectedId(index); // Lưu lại ID của công việc cần xóa
+    setIsDialogOpen(true); // Hiển thị dialog xác nhận
+  };
+
   
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  // Xử lý xác nhận xóa
+  const confirmRemoveFavoriteJob = async () => {
+    if (!selectedJobId) return;
 
-  // Fetch saved jobs from the API
+    const userId = getUserIdFromLocalStorage();
+    if (!userId) {
+      notification.error({
+        message: 'Lỗi người dùng',
+        description: 'Không tìm thấy thông tin người dùng trong localStorage.',
+        placement: 'topRight',
+      });
+      return;
+    }
 
+    try {
+      // Gửi yêu cầu xóa công việc yêu thích
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${userId}`
+      );
+
+      // Loại bỏ công việc khỏi danh sách hiện tại mà không cần tải lại
+      setUpdatedJobs((prevJobs) => prevJobs.filter((job) => job.id !== selectedId));
+
+      notification.success({
+        message: 'Đã xóa khỏi yêu thích!',
+        description: 'Công việc đã được xóa khỏi danh sách yêu thích.',
+        placement: 'topRight',
+      });
+
+      // Đóng dialog xác nhận
+      setIsDialogOpen(false);
+      setSelectedJobId(null);
+    } catch (error) {
+      console.error('Lỗi khi xóa công việc yêu thích:', error);
+      notification.error({
+        message: 'Lỗi hệ thống',
+        description: 'Không thể xóa công việc khỏi danh sách yêu thích.',
+        placement: 'topRight',
+      });
+      setIsDialogOpen(false);
+    }
+  };
+
+  // Hủy xóa công việc
+  const cancelRemoveFavoriteJob = () => {
+    setSelectedJobId(null); // Bỏ ID công việc cần xóa
+    setIsDialogOpen(false); // Đóng dialog
+  };
 
   return (
     <TooltipProvider>
+      <ConfirmationDialog
+        isOpen={isDialogOpen}
+        message={favorites.get(selectedJobId || "") ? "Do you want to remove this job from favorites?" : "Do you want to favorite this job?"}
+        onConfirm={confirmRemoveFavoriteJob}
+        onCancel={cancelRemoveFavoriteJob}
+      />
       <div className="lg:pl-[250px] flex flex-col md:flex-row bg-gray-100">
         <main className="flex-1 p-6">
           <div className="bg-white p-6 rounded-md shadow-md">
@@ -85,7 +128,7 @@ const FavoriteJobs: React.FC = () => {
             </div>
 
             <div className="space-y-4 overflow-y-auto">
-              {favertiedJobs.slice(0, itemsPerPage).map((job) => (
+              {updatedJobs.slice(0, itemsPerPage).map((job) => (
                 <div
                   key={job.id}
                   className="p-4 border rounded-md flex flex-col sm:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
@@ -137,7 +180,9 @@ const FavoriteJobs: React.FC = () => {
                   <div className="flex flex-row sm:flex-col items-center max-sm:w-full space-x-2 sm:space-y-2 mt-4 sm:mt-0 justify-end">
                     <Tooltip>
                       <TooltipTrigger>
-                        <button className="bg-slate-300 text-black px-4 py-2 rounded-md flex items-center">
+                        <button 
+                        onClick={() => handleRemoveFavoriteJob(job.id_job,job.id)}
+                        className="bg-slate-300 text-black px-4 py-2 rounded-md flex items-center">
                           <FiTrash className="mr-2" /> Bỏ lưu
                         </button>
                       </TooltipTrigger>
@@ -149,21 +194,37 @@ const FavoriteJobs: React.FC = () => {
             </div>
 
             <div className="mt-6 flex justify-between items-center">
-              <Pagination>
-                <PaginationPrevious>Trang trước</PaginationPrevious>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationLink isActive={true}>1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>2</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink>3</PaginationLink>
-                  </PaginationItem>
-                </PaginationContent>
-                <PaginationNext>Trang sau</PaginationNext>
-              </Pagination>
+            <Pagination>
+  <PaginationPrevious
+    onClick={() => handleFavertiedPageChange(Math.max(currentFavertiedPageJobs - 1, 1))}
+  >
+    Trang trước
+  </PaginationPrevious>
+
+  <PaginationContent>
+    {Array.from({ length: totalFavertiedPagesJobs }, (_, i) => (
+      <PaginationItem key={i}>
+        <PaginationLink
+          isActive={currentFavertiedPageJobs === i + 1}
+          onClick={() => {
+            handleFavertiedPageChange(i + 1);
+            setCurrentFavertiedPage(i + 1); // Correctly set the current page
+          }}
+          className={currentFavertiedPageJobs === i + 1 ? "bg-blue-500 text-white" : "bg-transparent text-black"}
+        >
+          {i + 1}
+        </PaginationLink>
+      </PaginationItem>
+    ))}
+  </PaginationContent>
+
+  <PaginationNext
+    onClick={() => handleFavertiedPageChange(Math.min(currentFavertiedPageJobs + 1, totalFavertiedPagesJobs))}
+  >
+    Trang sau
+  </PaginationNext>
+</Pagination>
+
             </div>
           </div>
         </main>

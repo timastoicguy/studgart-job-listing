@@ -38,7 +38,7 @@ const AccountLockConfirmationModal: React.FC<AccountLockConfirmationModalProps> 
 
   // Hàm khóa tài khoản chung cho cả hai trường hợp
   const lockAccount = async (accountId: string) => {
-    await axios.patch(`http://localhost:3000/api/users/${accountId}`, {
+    await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/api/users/${accountId}`, {
       isActive: false // Khóa tài khoản
     });
   };

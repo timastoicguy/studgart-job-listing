@@ -25,7 +25,7 @@ const JobseekerInfoForm = () => {
   // Hàm lấy dữ liệu người dùng từ API
   useEffect(() => {
     if (userId) {
-      axios.get(`http://localhost:3000/api/users/${userId}`)
+      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`)
         .then(response => {
           if (response.data.data) {
             setFormData({
@@ -54,7 +54,7 @@ const JobseekerInfoForm = () => {
   const handleSave = async () => {
     console.log(userId);
     try {
-      const response = await axios.patch(`http://localhost:3000/api/jobseekers/${userId}`, {
+      const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/api/jobseekers/${userId}`, {
         username: formData.name,
         bio: formData.bio,
       });
@@ -101,7 +101,7 @@ const JobseekerInfoForm = () => {
         const formData = new FormData();
         formData.append("file", file);
   
-        const response = await axios.post("http://localhost:3000/api/upload/upload-single", formData, {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upload/upload-single`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },

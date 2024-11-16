@@ -8,8 +8,6 @@ import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/post
 
 
 
-
-
 export default function JobListing() {
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);

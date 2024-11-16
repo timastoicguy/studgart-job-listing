@@ -20,7 +20,7 @@ export interface JobData {
 
 export const postJob = async (jobData: JobData): Promise<any> => {
   try {
-    const response = await axios.post("http://localhost:3000/api/jobs", jobData);
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/jobs`, jobData);
     console.log("Job posted successfully:", response.data);
     return response.data; 
   } catch (error) {

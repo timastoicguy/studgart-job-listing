@@ -96,12 +96,12 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Company Filter */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Công ty</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">Tìm kiếm</label>
         <input
           type="text"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          placeholder="Tên công ty"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Tên công việc"
           className="w-full p-2 border rounded"
         />
       </div>

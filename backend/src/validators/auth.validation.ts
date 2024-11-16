@@ -7,8 +7,8 @@ export const registerValidation = [
     .isEmail()
     .withMessage("Must be a valid email")
     .custom((value) => {
-      if (!value.endsWith("@gmail.com")) {
-        throw new Error("Email must be a Google email (@gmail.com)");
+      if (!value.includes("@")) {
+        throw new Error("Email must contain '@'");
       }
       return true;
     }),

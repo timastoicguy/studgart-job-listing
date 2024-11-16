@@ -21,7 +21,7 @@ export const uploadProfilePicture = async (profilePicture: File): Promise<string
   formData.append('file', profilePicture);
 
   try {
-    const response = await axios.post('http://localhost:3000/api/upload/upload-single', formData, {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upload/upload-single`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -72,7 +72,7 @@ export const register = async (registerData: RegisterData): Promise<any> => {
   };
 
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/register', registrationPayload, {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, registrationPayload, {
       headers: {
         'Content-Type': 'application/json',
       },
