@@ -21,6 +21,7 @@ export interface IUser extends Document {
   diamonds?: number; // Số kim cương hiện tại
   totalSpent?: number; // Tổng số tiền đã chi
   transactions?: mongoose.Types.ObjectId[];
+  freeDiamonds: number;
 }
 
 const userSchema = new Schema<IUser>({
@@ -45,9 +46,10 @@ const userSchema = new Schema<IUser>({
   googleId: { type: String },
   balance: { type: Number, default: 0 },
   rank: { type: String, default: "Sắt" },
-  diamonds: { type: Number, default: 2 },
+  diamonds: { type: Number, default: 0 },
   totalSpent: { type: Number, default: 0 },
   transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }],
+  freeDiamonds: { type: Number, default: 2 },
 });
 
 // Middleware to update the `updatedAt` field before saving

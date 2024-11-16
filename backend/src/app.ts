@@ -25,6 +25,8 @@ import paymentRoutes from "./routes/payment.routes";
 import http from "http";
 import { initSocket } from "./config/socket"; // initSocket from "./config/socket";
 import notificationRoutes from "./routes/notifications.routes";
+import diamontRoutes from "./routes/diamondConversion.routes";
+import rankRoutes from "./routes/ranks.routes";
 // Load environment variables
 dotenv.config();
 
@@ -63,8 +65,9 @@ app.use("/api", chatbotApitRoutes);
 app.use("/api", resumeRoutes);
 app.use("/api", notificationRoutes);
 // ko có swagger
-app.use("/api/payment", paymentRoutes);
-
+app.use("/api/payments", paymentRoutes);
+app.use("/api/diamond-conversions", diamontRoutes);
+app.use("/api/ranks", rankRoutes);
 //filters routes
 app.use("/api/filters", jobTypeRoutes);
 app.use("/api/filters", jobLevelRoutes);

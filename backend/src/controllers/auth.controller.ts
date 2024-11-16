@@ -12,7 +12,7 @@ import {
   generateVerificationToken,
   verifyToken,
 } from "../utils/token.util";
-import { toUserDTO } from "./user.controller";
+import { toUserDTO, toUserPaymentDTO } from "./user.controller";
 import { IUserDTO } from "../dto/user.dto";
 
 export const register = async (
@@ -256,7 +256,7 @@ export const login = async (
 
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
-    const user = toUserDTO(req.user as IUser);
+    const user = toUserPaymentDTO(req.user as IUser);
     res.status(200).json({
       error: null,
       data: {

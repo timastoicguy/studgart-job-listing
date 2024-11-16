@@ -8,12 +8,18 @@ export async function convertMoneyToDiamonds(userId: string, amount: number) {
   if (!user) throw new Error("User not found");
 
   // Quy đổi tiền thành kim cương
-  const conversion = await DiamondConversion.findOne({ currency: "VND" });
-  if (!conversion) throw new Error("Conversion rate not found");
+  let conversion: any = await DiamondConversion.findOne({ currency: "VND" });
+  if (!conversion) {
+    conversion = {
+      rate: 10000,
+    };
+  }
+
   const diamonds = Math.floor(amount / conversion.rate);
 
   // Lấy hạng của người dùng để xác định tỷ lệ thưởng
   const rank = await Rank.findOne({ name: user.rank });
+
   const bonusMultiplier = rank ? rank.bonusMultiplier : 0;
 
   // Tính số kim cương cộng thêm dựa trên tỷ lệ thưởng

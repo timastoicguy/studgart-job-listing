@@ -4,6 +4,8 @@ import { convertMoneyToDiamonds } from "../services/diamondService";
 import { PaymentStatus, Transaction } from "../models/transaction.model";
 import crypto from "crypto";
 import axios from "axios";
+import { config } from "../config/dotenv.config";
+import User from "../models/User";
 export async function manualPayment(req: Request, res: Response) {
   const { userId, amount, urlImage } = req.body;
 
@@ -90,8 +92,8 @@ export async function getTransactionById(req: Request, res: Response) {
 }
 
 export async function createMomoPayment(req: Request, res: Response) {
-  const { userId, amount } = req.body;
-
+  const { userId, amount, info } = req.body;
+  console.log(req.body);
   try {
     // Lưu giao dịch với trạng thái PENDING
     const transaction = new Transaction({
@@ -103,13 +105,12 @@ export async function createMomoPayment(req: Request, res: Response) {
     });
     await transaction.save();
 
-    const accessKey = "F8BBA842ECF85";
-    const secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-    const orderInfo = "pay with MoMo";
-    const partnerCode = "MOMO";
-    const redirectUrl =
-      "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
-    const ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
+    const accessKey = config.accessMomoKey;
+    const secretKey = config.secretMomoKey ?? "";
+    const orderInfo = info ?? "pay with MoMo";
+    const partnerCode = config.parnerMomoCode;
+    const redirectUrl = config.redirectUrl;
+    const ipnUrl = `${config.ipnURl}/momo_return`;
     const requestType = "payWithMethod";
     const orderId = transaction?._id;
     const requestId = orderId;
@@ -120,7 +121,7 @@ export async function createMomoPayment(req: Request, res: Response) {
 
     //before sign HMAC SHA256 with format
     //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
-    var rawSignature =
+    const rawSignature =
       "accessKey=" +
       accessKey +
       "&amount=" +
@@ -147,6 +148,7 @@ export async function createMomoPayment(req: Request, res: Response) {
       .update(rawSignature)
       .digest("hex");
 
+    console.log(signature);
     //json object send to MoMo endpoint
     const requestBody = JSON.stringify({
       partnerCode: partnerCode,
@@ -177,9 +179,132 @@ export async function createMomoPayment(req: Request, res: Response) {
     };
 
     const response = await axios.request(options);
+
     // Chuyển hướng người dùng đến trang thanh toán VNPay
     res.json({ error: null, data: response.data });
   } catch (error: any) {
     res.status(500).json({ error: error.message, data: null });
   }
 }
+
+export async function handleMomoPayReturn(req: Request, res: Response) {
+  const { orderId, partnerCode, amount, resultCode, transId, signature } =
+    req.body;
+
+  const transaction = await Transaction.findById(orderId);
+  if (transaction && transaction?.amount == amount) {
+    if (resultCode == 0) {
+      // Thanh toán thành công
+      console.log("thành công");
+      transaction.status = PaymentStatus.COMPLETED;
+      const result = await convertMoneyToDiamonds(
+        transaction.user.toString(),
+        transaction.amount
+      );
+      console.log("kim cương", result);
+      transaction.diamonds = result.diamonds;
+    } else {
+      transaction.status = PaymentStatus.FAILED;
+    }
+    await transaction.save();
+
+    res.json({ error: null, data: transaction });
+  } else {
+    res.status(400).json({ error: "Invalid secure hash", data: null });
+  }
+}
+
+export async function handelCheckStatus(req: Request, res: Response) {
+  const { orderId } = req.body;
+  try {
+    const rawSignature = `accessKey=${config.accessMomoKey}&orderId=${orderId}&partnerCode=${config.parnerMomoCode}&requestId=${orderId}`;
+    const signature = crypto
+      .createHmac("sha256", config.secretMomoKey as string)
+      .update(rawSignature)
+      .digest("hex");
+
+    const requestBody = JSON.stringify({
+      partnerCode: config.parnerMomoCode,
+      requestId: orderId,
+      orderId: orderId,
+      signature: signature,
+      lang: "vi",
+    });
+
+    // options for axios
+    const options = {
+      method: "POST",
+      url: "https://test-payment.momo.vn/v2/gateway/api/query",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: requestBody,
+    };
+
+    const result = await axios.request(options);
+
+    return res.status(200).json({ error: null, data: result.data });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, data: null });
+  }
+}
+
+export const diamondPayment = async (req: Request, res: Response) => {
+  const { userId, requiredDiamonds, description } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found", data: null });
+    }
+    // Giảm số kim cương
+    const freeDM = user?.freeDiamonds ?? 0;
+    if (!user.diamonds) user.diamonds = 0;
+    if (freeDM > 0) {
+      if (requiredDiamonds > freeDM) {
+        user.freeDiamonds = 0;
+        user.diamonds -= requiredDiamonds - freeDM;
+      } else {
+        user.freeDiamonds = user.freeDiamonds - requiredDiamonds;
+      }
+    } else {
+      user.diamonds -= requiredDiamonds;
+    }
+    await user.save();
+    // Ghi lại giao dịch
+    const transaction = new Transaction({
+      user: userId,
+      diamonds: requiredDiamonds,
+      amount: 0,
+      status: PaymentStatus.COMPLETED,
+      paymentMethod: "diamond",
+      description,
+    });
+    await transaction.save();
+
+    res.json({ error: null, data: { user, transaction } });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, data: null });
+  }
+};
+
+export const handelCheckDiamonds = async (req: Request, res: Response) => {
+  const { userId } = req.params; // Lấy userId từ params
+  console.log(userId);
+  try {
+    // Tìm người dùng
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found", data: null });
+    }
+    // Trả về số kim cương hiện tại
+    res.json({
+      error: null,
+      data: {
+        diamonds: user.diamonds,
+        freeDiamonds: user.freeDiamonds,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, data: null });
+  }
+};

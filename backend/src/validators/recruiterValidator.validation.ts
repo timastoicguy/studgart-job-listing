@@ -20,9 +20,5 @@ export const recruiterQueryValidation = [
     .optional()
     .isIn(["lock", "unlock", "pending"])
     .withMessage("Status must be one of 'lock', 'unlock', or 'pending'"),
-  query("company_id")
-    .optional()
-    .isMongoId()
-    .withMessage("Invalid company ID format"),
   query("user_id").optional().isMongoId().withMessage("Invalid user ID format"),
 ];
