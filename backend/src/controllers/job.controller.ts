@@ -43,6 +43,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
       company,
       category,
       requirements,
+      recruiter,
       location,
       experienceLevel,
       employmentType,
@@ -132,6 +133,13 @@ export const getAllJobs = async (req: Request, res: Response) => {
     if (company) {
       if (mongoose.Types.ObjectId.isValid(company)) {
         filter.company = company; // Lọc theo company ID
+      }
+    }
+
+    // Lọc theo recruiter, nếu được cung cấp
+    if (recruiter) {
+      if (mongoose.Types.ObjectId.isValid(recruiter)) {
+        filter.recruiter = recruiter; // Lọc theo recruiter ID
       }
     }
 

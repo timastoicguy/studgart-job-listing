@@ -3,7 +3,7 @@ import Company, { ICompany } from "../models/Company";
 import { ICompanyDTO } from "../dto/ICompanyDTO";
 
 export const toCompanyDTO = (company: ICompany): ICompanyDTO | null => {
-  if (company === null) {
+  if (!company) {
     return null;
   }
   return {
