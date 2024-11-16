@@ -16,6 +16,12 @@ export interface IUser extends Document {
   updatedAt: Date;
   isVerified: boolean;
   googleId?: string;
+  balance?: number; // Số dư hiện tại (kim cương)
+  rank?: string; // Hạng (Sắt, Đồng, Bạc, Vàng, Kim Cương)
+  diamonds?: number; // Số kim cương hiện tại
+  totalSpent?: number; // Tổng số tiền đã chi
+  transactions?: mongoose.Types.ObjectId[];
+  freeDiamonds: number;
 }
 
 const userSchema = new Schema<IUser>({
@@ -38,6 +44,12 @@ const userSchema = new Schema<IUser>({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   googleId: { type: String },
+  balance: { type: Number, default: 0 },
+  rank: { type: String, default: "Sắt" },
+  diamonds: { type: Number, default: 0 },
+  totalSpent: { type: Number, default: 0 },
+  transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }],
+  freeDiamonds: { type: Number, default: 2 },
 });
 
 // Middleware to update the `updatedAt` field before saving

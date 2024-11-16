@@ -4,7 +4,28 @@ import { IUserDTO } from "../dto/user.dto";
 import { PaginateResult } from "mongoose";
 import bcrypt from "bcryptjs";
 // Convert User Document to UserDTO
-export const toUserDTO = (user: IUser): IUserDTO => ({
+export const toUserDTO = (user: IUser): any => {
+  if (!user) {
+    return null;
+  }
+
+  return {
+    _id: user._id as string,
+    username: user.username,
+    email: user.email,
+    phone: user.phone,
+    fullName: user.fullName,
+    role: user.role,
+    profilePicture: user.profilePicture,
+    address: user.address,
+    bio: user.bio,
+    lastLogin: user.lastLogin,
+    isActive: user.isActive,
+    isVerified: user.isVerified,
+  };
+};
+
+export const toUserPaymentDTO = (user: IUser): any => ({
   _id: user._id as string,
   username: user.username,
   email: user.email,
@@ -17,8 +38,13 @@ export const toUserDTO = (user: IUser): IUserDTO => ({
   lastLogin: user.lastLogin,
   isActive: user.isActive,
   isVerified: user.isVerified,
+  balance: user.balance,
+  rank: user.rank,
+  diamonds: user.diamonds,
+  totalSpent: user.totalSpent,
+  transactions: user.transactions,
+  freeDiamonds: user.freeDiamonds,
 });
-
 // Create User
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -54,7 +80,7 @@ export const getUsers = async (req: Request, res: Response) => {
     // Execute query
     // @ts-ignore
     const users: PaginateResult<IUser> = await User.paginate(query, options);
-    const usersDTO = users.docs.map((user) => toUserDTO(user));
+    const usersDTO = users.docs.map((user) => toUserPaymentDTO(user));
     return res.status(200).json({
       error: null,
       data: {
@@ -73,11 +99,15 @@ export const getUsers = async (req: Request, res: Response) => {
 // Get User by ID
 export const getUserById = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.params.id).select("-passwordHash");
+    const user = await User.findById(req.params.id)
+      .populate("transactions")
+      .select("-passwordHash");
     if (!user) {
       return res.status(404).json({ error: "User not found", data: null });
     }
-    return res.status(200).json({ error: null, data: toUserDTO(user) });
+
+    console.log(user);
+    return res.status(200).json({ error: null, data: toUserPaymentDTO(user) });
   } catch (error: any) {
     return res.status(500).json({ error: error.message, data: null });
   }

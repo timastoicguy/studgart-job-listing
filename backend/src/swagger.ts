@@ -1,7 +1,7 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
-
+import { config } from "./config/dotenv.config";
 // Cấu hình các tùy chọn cho Swagger
 const swaggerOptions = {
   definition: {
@@ -13,7 +13,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
+        url: `${config.baseURL}/api`,
         description: "Local server",
       },
     ],
