@@ -72,9 +72,9 @@ if (userRole === "job_seeker") {
       },
     }
   );
-  console.log("AAAAAAAAAAAAA",recruiterResponse);
 
   const recruiters = recruiterResponse.data.data.recruiters;
+  console.log(recruiters);
   if (recruiters && recruiters.length > 0) {
     userData.recruiter_id = recruiters[0]._id;
   }
