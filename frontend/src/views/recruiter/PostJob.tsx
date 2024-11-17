@@ -109,6 +109,7 @@ export default function JobListing() {
     };
 
     loadRecommendedCompanies();
+    console.log(recommendedCompanies);
   }, []);
   return (
     <div className="flex flex-col gap-8 p-8 md:flex-row justify-center">
@@ -152,21 +153,23 @@ export default function JobListing() {
           <div>
           <label className="block text-sm font-semibold mb-1">Công ty</label>
           <select
-        value={selectedCompany}
-        onChange={(e) => setSelectedCompany(e.target.value)}
-        className="w-full p-3 border rounded-md"
-      >
-        <option value="">Chọn công ty</option>
-        {recommendedCompanies.length > 0 ? (
-          recommendedCompanies.map((company) => (
-            <option key={company._id} value={company._id}>
-              {company.company_name}
-            </option>
-          ))
-        ) : (
-          <option value="">Không có công ty nào</option>
-        )}
-      </select>
+  value={selectedCompany}
+  onChange={(e) => setSelectedCompany(e.target.value)}
+  className="w-full p-3 border rounded-md"
+>
+  <option value="">Chọn công ty</option>
+  {recommendedCompanies
+    .filter((item) => item) // Filter out null or undefined `company`
+    .map((item) => (
+      <option key={item._id} value={item._id}>
+        {item.company_name}
+      </option>
+    ))}
+  {recommendedCompanies.length === 0 && (
+    <option value="">Không có công ty nào</option>
+  )}
+</select>
+
           </div>
         </div>
         

@@ -20,9 +20,10 @@ import {
   TableCell,
 } from "@/components/ui/tablechecked";
 import { useParams } from "react-router-dom";
+import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
 
 const JobseekerPending = () => {
-  const [selectedAccounts, setSelectedAccounts] = useState<number[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState(1);
@@ -31,7 +32,7 @@ const JobseekerPending = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [usernames, setUsernames] = useState<Record<string, string>>({});
-
+console.log("jobId: ", accounts);
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -51,8 +52,9 @@ const JobseekerPending = () => {
         );
         setAccounts(response.data.data.docs);
 
-        console.log(accounts);
+        console.log("##########: ", accounts);
         setTotalPages(response.data.data.totalPages);
+        // Gửi thông báo
       } catch (error) {
         console.error("Error fetching accounts:", error);
         setAccounts([]);
@@ -81,11 +83,14 @@ const JobseekerPending = () => {
   useEffect(() => {
     accounts.forEach((account) => {
       const userId = account.job_seeker_id?.user_id;
+      console.log("accounts: ", userId);
       if (userId) fetchUsername(userId);
     });
-  }, [accounts]);
 
-  const handleAccept = async (applicationId: string) => {
+  }, [accounts]);
+  console.log("AAAAAAAAAAA: ", accounts);
+
+  const handleAccept = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
         `${
@@ -96,6 +101,7 @@ const JobseekerPending = () => {
         }
       );
 
+
       if (response.status === 200) {
         console.log("Application accepted");
         setAccounts((prevAccounts) =>
@@ -105,6 +111,11 @@ const JobseekerPending = () => {
               : account
           )
         );
+        await sendNotification(
+          userId,
+          "application_status",
+          "Công ty XYZ đã chấp nhận hồ sơ của bạn."
+        );
       } else {
         console.error("Error accepting application");
       }
@@ -113,7 +124,7 @@ const JobseekerPending = () => {
     }
   };
 
-  const handleReject = async (applicationId: string) => {
+  const handleReject = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
         `${
@@ -132,6 +143,11 @@ const JobseekerPending = () => {
               ? { ...account, application_status: "rejected" }
               : account
           )
+        );
+        await sendNotification(
+          userId,
+          "application_status",
+          `Công ty XYZ đã từ chối hồ sơ của bạn.`
         );
       } else {
         console.error("Error rejecting application");
@@ -162,24 +178,24 @@ const JobseekerPending = () => {
   );
 
   const handleViewResume = (resumeLink: string) => {
-    
     if (resumeLink) {
       window.open(resumeLink, "_blank");
     } else {
       console.log("No resume link available.");
     }
   };
-  const handleReview = async (applicationId: string) => {
+  const handleReview = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/applications/${applicationId}`,
         {
           application_status: "reviewed",
         }
       );
-  
-      if (response.status === 200) {
 
+      if (response.status === 200) {
         handleViewResume(response.data.data.resume);
         setAccounts((prevAccounts) =>
           prevAccounts.map((account) =>
@@ -188,7 +204,11 @@ const JobseekerPending = () => {
               : account
           )
         );
-
+        await sendNotification(
+          userId,
+          "application_status",
+          "Công ty XYZ đã xem xét hồ sơ của bạn."
+        );
       } else {
         console.error("Error reviewing application");
       }
@@ -196,7 +216,7 @@ const JobseekerPending = () => {
       console.error("Error reviewing application:", error);
     }
   };
-  
+
   return (
     <div className="px-2 py-4 md:px-4 rounded bg-white shadow-lg max-w-6xl mx-auto">
       <div className="mb-4 text-black">
@@ -303,30 +323,49 @@ const JobseekerPending = () => {
                     </TableCell>
                     <TableCell>
                       {account.job_id?.updatedDate
-                        ? new Date(account.job_id.updatedDate).toLocaleDateString("en-GB")
+                        ? new Date(
+                            account.job_id.updatedDate
+                          ).toLocaleDateString("en-GB")
                         : "null"}
                     </TableCell>
-                    <TableCell>{account.application_status || "null"}</TableCell>
                     <TableCell>
-                    <button
-                      className="text-blue-500 hover:text-blue-700 mx-1"
-                      onClick={() => handleReview(account._id)}
-                    >
-                      <FaEye title="Xem" size={18} />
-                    </button>
-                    <button
-                      className="text-green-500 hover:text-green-700 mx-1"
-                      onClick={() => handleAccept(account._id)}
-                    >
-                      <FaCheck title="Phù Hợp" size={18} />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700 mx-1"
-                      onClick={() => handleReject(account._id)}
-                    >
-                      <FaTimes title="Từ Chối" size={18} />
-                    </button>
-                  </TableCell>
+                      {account.application_status || "null"}
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        className={`text-blue-500 hover:text-blue-700 mx-1 ${
+                          account.application_status === "reviewed"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={() => handleReview(account._id, userId)}
+                        disabled={account.application_status === "reviewed"}
+                      >
+                        <FaEye title="Xem" size={18} />
+                      </button>
+                      <button
+                        className={`text-green-500 hover:text-green-700 mx-1 ${
+                          account.application_status === "accepted"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={() => handleAccept(account._id, userId)}
+                        disabled={account.application_status === "accepted"}
+                      >
+                        <FaCheck title="Phù Hợp" size={18} />
+                      </button>
+                      <button
+                        className={`text-red-500 hover:text-red-700 mx-1 ${
+                          account.application_status === "rejected"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={() => handleReject(account._id, userId)}
+                        disabled={account.application_status === "rejected"}
+                      >
+                        <FaTimes title="Từ Chối" size={18} />
+                      </button>
+                    </TableCell>
                   </TableRow>
                 );
               })
@@ -335,32 +374,32 @@ const JobseekerPending = () => {
         </Table>
 
         <div className="flex justify-center mt-4">
-        <Pagination>
-        <PaginationPrevious
-          onClick={() => handlePageChange(page - 1)}
-          disabled={page === 1}
-        >
-          Trang trước
-        </PaginationPrevious>
-        <PaginationContent>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <PaginationItem key={i}>
-              <PaginationLink
-                isActive={page === i + 1}
-                onClick={() => handlePageChange(i + 1)}
-              >
-                {i + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-        </PaginationContent>
-        <PaginationNext
-          onClick={() => handlePageChange(page + 1)}
-          disabled={page === totalPages}
-        >
-          Trang sau
-        </PaginationNext>
-      </Pagination>
+          <Pagination>
+            <PaginationPrevious
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+            >
+              Trang trước
+            </PaginationPrevious>
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    isActive={page === i + 1}
+                    onClick={() => handlePageChange(i + 1)}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </PaginationContent>
+            <PaginationNext
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+            >
+              Trang sau
+            </PaginationNext>
+          </Pagination>
         </div>
       </div>
     </div>
