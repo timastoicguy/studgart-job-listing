@@ -42,7 +42,7 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
           <DropdownMenuLabel>Thông tin tài khoản</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <NavLink to={`/jobseeker/profile/${userData.id}`}>Thông tin cá nhân</NavLink>
+            <NavLink to={`/profile/${userData.id}`}>Thông tin cá nhân</NavLink>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onLogout}>Đăng xuất</DropdownMenuItem>
