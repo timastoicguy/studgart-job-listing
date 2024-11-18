@@ -72,17 +72,13 @@ const initSocket = (server: http.Server) => {
         });
     });
 
-    socket.on("joinNotification", (userId) => {
+    socket.on("joinNotification", async ({ userId }) => {
       socket.join(userId); // Tham gia phòng của user
-      console.log("User joinNotification:", socket.id);
-
     });
     socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
       // Optional: Remove specific listeners if necessary
       socket.removeAllListeners(); // Remove all listeners to prevent memory leaks
     });
-
   });
 };
 
