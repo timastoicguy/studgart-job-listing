@@ -7,13 +7,20 @@ import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
 import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/postJobs";
 
 
-
+const getRecruiterIdFromLocalStorage = (): string | null => {
+  const userData = localStorage.getItem("userData");
+  if (userData) {
+    const parsedData = JSON.parse(userData);
+    return parsedData.recruiter_id || null; // Return user ID or null if not found
+  }
+  return null; // Return null if no userData in localStorage
+};
 export default function JobListing() {
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);
   const [salaryMax, setSalaryMax] = useState(1200);
   const [currency, setCurrency] = useState("VNĐ");
-  const [deadline, setDeadline] = useState("2025-12-14");
+  const [applicationDeadline, setApplicationDeadline] = useState(new Date("2025-12-14"));
   const [jobDescription, setJobDescription] = useState(`
     - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
     - Participate in the maintenance and upgrade of the website's features.
@@ -33,7 +40,7 @@ export default function JobListing() {
   const [location, setLocation] = useState("HCM");
   const [companyId, setCompanyId] = useState("60df7992fc13ae1af000006c"); // Update with actual ObjectId
   const [jobCategoryId, setJobCategoryId] = useState("60df7992fc13ae1af000006d"); // Update with actual ObjectId
-  const [recruiterId, setRecruiterId] = useState("60df7992fc13ae1af000006e"); // Update with actual ObjectId
+
   const [companyName, setCompanyName] = useState("CA Advance");
   const [companyLogo, setCompanyLogo] = useState("/path/to/company-logo.png");
   const [companyAddress, setCompanyAddress] = useState("Lầu 21, Centec Tower, 72-74 đường Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh");
@@ -41,14 +48,22 @@ export default function JobListing() {
   const [selectedSkill, setSelectedSkill] = useState("");
   const availableSkills = ["JavaScript", "React", "Node.js", "CSS", "HTML"];
 
+  const recruiterId= getRecruiterIdFromLocalStorage() || "";
+
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Cập nhật giá trị dạng Date từ input
+    setApplicationDeadline(new Date(event.target.value));
+  };
+
   const handleSubmit = async () => {
     const skillsToSend = skills.length > 0 ? skills.map(skill => ({ name: skill, code: skill.toUpperCase() })) : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
     
+    console.log("recruiterId:", recruiterId);
     const jobData = {
       title: title.trim(),
       salaryRange: { min: salaryMin, max: salaryMax },
       currency,
-      deadline,
+      applicationDeadline,
       description: jobDescription,
       responsibilities: jobDescription.split("\n").filter(line => line.trim() !== ""),
       requirements: requirements.split("\n").filter(line => line.trim() !== ""),
@@ -62,7 +77,7 @@ export default function JobListing() {
       recruiter: recruiterId, // Ensure this is a valid ObjectId
       technologies: skillsToSend,
     };
-  
+
     console.log("Job Data:", JSON.stringify(jobData, null, 2)); // Log the job data
   
     try {
@@ -175,14 +190,14 @@ export default function JobListing() {
         
         {/* Deadline */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Thời gian hết hạn</label>
-          <input
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            className="w-full p-3 border rounded-md"
-          />
-        </div>
+        <label className="block text-sm font-semibold mb-1">Thời gian hết hạn</label>
+        <input
+          type="date"
+          value={applicationDeadline.toISOString().split("T")[0]} // Hiển thị giá trị theo định dạng YYYY-MM-DD
+          onChange={handleDateChange}
+          className="w-full p-3 border rounded-md"
+        />
+      </div>
 
         {/* Job Description */}
         <div className="mb-6">
@@ -336,7 +351,7 @@ export default function JobListing() {
           </p>
           <p className="text-gray-400 mt-1">10 minutes ago</p>
 
-          <p className="text-gray-500 mt-2">Hết hạn: {deadline}</p>
+          <p className="text-gray-500 mt-2">Hết hạn: {applicationDeadline.toDateString()}</p> {/* Hiển thị định dạng ngày đọc được */}
         </div>
 
         {/* Section 2: Job Details */}

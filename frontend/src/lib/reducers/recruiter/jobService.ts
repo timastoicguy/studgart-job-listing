@@ -16,6 +16,7 @@ export interface JobData {
   technologies: { name: string; code: string }[];
   employmentType: { name: string; code: string }[];
   experienceLevel: { name: string; code: string }[];
+  applicationDeadline: Date;
 }
 
 export const postJob = async (jobData: JobData): Promise<any> => {

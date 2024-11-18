@@ -306,6 +306,12 @@ console.log("jobId: ", accounts);
                   Đang tải dữ liệu...
                 </TableCell>
               </TableRow>
+            ) : accounts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-4">
+                  Hiện tại chưa có người đăng ký
+                </TableCell>
+              </TableRow>
             ) : (
               accounts.map((account, index) => {
                 const userId = account.job_seeker_id?.user_id;

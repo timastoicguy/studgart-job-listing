@@ -19,7 +19,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFetchJobs } from "@/lib/reducers/jobseeker/useFetchJobs";
+import { useFetchJobs } from "@/lib/reducers/recruiter/useFetchJobs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -34,9 +34,7 @@ const JobPosted: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
   const [favorites, setFavorites] = useState(new Map<string, boolean>());
-  const [appliedJobs, setAppliedJobs] = useState<Map<string, boolean>>(
-    new Map()
-  );
+  const [applicationDeadlineMap, setApplicationDeadlineMap] = useState<Map<string, boolean>>(new Map());
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for favoriting
   const navigate = useNavigate();
@@ -62,43 +60,7 @@ const JobPosted: React.FC = () => {
   const handleCompanyClick = (company: any) =>
     navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
 
-  useEffect(() => {
-    jobListings.forEach(async (job) => {
-      try {
-        const response = await axios.get(
-          `${
-            import.meta.env.VITE_API_BASE_URL
-          }/api/applications?page=1&job_id=${
-            job.id
-          }&job_seeker_id=${jobSeekerId}`
-        );
-        setAppliedJobs((prev) =>
-          new Map(prev).set(job.id, response.data.data.docs.length > 0)
-        );
-      } catch (error) {
-        console.error("Error checking application status:", error);
-      }
-    });
-  }, [jobListings]);
 
-  useEffect(() => {
-    jobListings.forEach(async (job) => {
-      try {
-        const response = await axios.get(
-          `${
-            import.meta.env.VITE_API_BASE_URL
-          }/api/favorites?job_id=${
-            job.id
-          }&job_seeker_id=${jobSeekerId}`
-        );
-        setFavorites((prev) =>
-          new Map(prev).set(job.id, response.data.data.docs.length > 0)
-        );
-      } catch (error) {
-        console.error("Error checking application status:", error);
-      }
-    });
-  }, [jobListings]);
 
   
   useEffect(() => {
@@ -140,82 +102,85 @@ useEffect(() => {
             </div>
 
             <div className="space-y-4 overflow-y-auto">
-              {loading
-                ? Array.from({ length: itemsPerPage }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
-                    >
-                      <Skeleton className="w-20 h-20 rounded-full" />
-                      <Skeleton className="w-20 h-8 rounded-md" />
-                    </div>
-                  ))
-                : jobListings.map((job, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex space-x-4 flex-1">
-                        <img
-                          src={job.avatar || "https://via.placeholder.com/48"}
-                          alt="company logo"
-                          className="w-20 h-20 object-cover rounded-full"
-                        />
-                        <div className="flex-1 flex flex-col justify-between">
-                          <div className="flex items-center space-x-2 mb-1">
-                            {job.isHot && (
-                              <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
-                                Tuyển gấp
-                              </span>
-                            )}
-                            {job.isNew && (
-                              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
-                                Mới
-                              </span>
-                            )}
-                          </div>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <h3
-                                className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
-                                onClick={() => handleJobClick(job)} // Navigate on click
-                              >
-                                {job.title}
-                              </h3>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <span>{job.title}</span>
-                            </TooltipContent>
-                          </Tooltip>
-                          <p className="text-gray-600">{job.techStack}</p>
-                          <div className="text-sm text-gray-500 flex items-center space-x-2">
-                            <FiMapPin className="text-gray-500" />
-                            <span>{job.location}</span>
-                          </div>
-                          <span>{job.timePosted}</span>
-                          <div className="text-red-500 font-semibold mt-1">
-                            {job.salary}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
-                        <button
-                                                        onClick={() => handleJobClick(job)} // Navigate on click
+            {loading
+        ? Array.from({ length: itemsPerPage }).map((_, index) => (
+            <div
+              key={index}
+              className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
+            >
+              <Skeleton className="w-20 h-20 rounded-full" />
+              <Skeleton className="w-20 h-8 rounded-md" />
+            </div>
+          ))
+        : jobListings.map((job, index) => {
+            // Chuyển đổi applicationDeadline sang Date và so sánh với ngày hiện tại
+            const jobDeadline = new Date(job.applicationDeadline);
+            const isExpired = jobDeadline < new Date();
+            console.log("isExpired:", isExpired);
 
-                          className={`${
-                            appliedJobs.get(job.id)
-                              ? "bg-gray-400"
-                              : "bg-green-500"
-                          } text-white px-4 py-2 rounded-md`}
+            return (
+              <div
+                key={index}
+                className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex space-x-4 flex-1">
+                  <img
+                    src={job.avatar || "https://via.placeholder.com/48"}
+                    alt="company logo"
+                    className="w-20 h-20 object-cover rounded-full"
+                  />
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex items-center space-x-2 mb-1">
+                      {job.isHot && (
+                        <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
+                          Tuyển gấp
+                        </span>
+                      )}
+                      {job.isNew && (
+                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
+                          Mới
+                        </span>
+                      )}
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <h3
+                          className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
+                          onClick={() => handleJobClick(job)} // Navigate on click
                         >
-                          {appliedJobs.get(job.id)
-                            ? "Đã hết hạn"
-                            : "Còn hạn"}
-                        </button>
-
-                      </div>
+                          {job.title}
+                        </h3>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>{job.title}</span>
+                      </TooltipContent>
+                    </Tooltip>
+                    <p className="text-gray-600">{job.techStack}</p>
+                    <div className="text-sm text-gray-500 flex items-center space-x-2">
+                      <FiMapPin className="text-gray-500" />
+                      <span>{job.location}</span>
                     </div>
-                  ))}
+                    <span className="text-sm text-red-500">Exp: {job.applicationDeadline.toLocaleDateString()}</span>
+                    <div className="text-red-500 font-semibold mt-1">
+                      {job.salary}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
+                  <button
+                    onClick={() => handleJobClick(job)} // Navigate on click
+                    className={`${
+                      isExpired ? "bg-gray-400" : "bg-green-500"
+                    } text-white px-4 py-2 rounded-md`}
+                  >
+                    {isExpired ? "Đã hết hạn" : "Còn hạn"}
+                  </button>
+
+                </div>
+                
+              </div>
+            );
+          })}
             </div>
 
             <div className="mt-6 flex justify-between items-center">
