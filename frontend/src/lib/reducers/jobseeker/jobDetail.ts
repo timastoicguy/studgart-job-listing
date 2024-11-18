@@ -31,7 +31,7 @@ export interface JobData {
 // Hàm lấy dữ liệu công việc từ API
 export const fetchDetailJobData = async (jobId: string): Promise<JobData | null> => {
   try {
-    const response = await axios.get<{ data: JobData }>(`http://localhost:3000/api/jobs/${jobId}`);
+    const response = await axios.get<{ data: JobData }>(`${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`);
     console.log(response.data);
     return response.data.data; // Assuming data is nested within response
   } catch (error) {
@@ -56,7 +56,7 @@ export const applyForJob = async (jobId: string, applicantData: {
   }
 
   try {
-    await axios.post(`http://localhost:3000/api/jobs/${jobId}/apply`, formData, {
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}/apply`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

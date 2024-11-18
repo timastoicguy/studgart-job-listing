@@ -54,7 +54,7 @@ useEffect(() => {
   console.log(companyId);
 
   // Gọi API khi component được mount
-  axios.get(`http://localhost:3000/api/companies/${companyId}`)
+  axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/companies/${companyId}`)
     .then(response => {
       setCompanyData(response.data.data);
     })
@@ -92,7 +92,7 @@ const handleJobClick = (jobId: string) => { // Define 'jobId' as a string
 useEffect(() => {
   const fetchJobListings = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/jobs?page=${page}&limit=${itemsPerPage}&company=${companyId}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/jobs?page=${page}&limit=${itemsPerPage}&company=${companyId}`);
       setJobListings(response.data.data.docs);
       setTotalPages(response.data.data.totalPages); // Set total pages based on API response
     } catch (error) {

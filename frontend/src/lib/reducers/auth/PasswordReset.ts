@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const passwordReset = async (email: string): Promise<void> => {
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/forgot-password', {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/forgot-password`, {
       email: email,
     });
 

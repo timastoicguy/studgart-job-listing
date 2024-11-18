@@ -24,7 +24,7 @@ const AccountActivateConfirmationModal: React.FC<AccountActivateConfirmationModa
       await Promise.all(
         selectedAccounts.map(async (accountId) => {
           await axios.patch(
-            `http://localhost:3000/api/users/${accountId}`,
+            `${import.meta.env.VITE_API_BASE_URL}/api/users/${accountId}`,
             { isActive: true } // Gửi dữ liệu cập nhật kích hoạt tài khoản
           );
         })

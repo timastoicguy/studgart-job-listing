@@ -15,6 +15,8 @@ interface Job {
   avatar: string;
   isHot: boolean;
   isNew: boolean;
+  applicationDeadline: Date;
+
 }
 export interface Favorite {
   id: string;
@@ -73,6 +75,15 @@ interface FetchJobsReturn {
   handlePageChange: (page: number) => void;
   handleFavertiedPageChange: (page: number) => void;
 }
+const getRecruiterIdFromLocalStorage = (): string | null => {
+  const userData = localStorage.getItem('userData');
+  if (userData) {
+    const parsedData = JSON.parse(userData);
+    return parsedData.recruiter_id || null; // Return user ID or null if not found
+  }
+  return null; // Return null if no userData in localStorage
+};
+
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -153,6 +164,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
           timePosted: new Date(job.postedDate).toLocaleDateString(),
           avatar: job.company?.avatar || "",
           isHot: job.isUrgent,
+          applicationDeadline: new Date(job.applicationDeadline),
           isNew:
             new Date().getTime() - new Date(job.postedDate).getTime() <
             7 * 24 * 60 * 60 * 1000,
@@ -177,12 +189,17 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       if (!query.has("page")) {
         query.set("page", currentPageJobs.toString());
       }
-      
+  
       // Add limit to query if not already present
       if (!query.has("limit")) {
         query.set("limit", limit.toString());
       }
-      
+  const a=getRecruiterIdFromLocalStorage();
+      // Add recruiter to query if not already present
+      if (!query.has("recruiter")) {
+        query.set("recruiter", `${a}`); // Giá trị recruiter mặc định
+      }
+  
       const queryString = query.toString();
       console.log(queryString);
 
@@ -202,6 +219,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
           timePosted: new Date(job.postedDate).toLocaleDateString(),
           avatar: job.company?.avatar || "",
           isHot: job.isUrgent,
+          applicationDeadline: new Date(job.applicationDeadline),
           isNew:
             Date.now() - new Date(job.postedDate).getTime() <
             7 * 24 * 60 * 60 * 1000,

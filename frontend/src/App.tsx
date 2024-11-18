@@ -51,7 +51,7 @@ function App() {
           <Route path="/recruiter/jobpending" element={<JobPending />} />
           <Route path="/recruiter/hrdetailjob" element={<DetailJobHR />} />
           <Route path="/recruiter/jobreject" element={<JobReject />} />
-          <Route path="/recruiter/jobseekerpending" element={<JobseekerPending />} />
+          <Route path="/recruiter/jobseekerpending/:jobId" element={<JobseekerPending />} />
 
           <Route path="jobseeker/jobs" element={<Job />} />
           <Route path="/jobseeker/detailjob/:jobId" element={<DetailJob />} />

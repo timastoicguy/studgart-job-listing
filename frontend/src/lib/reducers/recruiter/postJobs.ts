@@ -29,7 +29,7 @@ interface FetchRecommendedCompaniesResponse {
 export async function fetchRecommendedCompanies(): Promise<FetchRecommendedCompaniesResponse | null> {
   try {
     // Gửi yêu cầu GET đến backend để lấy dữ liệu công ty
-    const response = await axios.get("http://localhost:3000/api/recruiters?page=1&limit=10&user_id=66f813158d46339b2311bcf7");
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/recruiters?page=1&limit=10&user_id=66f813158d46339b2311bcf7`);
 
     // Dữ liệu trả về đã được Axios tự động parse, bạn có thể trực tiếp sử dụng response.data
     const data: FetchRecommendedCompaniesResponse = response.data;

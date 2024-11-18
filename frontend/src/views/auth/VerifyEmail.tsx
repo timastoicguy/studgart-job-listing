@@ -15,7 +15,7 @@ const VerifyEmail: React.FC = () => {
     const verifyEmail = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:3000/api/auth/verify/${token}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/verify/${token}`);
         if (response.status === 200) {
           setVerified(true);
           toast.success("Email verified successfully!");
@@ -39,7 +39,7 @@ const VerifyEmail: React.FC = () => {
         toast.error("Email not found. Please register again.");
         return;
       }
-      const response = await axios.post('http://localhost:3000/api/auth/resend-verification', { email: userEmail });
+      const response = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/auth/resend-verification', { email: userEmail });
       if (response.status === 200) {
         toast.success("Verification email resent successfully!");
       }

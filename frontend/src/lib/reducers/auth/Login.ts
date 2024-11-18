@@ -5,9 +5,11 @@ export const login = async (email: string, password: string) => {
     email,
     password,
   };
+  console.log('Login data:', `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`);
 
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/login', loginData, {
+
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, loginData, {
       headers: {
         'Content-Type': 'application/json',
       },
