@@ -78,7 +78,7 @@ const ranks = [
   { name: "DIAMOND", symbol: "💎" },
 ];
 
-const amounts = [10000, 20000, 100000, 200000, 500000];
+const amounts = [20000,50000, 100000, 200000, 500000];
 
 const handlePaymentOptionChange = (e: RadioChangeEvent) => {
   setSelectedPaymentOption(e.target.value as "transfer" | "momo");
@@ -89,12 +89,13 @@ const handleAmountSelect = (amount: number) => {
 };
 
 const handleConfirmPayment = async () => {
+
   if (!selectedAmount) {
     message.error("Vui lòng chọn số tiền cần thanh toán.");
     
     return;
   }
-
+  if(selectedPaymentOption=='transfer'){
   const payload = {
     userId: userData?.id || userId,
     amount: selectedAmount,
@@ -126,7 +127,50 @@ const handleConfirmPayment = async () => {
   } catch (error: any) {
     console.error("Lỗi khi gửi dữ liệu thanh toán:", error);
     message.error(error.response?.data?.message || "Đã xảy ra lỗi khi thanh toán.");
+  }}
+  else {
+    const payload = {
+      userId: userData?.id || userId,
+      amount: selectedAmount,
+      info: "THANH TOÁN BẰNG MOMO", // Dữ liệu ảnh cần cập nhật
+    };
+  
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/momo`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        const redirectUrl = response.data.data.shortLink || response.data.data.payUrl;
+  
+        if (redirectUrl) {
+          window.open(redirectUrl, "_blank"); // Mở tab mới với URL trả về
+        } else {
+          message.error("Không nhận được đường dẫn thanh toán.");
+        }
+  
+        message.success("Thanh toán thành công!");
+        // Reset lại các giá trị sau khi thanh toán
+        setSelectedFile(null);
+        setSelectedAmount(null);
+        setIsUploadConfirmed(false);
+      } else {
+        message.error(response.data.message || "Đã xảy ra lỗi khi thanh toán.");
+      }
+  
+  } catch (error: any) {
+    console.error("Lỗi khi gửi dữ liệu thanh toán:", error);
+    message.error(error.response?.data?.message || "Đã xảy ra lỗi khi thanh toán.");
   }
+      }
+    
 };
 
 

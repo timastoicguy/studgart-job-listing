@@ -24,6 +24,7 @@ import InfoForm from "./views/share/InfoForm";
 import CompanyInfoForm from "./views/company/CompanyInfoForm";
 import LogoUpload  from "./views/company/LogoUpload";
 import PaymentForm  from "./views/share/PaymentForm";
+import PaymentRedirect  from "./views/share/PaymentRedirect";
 
 import AdminDashboard from "./views/admin/Dashboard"; // Adjusted import for AdminDashboard
 import AccountAll from "./views/admin/AccountAll"; // Adjusted import for AccountAll
@@ -57,12 +58,13 @@ function App() {
           <Route path="/jobseeker/detailjob/:jobId" element={<DetailJob />} />
           <Route path="/jobseeker/detailCompany/:companyId" element={<DetailCompany />} />
           <Route path="/jobseeker/favoritejobs" element={<FavoriteJobs />} />
-          <Route path="/profile/:userId" element={<InfoForm />} />
 
-          
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />
+
           <Route path="/payment/:userId" element={<PaymentForm />} />
+          <Route path="/payment" element={<PaymentRedirect />} />
+          <Route path="/profile/:userId" element={<InfoForm />} />
         </Route>
       </Routes>
     </div>
