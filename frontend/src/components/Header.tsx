@@ -1,22 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiSidebar } from "react-icons/fi";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "./ui/dropdown-menu"; // Adjust path as necessary
+// Adjust path as necessary
 import { roleOptions, MenuItem as RoleMenuItem } from "./menuData"; // Import menu data and alias MenuItem for clarity
-import { NavLink } from "react-router-dom";
 import socket from "@/store/socket"; // Ensure socket is configured correctly
 import axios from "axios";
 import AvatarDropdownMenu from "./AvatarDropdownMenu"; // Import AvatarDropdownMenu component
 import HoverDropdownMenu from "./HoverDropdownMenu"; // Import HoverDropdownMenu component
 
+const url_base = `${import.meta.env.VITE_API_BASE_URL}`;
 interface HeaderProps {
   showSideBar: boolean;
   setShowSideBar: (showSideBar: boolean) => void;
@@ -37,48 +30,108 @@ export interface MenuItem {
 
 // The rest of the code remains the same
 
-export default function Header({ showSideBar, setShowSideBar, userData, onLogout }: HeaderProps) {
+export default function Header({
+  showSideBar,
+  setShowSideBar,
+  userData,
+  onLogout,
+}: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [badgeCount, setBadgeCount] = useState<number>(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     // Fetch user data from localStorage
-    const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      const parsedData = JSON.parse(storedUserData);
-      fetchNotifications(parsedData.id); // Fetch notifications for the user
-    }
+    fetchNotifications();
 
-    // Set up socket connection
-    socket.connect();
-    socket.on("joinNotification", (data) => {
+    socket.emit("joinNotification", { userId: userData?.id });
+    socket.on("notification", (data) => {
+      setNotifications((prevNotifications) => [data, ...prevNotifications]);
+      console.log("Notification received:", data);
       setBadgeCount((prev) => prev + 1); // Increment badge count for new notifications
     });
 
     return () => {
-      socket.off("joinNotification");
-      socket.disconnect();
+      socket.off("notification");
     };
   }, []);
 
-  const fetchNotifications = async (userId: string) => {
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/api/notifications/${userId}?page=1&limit=10`);
-      if (response.data.success) {
-        setNotifications(response.data.notifications.docs);
-        setBadgeCount(response.data.notifications.docs.filter((n: any) => !n.isRead).length);
+      const response = await axios.get(
+        `${url_base}/api/notifications/${userData?.id}?page=${page}&limit=10`
+      );
+      const newNotifications = response.data.notifications.docs;
+
+      // if (response.data.success) {
+      //   setNotifications(response.data.notifications.docs);
+      //   setBadgeCount(
+      //     response.data.notifications.docs.filter((n: any) => !n.isRead).length
+      //   );
+      // }
+
+      if (newNotifications.length === 0) {
+        setHasMore(false); // No more notifications
+      } else {
+        setNotifications((prev) => [...prev, ...newNotifications]);
+        setBadgeCount(newNotifications.filter((n: any) => !n.isRead).length);
+
+        setPage((prev) => prev + 1);
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("Error loading notifications:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Handle scroll event
+  const handleScroll = () => {
+    const container: any = scrollRef.current;
+    if (!container) return;
+
+    if (
+      container.scrollHeight - container.scrollTop <=
+      container.clientHeight + 10
+    ) {
+      fetchNotifications();
+    }
+  };
+
+  // const fetchNotifications = async (userId: string) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:3000/api/notifications/${userId}?page=1&limit=10`
+  //     );
+  //     if (response.data.success) {
+  //       setNotifications(response.data.notifications.docs);
+  //       setBadgeCount(
+  //         response.data.notifications.docs.filter((n: any) => !n.isRead).length
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching notifications:", error);
+  //   }
+  // };
+
   const markAllAsRead = async () => {
     try {
-      await axios.put(`/api/notifications/markAsRead`, { userId: userData?.id });
+      await axios.put(`/api/notifications/markAsRead`, {
+        userId: userData?.id,
+      });
       setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => ({ ...notification, isRead: true }))
+        prevNotifications.map((notification) => ({
+          ...notification,
+          isRead: true,
+        }))
       );
       setBadgeCount(0); // Reset the badge count after marking all as read
     } catch (error) {
@@ -88,12 +141,14 @@ export default function Header({ showSideBar, setShowSideBar, userData, onLogout
 
   const markNotificationAsRead = async (notificationId: string) => {
     try {
-      await axios.patch(`http://localhost:3000/api/notification/${notificationId}`, {
-        isRead: true
+      await axios.patch(`${url_base}/api/notification/${notificationId}`, {
+        isRead: true,
       });
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) =>
-          notification._id === notificationId ? { ...notification, isRead: true } : notification
+          notification._id === notificationId
+            ? { ...notification, isRead: true }
+            : notification
         )
       );
       setBadgeCount((prev) => prev - 1); // Decrease badge count when a notification is marked as read
@@ -121,7 +176,18 @@ export default function Header({ showSideBar, setShowSideBar, userData, onLogout
           </button>
           <div className="flex items-center">
             <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
-            <span className="ml-2 text-lg font-semibold text-green-500">STUDGART</span>
+            <span
+              className="ml-2 text-lg font-semibold text-green-500"
+              onClick={async () => {
+                await axios.post(`${url_base}/api/notifications`, {
+                  userId: userData?.id,
+                  type: "nothing",
+                  content: "Hello world",
+                });
+              }}
+            >
+              STUDGART
+            </span>
           </div>
         </div>
 
@@ -145,7 +211,11 @@ export default function Header({ showSideBar, setShowSideBar, userData, onLogout
               onClick={() => setShowNotifications(!showNotifications)}
             >
               <span className="relative">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 24a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6v-5a6 6 0 0 0-12 0v5l-2 2v1h16v-1l-2-2z" />
                 </svg>
                 {badgeCount > 0 && (
@@ -166,19 +236,40 @@ export default function Header({ showSideBar, setShowSideBar, userData, onLogout
                     Đánh dấu là đã đọc
                   </button>
                 </div>
-                <div className=" max-h-64 overflow-y-auto">
+                <div
+                  className=" max-h-64 overflow-y-auto"
+                  ref={scrollRef}
+                  onScroll={handleScroll}
+                >
                   {notifications.length > 0 ? (
                     notifications.map((notification) => (
                       <div
                         key={notification._id}
-                        className={`p-4 ${notification.isRead ? "bg-white text-black" : "bg-gray-100 text-black"} border-b border-gray-200 text-sm`}
-                        onClick={() => !notification.isRead && markNotificationAsRead(notification._id)}
+                        className={`p-4 ${
+                          notification.isRead
+                            ? "bg-white text-black"
+                            : "bg-gray-100 text-black"
+                        } border-b border-gray-200 text-sm`}
+                        onClick={() =>
+                          !notification.isRead &&
+                          markNotificationAsRead(notification._id)
+                        }
                       >
                         {notification.content}
                       </div>
                     ))
                   ) : (
-                    <div>Không có thông báo nào</div>
+                    <div className="text-center py-2 text-gray-500">
+                      Không có thông báo nào
+                    </div>
+                  )}
+                  {loading && (
+                    <div className="text-center py-2">Đang tải...</div>
+                  )}
+                  {!hasMore && notifications.length > 0 && (
+                    <div className="text-center py-2 text-gray-500">
+                      Đã hết thông báo
+                    </div>
                   )}
                 </div>
               </div>
