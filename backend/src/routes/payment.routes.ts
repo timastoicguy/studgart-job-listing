@@ -10,6 +10,7 @@ import {
   handelCheckStatus,
   diamondPayment,
   handelCheckDiamonds,
+  getTransactions,
 } from "../controllers/payment.controller";
 import { checkDiamonds } from "../middlewares/payment.middkeware";
 
@@ -114,6 +115,32 @@ router.post("/approve", approveManualTransaction);
 router.get("/user/:userId", getTransactionsByUserId);
 // Route lấy chi tiết giao dịch theo _id
 
+// Route lấy danh sách giao dịch của người dùng với phân trang
+
+/**
+ * @swagger
+ * /payments:
+ *   get:
+ *     tags: [Payments]
+ *     summary: Get all transactions
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         example: 10
+ *     responses:
+ *       200:
+ *         description: transactions retrieved successfully
+ *       404:
+ *         description: not found
+ */
+router.get("/", getTransactions);
 /**
  * @swagger
  * /payments/{transactionId}:
