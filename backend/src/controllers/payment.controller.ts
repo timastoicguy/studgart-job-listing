@@ -71,7 +71,21 @@ export async function getTransactionsByUserId(req: Request, res: Response) {
     res.status(500).json({ error: error.message, data: null });
   }
 }
+export async function getTransactions(req: Request, res: Response) {
+  const { page = 1, limit = 10 } = req.query;
 
+  try {
+    // @ts-ignore
+    const transactions = await Transaction.paginate(
+      {},
+      { page: Number(page), limit: Number(limit), sort: { createdAt: -1 } }
+    );
+
+    res.json({ error: null, data: transactions });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, data: null });
+  }
+}
 // controllers/paymentController.ts
 export async function getTransactionById(req: Request, res: Response) {
   const { transactionId } = req.params;
