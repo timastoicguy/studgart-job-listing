@@ -73,6 +73,7 @@ const initSocket = (server: http.Server) => {
     });
 
     socket.on("joinNotification", async ({ userId }) => {
+      console.log("joinNotification", userId);
       socket.join(userId); // Tham gia phòng của user
     });
     socket.on("disconnect", () => {

@@ -5,7 +5,7 @@ export interface Company {
   _id: string;
   user_id: string;
   company_size: string;
-  company_name: string;  // Use 'company_name' instead of 'name' to match the API
+  company_name: string; // Use 'company_name' instead of 'name' to match the API
   contact_email: string;
   contact_phone: string;
   company_address: string;
@@ -16,23 +16,33 @@ export interface Company {
   __v: number;
 }
 
+export interface User {
+  _id: string;
+  profilePicture: string;
+  username: string;
+  email: string;
+  phone: string;
+  address: string;
+  bio: string;
+}
+
 export interface JobData {
   title: string;
   salaryRange: { min: number; max: number };
   currency: string; // Make sure to add this field if it's expected
-  deadline: string;  // Add this field if it's expected
+  deadline: string; // Add this field if it's expected
   description: string;
   requirements: string[];
   benefits: string[];
   location: { name: string; code: string }[]; // Updated to reflect the API response
-  company: Company;  // Update to include the entire Company interface
+  company: Company; // Update to include the entire Company interface
 }
 
-// Hàm lấy dữ liệu công việc từ API
+// Function to fetch job details
 export const fetchDetailJobData = async (jobId: string): Promise<JobData | null> => {
   try {
     const response = await axios.get<{ data: JobData }>(`${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`);
-    console.log(response.data);
+    console.log("Job Data Response: ", response.data);
     return response.data.data; // Assuming data is nested within response
   } catch (error) {
     console.error("Error fetching job data:", error);
@@ -40,12 +50,24 @@ export const fetchDetailJobData = async (jobId: string): Promise<JobData | null>
   }
 };
 
-// Hàm gửi thông tin ứng tuyển
+// Function to fetch user data based on user_id
+export const fetchUserData = async (userId: string): Promise<User | null> => {
+  try {
+    const response = await axios.get<{ data: User }>(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`);
+    console.log("User Data Response: ", response.data);
+    return response.data.data; // Assuming data is nested within response
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};
+
+// Function to submit a job application
 export const applyForJob = async (jobId: string, applicantData: {
   name: string;
   email: string;
-  resume: File; // Giả sử bạn gửi hồ sơ ứng viên dưới dạng file
-  coverLetter?: string; // Thư xin việc là tùy chọn
+  resume: File; // Assuming the resume is sent as a file
+  coverLetter?: string; // Cover letter is optional
 }): Promise<void> => {
   const formData = new FormData();
   formData.append('name', applicantData.name);
