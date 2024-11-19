@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 interface Job {
   id: string;
@@ -58,6 +59,15 @@ interface RecommendedApiResponse {
   error?: string;
 }
 
+export interface User {
+  _id: string;
+  profilePicture: string;
+  username: string;
+  email: string;
+  phone: string;
+  address: string;
+  bio: string;
+}
 interface FetchJobsReturn {
   jobs: Job[];
   favertiedJobs: Favorite[];
@@ -97,27 +107,31 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   };
 
   // Fetch main jobs and top companies
-
   const fetchTopCompanies = async () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/companies-top/top?size=5`
       );
       const result = await response.json();
-
+  
       if (!result.error && result.data && result.data.topCompanies) {
-        const formattedTopCompanies = result.data.topCompanies.map(
-          (company: any) => ({
-            id: company.company._id,
-            name: company.company.company_name,
-            avatar: company.company.avatar, // If avatar is available in the API response, use it here
-            location: company.company.company_address,
-            openings: company.jobCount,
+        // Map over the companies to format and fetch additional user data
+        const formattedTopCompanies = await Promise.all(
+          result.data.topCompanies.map(async (company: any) => {
+            const avatar = await fetchUserData(company.company.user_id); // Fetch user data based on user_id
+
+            return {
+              id: company.company._id,
+              name: company.company.company_name,
+              avatar: avatar?.profilePicture || company.company.logo || "", // Use user profile picture or company logo
+              location: company.company.company_address,
+              openings: company.jobCount,
+            };
           })
         );
-        console.log("formattedTopCompanies", result);
-
+  
         setTopCompanies(formattedTopCompanies);
+        console.log("User Data1111:", formattedTopCompanies);
       } else {
         console.error("Failed to fetch top companies:", result);
         setTopCompanies([]);
@@ -127,7 +141,19 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       setTopCompanies([]);
     }
   };
+  
 
+   const fetchUserData = async (userId: string): Promise<User | null> => {
+    try {
+      const response = await axios.get<{ data: User }>(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`);
+
+      return response.data.data; // Assuming data is nested within response
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  };
+  
   const fetchRecommendedJobs = async () => {
     const query = searchParams.toString();
     try {
@@ -137,6 +163,8 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         }/api/group/jobs/suggestions/?page=${page}&limit=5&${query}`
       );
       const result: RecommendedApiResponse = await response.json();
+
+      // const avatar = await fetchUserData(company.company.user_id); // Fetch user data based on user_id
 
       if (
         !result.error &&
@@ -152,7 +180,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
           salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
           techStack: job.technologies.map((tech: any) => tech.name).join(", "),
           timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "",
+          avatar: job.company?.avatar || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png",
           isHot: job.isUrgent,
           isNew:
             new Date().getTime() - new Date(job.postedDate).getTime() <
@@ -173,41 +201,51 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     setLoading(true);
     try {
       const query = new URLSearchParams(searchParams);
-      
-      // Add page to query if not already present
+  
+      // Add page and limit to query if not already present
       if (!query.has("page")) {
         query.set("page", currentPageJobs.toString());
       }
-      
-      // Add limit to query if not already present
       if (!query.has("limit")) {
         query.set("limit", limit.toString());
       }
-      
+  
       const queryString = query.toString();
       console.log(queryString);
-
+  
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/jobs?${queryString}`
       );
       const result: ApiResponse = await response.json();
-
+  
+      console.log("Job Data Response: ", result);
+  
       if (!result.error) {
-        const formattedJobs = result.data.docs.map((job: any) => ({
-          id: job._id,
-          title: job.title,
-          company: job.company?.company_name || "",
-          location: job.location[0]?.name || "",
-          salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
-          techStack: job.technologies.map((tech: any) => tech.name).join(", "),
-          timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "",
-          isHot: job.isUrgent,
-          isNew:
-            Date.now() - new Date(job.postedDate).getTime() <
-            7 * 24 * 60 * 60 * 1000,
-        }));
-
+        // Fetch avatar for each company
+        const formattedJobs = await Promise.all(
+          result.data.docs.map(async (job: any) => {
+            let avatar = job.company?.logo || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"; // Default to company logo if available
+            if (job.company?.user_id) {
+              const userData = await fetchUserData(job.company.user_id);
+              avatar = userData?.profilePicture || avatar; // Use user profile picture if available
+            }
+            return {
+              id: job._id,
+              title: job.title,
+              company: job.company?.company_name || "",
+              location: job.location[0]?.name || "",
+              salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
+              techStack: job.technologies.map((tech: any) => tech.name).join(", "),
+              timePosted: new Date(job.postedDate).toLocaleDateString(),
+              avatar, // Set the resolved avatar
+              isHot: job.isUrgent,
+              isNew:
+                Date.now() - new Date(job.postedDate).getTime() <
+                7 * 24 * 60 * 60 * 1000, // Check if the job is new
+            };
+          })
+        );
+  
         setJobs(formattedJobs);
         setTotalPagesJobs(result.data.totalPages);
       }
@@ -217,6 +255,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       setLoading(false);
     }
   };
+  
 
 
   const fetchFaveritedJobs = async () => {
