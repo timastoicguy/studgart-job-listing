@@ -114,9 +114,9 @@ const useLoginStore = create<LoginState>((set) => ({
           } else if (userRole === "recruiter") {
             redirectPage = "recruiter/postjob";
           } else if (userRole === "company") {
-            redirectPage = "profile";
+            redirectPage = "company/companyidentity";
           } else {
-            redirectPage = "dashboard";
+            redirectPage = "admin/accountall";
           }
 
           setPage(redirectPage);
