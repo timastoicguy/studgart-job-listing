@@ -1,4 +1,6 @@
+import { toCompanyDTO } from "../controllers/company.controller";
 import { toRecruiterDTO } from "../controllers/recruiter.controller";
+import { toUserDTO } from "../controllers/user.controller";
 import { IRecruiter, Recruiter } from "../models/recruiter";
 
 export const createRecruiter = async (recruiterData: any) => {
@@ -10,6 +12,7 @@ export const createRecruiter = async (recruiterData: any) => {
       "user_id",
       "company_id",
     ]);
+
     return toRecruiterDTO(populatedRecruiter as IRecruiter);
   } catch (error: any) {
     throw new Error(`Error creating recruiter: ${error.message}`);

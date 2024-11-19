@@ -4,7 +4,7 @@ import axios from 'axios';
 export const passwordNew = async (token: string, newPassword: string) => {
   try {
     const response = await axios.post(
-      `http://localhost:3000/api/auth/reset-password/${token}`, 
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/reset-password/${token}`, 
       {
         newPassword: newPassword
       }, 

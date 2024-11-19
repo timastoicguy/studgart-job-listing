@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { FiHeart, FiMapPin } from "react-icons/fi";
+import {  FiMapPin,FiRefreshCcw } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import {
   Tooltip,
   TooltipTrigger,
@@ -21,16 +22,41 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFetchJobs } from "@/lib/reducers/jobseeker/useFetchJobs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ConfirmationDialog from "./ConfirmationDialog";
+import { notification } from 'antd';  // Import notification from Ant Design
+const getJobSeekerIdFromLocalStorage = (): string | null => {
+  const userData = localStorage.getItem("userData");
+  if (userData) {
+    const parsedData = JSON.parse(userData);
+    return parsedData.job_seeker_id || null; // Return user ID or null if not found
+  }
+  return null; // Return null if no userData in localStorage
+};
+const getJoUserIdFromLocalStorage = (): string | null => {
+  const userData = localStorage.getItem("userData");
+  if (userData) {
+    const parsedData = JSON.parse(userData);
+    return parsedData.id || null; // Return user ID or null if not found
+  }
+  return null; // Return null if no userData in localStorage
+};
 
 const Jobs: React.FC = () => {
-  const itemsPerPage = 10;
-  const jobSeekerId = "67273fea96599e898e7bbd6c"; // Replace with dynamic ID
-  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+  const jobSeekerId = getJobSeekerIdFromLocalStorage(); // Replace with dynamic ID
+  const userId = getJoUserIdFromLocalStorage(); // Replace with dynamic ID
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
   const [favorites, setFavorites] = useState(new Map<string, boolean>());
-  const [appliedJobs, setAppliedJobs] = useState<Map<string, boolean>>(new Map());
+  const [appliedJobs, setAppliedJobs] = useState<Map<string, boolean>>(
+    new Map()
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for favoriting
   const navigate = useNavigate();
+
+  const [currentPageJobs, setCurrentPageJobs] = useState(1); // Initialize currentPageJobs
 
   const {
     jobs: jobListings,
@@ -38,39 +64,95 @@ const Jobs: React.FC = () => {
     topCompanies = [],
     totalPagesJobs,
     loading,
-    handlePageChange ,
-  } = useFetchJobs(currentPage);
-
+    handlePageChange,
+  } = useFetchJobs(currentPageJobs);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value);
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setSearchQuery(e.target.value);
 
-  const handleFavoriteJob = async (jobId: string) => {
+  const handleFavoriteJob = (jobId: string) => {
+    setSelectedJobId(jobId); // Set the job ID for confirmation
+    setIsDialogOpen(true); // Open the confirmation dialog
+  };
+  
+  const confirmFavoriteJob = async () => {
+    if (!selectedJobId) return;
+  
+    const isAlreadyFavorited = favorites.get(selectedJobId); // Check if already favorited
+  
     try {
-      const response = await axios.post("http://localhost:3000/api/favorites", {
-        job_id: jobId,
-        job_seeker_id: jobSeekerId,
-        status: "saved",
-      });
-
-      if (response.status === 200) {
-        setFavorites(new Map(favorites).set(jobId, true));
+      if (isAlreadyFavorited) {
+        console.log('Removing job from favorites', {
+          job_id: selectedJobId,
+          job_seeker_id: jobSeekerId,
+        });
+  
+        // Post remove favorite action to API
+        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${jobSeekerId}`);
+  
+        // Show success notification for removal
+        notification.success({
+          message: 'Job Removed from Favorites!',
+          description: 'You have successfully removed this job from your favorites.',
+          placement: 'topRight',
+        });
+  
+        // Update favorites state to reflect the removal
+        setFavorites((prev) => {
+          const updatedFavorites = new Map(prev);
+          updatedFavorites.delete(selectedJobId); // Remove from map
+          return updatedFavorites;
+        });
+      } else {
+        // Post favorite action to API
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/favorites`, {
+          job_id: selectedJobId,
+          job_seeker_id: jobSeekerId,
+          status: 'saved',
+        });
+  
+        // Show success notification for favoriting
+        notification.success({
+          message: 'Job Favorited!',
+          description: 'You have successfully favorited this job.',
+          placement: 'topRight',
+        });
+  
+        // Update favorite state to reflect the change
+        setFavorites((prev) => new Map(prev).set(selectedJobId, true));
       }
+      
+      // Close the dialog after the operation
+      setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error favoriting job:", error);
+      console.error(isAlreadyFavorited ? "Error removing favorite job:" : "Error favoriting job:", error);
+      setIsDialogOpen(false); // Close dialog if error occurs
     }
   };
-
-  const handleJobClick = (job: any) => navigate(`/jobseeker/detailjob/${job.id}`, { state: { job } });
-  const handleCompanyClick = (company: any) => navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
+  
+  const cancelFavoriteJob = () => {
+    setSelectedJobId(null); // Clear the selected job ID
+    setIsDialogOpen(false); // Close the dialog
+  };
+  const handleJobClick = (job: any) =>
+    navigate(`/jobseeker/detailjob/${job.id}`, { state: { job } });
+  const handleCompanyClick = (company: any) =>
+    navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
 
   useEffect(() => {
     jobListings.forEach(async (job) => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/applications?page=1&job_id=${job.id}&job_seeker_id=${jobSeekerId}`);
-        setAppliedJobs((prev) => new Map(prev).set(job.id, response.data.data.docs.length > 0));
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/applications?job_id=${
+            job.id
+          }&job_seeker_id=${jobSeekerId}`
+        );
+        setAppliedJobs((prev) =>
+          new Map(prev).set(job.id, response.data.data.docs.length > 0)
+        );
       } catch (error) {
         console.error("Error checking application status:", error);
       }
@@ -78,17 +160,59 @@ const Jobs: React.FC = () => {
   }, [jobListings]);
 
   useEffect(() => {
+    jobListings.forEach(async (job) => {
+      try {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/favorites?job_id=${
+            job.id
+          }&job_seeker_id=${jobSeekerId}`
+        );
+        setFavorites((prev) =>
+          new Map(prev).set(job.id, response.data.data.docs.length > 0)
+        );
+      } catch (error) {
+        console.error("Error checking application status:", error);
+      }
+    });
+  }, [jobListings]);
+
+  
+  useEffect(() => {
     const filtered = jobListings.filter(
       (job) =>
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.avatar.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredJobs(filtered);
-    setCurrentPage(1);
   }, [jobListings, searchQuery]);
+
+ // Function to handle page change and update URL
+ const handlePageUrlChange = (page: number) => {
+  setCurrentPageJobs(page);
+  const searchParams = new URLSearchParams(location.search);
+  searchParams.set("page", page.toString()); // Update page in the URL
+  navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+};
+
+useEffect(() => {
+  // Parse the page number from the URL when component mounts
+  const params = new URLSearchParams(location.search);
+  const pageFromUrl = parseInt(params.get("page") || "1", 10);
+  setCurrentPageJobs(pageFromUrl);
+}, [location]);
   return (
+    
     <TooltipProvider>
       <div className="lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
+      <ConfirmationDialog
+          isOpen={isDialogOpen}
+          message={favorites.get(selectedJobId || "") ? "Do you want to remove this job from favorites?" : "Do you want to favorite this job?"}
+          onConfirm={confirmFavoriteJob}
+          onCancel={cancelFavoriteJob}
+        />
+
         <main className="flex-1 p-6">
           <div className="bg-white p-6 rounded-md shadow-md">
             <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
@@ -96,32 +220,25 @@ const Jobs: React.FC = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4">
-              <input
-                type="text"
-                className="w-full sm:w-1/2 border rounded-md p-2"
-                placeholder="Tìm kiếm theo tên công ty, công việc"
-                value={searchQuery}
-                onChange={handleSearch}
-              />
-              <div className="flex items-center w-full sm:w-auto">
-                <span className="mr-2">Sort by:</span>
-                <select className="border rounded-md p-2 w-full sm:w-auto">
-                  <option value="newest">Mới nhất</option>
-                  <option value="oldest">Cũ nhất</option>
-                </select>
-              </div>
+
             </div>
 
             <div className="space-y-4 overflow-y-auto">
               {loading
                 ? Array.from({ length: itemsPerPage }).map((_, index) => (
-                    <div key={index} className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm">
+                    <div
+                      key={index}
+                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
+                    >
                       <Skeleton className="w-20 h-20 rounded-full" />
                       <Skeleton className="w-20 h-8 rounded-md" />
                     </div>
                   ))
-                : currentJobs.map((job, index) => (
-                    <div key={index} className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow">
+                : jobListings.map((job, index) => (
+                    <div
+                      key={index}
+                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
+                    >
                       <div className="flex space-x-4 flex-1">
                         <img
                           src={job.avatar || "https://via.placeholder.com/48"}
@@ -143,7 +260,10 @@ const Jobs: React.FC = () => {
                           </div>
                           <Tooltip>
                             <TooltipTrigger>
-                              <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer">
+                              <h3
+                                className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
+                                onClick={() => handleJobClick(job)} // Navigate on click
+                              >
                                 {job.title}
                               </h3>
                             </TooltipTrigger>
@@ -163,56 +283,83 @@ const Jobs: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
-                        <button className={`${appliedJobs.get(job.id) ? "bg-gray-400" : "bg-green-500"} text-white px-4 py-2 rounded-md`}>
-                          {appliedJobs.get(job.id) ? "Đã ứng tuyển" : "Ứng tuyển"}
+                        <button
+                                                        onClick={() => handleJobClick(job)} // Navigate on click
+
+                          className={`${
+                            appliedJobs.get(job.id)
+                              ? "bg-gray-400"
+                              : "bg-green-500"
+                          } text-white px-4 py-2 rounded-md`}
+                        >
+                          {appliedJobs.get(job.id)
+                            ? "Đã ứng tuyển"
+                            : "Ứng tuyển"}
                         </button>
                         <Tooltip>
-                          <TooltipTrigger>
-                            <FiHeart
-                              className={`${favorites.get(job.id) ? "text-red-500" : "text-gray-500"} hover:text-red-500 cursor-pointer`}
-                              onClick={() => handleFavoriteJob(job.id)}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>Yêu thích</TooltipContent>
-                        </Tooltip>
+      <TooltipTrigger>
+        <FaHeart
+          className={`${
+            favorites.get(job.id) ? "text-red-500" : "text-gray-500"
+          } hover:text-red-500 cursor-pointer transition-colors duration-300`}
+          onClick={() => handleFavoriteJob(job.id)}
+        />
+      </TooltipTrigger>
+      <TooltipContent>
+        {favorites.get(job.id) ? "Đã Yêu thích" : "Yêu thích"} {/* Hiển thị nội dung tooltip tùy theo trạng thái yêu thích */}
+      </TooltipContent>
+    </Tooltip>
                       </div>
                     </div>
                   ))}
             </div>
 
             <div className="mt-6 flex justify-between items-center">
-            <Pagination>
-  <PaginationPrevious
-    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-  >
-    Trang trước
-  </PaginationPrevious>
-  <PaginationContent>
-    {Array.from({ length: totalPagesJobs }, (_, i) => (
-      <PaginationItem key={i}>
-        <PaginationLink
-          isActive={currentPage === i + 1}
-          onClick={() => handlePageChange(i + 1)}
-          className={currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-transparent text-black"} // Apply custom styles here
-        >
-          {i + 1}
-        </PaginationLink>
-      </PaginationItem>
-    ))}
-  </PaginationContent>
-  <PaginationNext
-    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPagesJobs))}
-  >
-    Trang sau
-  </PaginationNext>
-</Pagination>
-
+              <Pagination>
+                <PaginationPrevious
+                  onClick={() =>
+                    handlePageChange(Math.max(currentPageJobs - 1, 1))
+                  }
+                >
+                  Trang trước
+                </PaginationPrevious>
+                <PaginationContent>
+                  {Array.from({ length: totalPagesJobs }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPageJobs === i + 1}
+                        onClick={() => {
+                          handlePageChange(i + 1);
+                          setCurrentPageJobs(i + 1); // Correctly set the current page
+                          handlePageUrlChange(i + 1);
+                        }}
+                        className={
+                          currentPageJobs === i + 1
+                            ? "bg-blue-500 text-white"
+                            : "bg-transparent text-black"
+                        } // Apply custom styles here
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                </PaginationContent>
+                <PaginationNext
+                  onClick={() =>
+                    handlePageChange(
+                      Math.min(currentPageJobs + 1, totalPagesJobs)
+                    )
+                  }
+                >
+                  Trang sau
+                </PaginationNext>
+              </Pagination>
             </div>
           </div>
         </main>
 
-         {/* Right Sidebar */}
-         <aside className="space-y-6">
+        {/* Right Sidebar */}
+        <aside className="space-y-6">
           <div className="bg-white p-6 rounded-md shadow-md border">
             <h2 className="text-lg text-green-500 font-bold mb-4">
               Các công việc có thể bạn quan tâm
@@ -260,7 +407,7 @@ const Jobs: React.FC = () => {
                 >
                   <img
                     src={company.avatar || "https://via.placeholder.com/48"}
-                    alt="company logo"  
+                    alt="company logo"
                     className="w-12 h-12 object-cover rounded-full"
                   />
                   <div>

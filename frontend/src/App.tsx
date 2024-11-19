@@ -18,12 +18,12 @@ import Job from "./views/jobseeker/Jobs";
 import DetailJob from "./views/jobseeker/DetailJob";
 import DetailCompany from "./views/jobseeker/DetailCompany";
 import FavoriteJobs from "./views/jobseeker/FavoriteJobs";
-import JobseekerInfoForm from "./views/jobseeker/JobseekerInfoForm";
+import InfoForm from "./views/share/InfoForm";
 
 
 import CompanyInfoForm from "./views/company/CompanyInfoForm";
 import LogoUpload  from "./views/company/LogoUpload";
-import PaymentForm  from "./views/company/PaymentForm";
+import PaymentForm  from "./views/share/PaymentForm";
 
 import AdminDashboard from "./views/admin/Dashboard"; // Adjusted import for AdminDashboard
 import AccountAll from "./views/admin/AccountAll"; // Adjusted import for AccountAll
@@ -51,18 +51,18 @@ function App() {
           <Route path="/recruiter/jobpending" element={<JobPending />} />
           <Route path="/recruiter/hrdetailjob" element={<DetailJobHR />} />
           <Route path="/recruiter/jobreject" element={<JobReject />} />
-          <Route path="/recruiter/jobseekerpending" element={<JobseekerPending />} />
+          <Route path="/recruiter/jobseekerpending/:jobId" element={<JobseekerPending />} />
 
           <Route path="jobseeker/jobs" element={<Job />} />
           <Route path="/jobseeker/detailjob/:jobId" element={<DetailJob />} />
           <Route path="/jobseeker/detailCompany/:companyId" element={<DetailCompany />} />
           <Route path="/jobseeker/favoritejobs" element={<FavoriteJobs />} />
-          <Route path="/jobseeker/profile/:userId" element={<JobseekerInfoForm />} />
+          <Route path="/profile/:userId" element={<InfoForm />} />
 
           
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />
-          <Route path="/company/payment" element={<PaymentForm />} />
+          <Route path="/payment/:userId" element={<PaymentForm />} />
         </Route>
       </Routes>
     </div>
