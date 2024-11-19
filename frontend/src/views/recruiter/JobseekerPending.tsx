@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tablechecked";
 import { useParams } from "react-router-dom";
 import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
+import Preview from "./Prevew";
 
 const JobseekerPending = () => {
   const [selectedAccounts, setSelectedAccounts] = useState([]);
@@ -32,7 +33,7 @@ const JobseekerPending = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [usernames, setUsernames] = useState<Record<string, string>>({});
-console.log("jobId: ", accounts);
+  console.log("jobId: ", accounts);
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -86,7 +87,6 @@ console.log("jobId: ", accounts);
       console.log("accounts: ", userId);
       if (userId) fetchUsername(userId);
     });
-
   }, [accounts]);
   console.log("AAAAAAAAAAA: ", accounts);
 
@@ -100,7 +100,6 @@ console.log("jobId: ", accounts);
           application_status: "accepted",
         }
       );
-
 
       if (response.status === 200) {
         console.log("Application accepted");
@@ -338,7 +337,7 @@ console.log("jobId: ", accounts);
                       {account.application_status || "null"}
                     </TableCell>
                     <TableCell>
-                      <button
+                      {/* <button
                         className={`text-blue-500 hover:text-blue-700 mx-1 ${
                           account.application_status === "reviewed"
                             ? "opacity-50 cursor-not-allowed"
@@ -348,7 +347,8 @@ console.log("jobId: ", accounts);
                         disabled={account.application_status === "reviewed"}
                       >
                         <FaEye title="Xem" size={18} />
-                      </button>
+                      </button> */}
+                      <Preview account={account} userId={userId}></Preview>
                       <button
                         className={`text-green-500 hover:text-green-700 mx-1 ${
                           account.application_status === "accepted"
