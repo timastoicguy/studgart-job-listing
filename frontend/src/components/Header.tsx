@@ -8,6 +8,7 @@ import socket from "@/store/socket"; // Ensure socket is configured correctly
 import axios from "axios";
 import AvatarDropdownMenu from "./AvatarDropdownMenu"; // Import AvatarDropdownMenu component
 import HoverDropdownMenu from "./HoverDropdownMenu"; // Import HoverDropdownMenu component
+import { useParams } from "react-router-dom";
 
 const url_base = `${import.meta.env.VITE_API_BASE_URL}`;
 interface HeaderProps {
@@ -36,6 +37,7 @@ export default function Header({
   userData,
   onLogout,
 }: HeaderProps) {
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [badgeCount, setBadgeCount] = useState<number>(0);
@@ -43,6 +45,22 @@ export default function Header({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const scrollRef = useRef(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    profilePicture: "",
+    email: "",
+    name: "",
+    phone: "",
+    address: "",
+    bio: "",
+    balance: 0,
+    rank: "",
+    diamonds: 0,
+    totalSpent: 0,
+    transactions: [] as any[],
+    freeDiamonds: 0,
+  });
+  console.log("User data:", formData);
 
   useEffect(() => {
     // Fetch user data from localStorage
@@ -53,6 +71,23 @@ export default function Header({
       setNotifications((prevNotifications) => [data, ...prevNotifications]);
       console.log("Notification received:", data);
       setBadgeCount((prev) => prev + 1); // Increment badge count for new notifications
+// Check if the audio file exists and log its path
+const audioPath = "/audio/notification.mp3"; // Path to your audio file
+console.log("Audio file path:", audioPath);
+
+// Check if the audio file is loading
+const audio = new Audio(audioPath);
+audio.onloadstart = () => {
+  console.log("Audio file started loading...");
+};
+audio.onerror = (error) => {
+  console.error("Error loading audio file:", error);
+};
+
+// Play sound notification
+audio.play().catch((error) => {
+  console.error("Error playing audio:", error);
+});
     });
 
     return () => {
@@ -106,21 +141,32 @@ export default function Header({
     }
   };
 
-  // const fetchNotifications = async (userId: string) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `http://localhost:3000/api/notifications/${userId}?page=1&limit=10`
-  //     );
-  //     if (response.data.success) {
-  //       setNotifications(response.data.notifications.docs);
-  //       setBadgeCount(
-  //         response.data.notifications.docs.filter((n: any) => !n.isRead).length
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching notifications:", error);
-  //   }
-  // };
+  useEffect(() => {
+    if (userData?.id) {
+      axios
+        .get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userData?.id}`)
+        .then((response) => {
+          if (response.data.data) {
+            setFormData({
+              profilePicture: response.data.data.profilePicture || "",
+              email: response.data.data.email || "",
+              name: response.data.data.username || "",
+              phone: response.data.data.phone || "",
+              address: response.data.data.address || "",
+              bio: response.data.data.bio || "",
+              balance: response.data.data.balance || 0,
+              rank: response.data.data.rank || "",
+              diamonds: response.data.data.diamonds || 0,
+              totalSpent: response.data.data.totalSpent || 0,
+              transactions: response.data.data.transactions || [],
+              freeDiamonds: response.data.data.freeDiamonds || 0,
+            });
+          }
+
+        })
+        .catch((error) => console.error("Error fetching user data:", error));
+    }
+  }, [userData?.id]);
 
   const markAllAsRead = async () => {
     try {
@@ -175,7 +221,8 @@ export default function Header({
             </span>
           </button>
           <div className="flex items-center">
-            <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
+          <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
+
             <span
               className="ml-2 text-lg font-semibold text-green-500"
               onClick={async () => {

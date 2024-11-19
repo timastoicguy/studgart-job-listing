@@ -20,7 +20,7 @@ const useUploadSingle = () => {
     setUploading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/upload/upload-single', formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upload/upload-single`, formData, {
         headers: {
           'Accept': 'application/json',
           // 'Content-Type': 'multipart/form-data' // có thể không cần thiết
