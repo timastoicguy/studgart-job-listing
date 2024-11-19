@@ -2,7 +2,6 @@ import axios from "axios";
 
 export const sendNotification = async (userId: string, type: string, content: string) => {
     try {
-        console.log("AAAAAAAAAFFFFFFF",userId);
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/notifications`,
         {

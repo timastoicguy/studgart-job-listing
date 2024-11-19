@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog"; // Importing Dialog components
-import { fetchDetailJobData } from "@/lib/reducers/jobseeker/jobDetail";
+import { fetchDetailJobData, fetchUserData } from "@/lib/reducers/jobseeker/jobDetail";
 import { useNavigate, useParams } from "react-router-dom";
 import { Upload, Button, UploadFile, UploadProps, message } from "antd"; // Importing UploadFile
 import { UploadOutlined } from "@ant-design/icons";
@@ -152,10 +152,11 @@ const DetailJob: React.FC = () => {
       console.log(jobId);
       if (!jobId) return; // Check if jobId is available
       const response = await fetchDetailJobData(jobId);
+      const response2 = await fetchUserData(response?.company.user_id||"");
 
       // Check if response contains data
       if (response) {
-        console.log("Test: ", response.company); // Log company details for testing
+        console.log("Test: ", response); // Log company details for testing
 
         // Set state with values from fetched data
         setTitle(response.title || "N/A");
@@ -184,7 +185,7 @@ const DetailJob: React.FC = () => {
 
         setCompanyName(response.company?.company_name || "N/A"); // Match the API structure
         setCompanyLogo(
-          response.company?.logo || "https://via.placeholder.com/48"
+          response2?.profilePicture || "https://via.placeholder.com/48"
         ); // Ensure logo is handled properly
         setCompanyAddress(response.company?.company_address || "N/A");
         setIndustry(response.company?.industry || "N/A"); // Ensure to match the API field if exists

@@ -83,12 +83,10 @@ console.log("jobId: ", accounts);
   useEffect(() => {
     accounts.forEach((account) => {
       const userId = account.job_seeker_id?.user_id;
-      console.log("accounts: ", userId);
       if (userId) fetchUsername(userId);
     });
 
   }, [accounts]);
-  console.log("AAAAAAAAAAA: ", accounts);
 
   const handleAccept = async (applicationId: string, userId: string) => {
     try {

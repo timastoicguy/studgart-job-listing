@@ -23,6 +23,9 @@ import InfoForm from "./views/share/InfoForm";
 
 import CompanyInfoForm from "./views/company/CompanyInfoForm";
 import LogoUpload  from "./views/company/LogoUpload";
+import CompanyIdentity  from "./views/company/CompanyIdentity";
+import AddCompanyIdentity  from "./views/company/AddCompanyIdentity";
+
 import PaymentForm  from "./views/share/PaymentForm";
 import PaymentRedirect  from "./views/share/PaymentRedirect";
 
@@ -61,6 +64,8 @@ function App() {
 
           <Route path="/company/info" element={<CompanyInfoForm />} />
           <Route path="/company/logoupload" element={<LogoUpload />} />
+          <Route path="/company/companyidentity" element={<CompanyIdentity />} />
+          <Route path="/company/addcompanyidentity" element={<AddCompanyIdentity />} />
 
           <Route path="/payment/:userId" element={<PaymentForm />} />
           <Route path="/payment" element={<PaymentRedirect />} />

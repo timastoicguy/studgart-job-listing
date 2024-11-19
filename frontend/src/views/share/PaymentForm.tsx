@@ -7,6 +7,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import useUploadSingle from "@/lib/reducers/file/useUploadSingle";
+import { notification } from 'antd';
 
 const PaymentForm = () => {
   const [selectedPaymentOption, setSelectedPaymentOption] = useState<
@@ -43,6 +44,7 @@ const handleConfirmUpload = () => {
 };
 
 useEffect(() => {
+  // Lấy thông tin user
   const fetchUserData = async () => {
     try {
       const response = await fetch(
@@ -66,6 +68,57 @@ useEffect(() => {
       message.error("Đã xảy ra lỗi khi lấy dữ liệu.");
     }
   };
+
+  // Kiểm tra trạng thái thanh toán qua MoMo
+  const checkMomoPaymentStatus = async (orderId: string) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/momo-check-status`,
+        { orderId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+          },
+        }
+      );
+  
+      const result = response.data;
+      if (result.error === null && result.data) {
+        const formattedAmount = result.data.amount.toLocaleString();
+        // Hiển thị thông báo thành công
+        notification.success({
+          message: 'Trạng thái thanh toán',
+          description: `Bạn đã thanh toán ${formattedAmount} ${result.data.message}`, // Mô tả thông báo
+          placement: 'topRight', // Vị trí hiển thị
+        });
+      } else {
+        // Hiển thị thông báo lỗi
+        notification.error({
+          message: 'Lỗi kiểm tra thanh toán',
+          description: 'Không thể kiểm tra trạng thái thanh toán.',
+          placement: 'topRight', // Vị trí hiển thị
+        });
+      }
+    } catch (error: any) {
+      console.error("Lỗi khi kiểm tra trạng thái thanh toán:", error);
+      
+      // Hiển thị thông báo lỗi nếu có
+      notification.error({
+        message: 'Lỗi hệ thống',
+        description: error.response?.data?.message || 'Đã xảy ra lỗi khi kiểm tra thanh toán.',
+        placement: 'topRight', // Vị trí hiển thị
+      });
+    }
+  };
+
+  // Thực hiện kiểm tra orderId từ URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderId = urlParams.get("orderId");
+
+  if (orderId) {
+    checkMomoPaymentStatus(orderId);
+  }
 
   fetchUserData();
 }, []); // Run once when the component is mounted
