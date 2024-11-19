@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/pagination";
 import { Favorite, useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
 import { notification } from 'antd';
-import ConfirmationDialog from './ConfirmationDialog';
+import ConfirmationDialog from '../component/ConfirmationDialog';
 
 const getUserIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem('userData');

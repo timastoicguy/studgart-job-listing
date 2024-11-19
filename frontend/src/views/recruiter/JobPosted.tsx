@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { notification } from 'antd';  // Import notification from Ant Design
-import ConfirmationDialog from "../jobseeker/ConfirmationDialog";
+import ConfirmationDialog from "../component/ConfirmationDialog";
 
 
 const JobPosted: React.FC = () => {

@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFetchJobs } from "@/lib/reducers/jobseeker/useFetchJobs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import ConfirmationDialog from "./ConfirmationDialog";
+import ConfirmationDialog from "../component/ConfirmationDialog";
 import { notification } from 'antd';  // Import notification from Ant Design
 const getJobSeekerIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem("userData");

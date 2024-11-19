@@ -110,11 +110,12 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
           (company: any) => ({
             id: company.company._id,
             name: company.company.company_name,
-            avatar: "", // If avatar is available in the API response, use it here
+            avatar: company.company.avatar, // If avatar is available in the API response, use it here
             location: company.company.company_address,
             openings: company.jobCount,
           })
         );
+        console.log("formattedTopCompanies", result);
 
         setTopCompanies(formattedTopCompanies);
       } else {
