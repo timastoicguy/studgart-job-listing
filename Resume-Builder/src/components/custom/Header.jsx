@@ -14,13 +14,13 @@ function Header() {
             {isAuthenticated ? (
                 <div className='flex gap-2 items-center'>
                     <Link to={'/dashboard'}>
-                        <Button variant="outline">Dashboard</Button>
+                        <Button variant="outline">Tổng quan</Button>
                     </Link>
                     <UserButton user={user} /> {/* Pass user object to UserButton */}
                 </div>
             ) : (
                 <Link to={'/auth/sign-in'}>
-                    <Button>Get Started</Button>
+                    <Button>Bắt đầu</Button>
                 </Link>
             )}
         </div>

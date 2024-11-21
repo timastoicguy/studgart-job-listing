@@ -66,7 +66,6 @@ export default function MainLayout() {
       <Header
         showSideBar={showSidebar}
         setShowSideBar={setShowSidebar}
-        userData={userData} // Pass userData to Header
         onLogout={onLogout} // Pass onLogout function to Header
       />
 

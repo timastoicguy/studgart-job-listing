@@ -25,17 +25,18 @@ const handleLogin = async (
   authStore.setLoading(true);
 
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
-      email,
-      password,
-    });
-
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+      {
+        email,
+        password,
+      }
+    );
 
     if (!response.data) {
       toast.error("Login failed. Please check your credentials.");
       return;
     }
-
 
     const userRole: UserRole = response?.data.data?.user?.role || "job_seeker";
     const userId = response?.data.data?.user?._id || "null";
@@ -43,8 +44,8 @@ const handleLogin = async (
     const accessToken = response.data.data.accessToken;
     const refreshToken = response.data.data.refreshToken;
 
-    authStore.setTokens(accessToken, refreshToken);
 
+    authStore.setTokens(accessToken, refreshToken);
 
     const userData: UserData = {
       name: response?.data.data?.user?.username || "Default User",
@@ -56,17 +57,23 @@ const handleLogin = async (
     if (userRole === "job_seeker") {
       const jobSeekerResponse = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/job_seekers`,
-        { params: { user_id: userId }, headers: { Authorization: `Bearer ${accessToken}` } }
+        {
+          params: { user_id: userId },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
       );
-      console.log("Recuiter Response",jobSeekerResponse);
+      console.log("Recuiter Response", jobSeekerResponse);
 
       userData.job_seeker_id = jobSeekerResponse.data?.data?.jobSeekers[0]?._id;
     } else if (userRole === "recruiter") {
       const recruiterResponse = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters`,
-        { params: { user_id: userId }, headers: { Authorization: `Bearer ${accessToken}` } }
+        {
+          params: { user_id: userId },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
       );
-      console.log("Recuiter Response",recruiterResponse);
+      console.log("Recuiter Response", recruiterResponse);
       userData.recruiter_id = recruiterResponse.data?.data[0]?._id;
     } else if (userRole === "company") {
       const companyResponse = await axios.get(

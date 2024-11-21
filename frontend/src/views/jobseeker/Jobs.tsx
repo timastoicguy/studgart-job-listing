@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
-import {  FiMapPin,FiRefreshCcw } from "react-icons/fi";
+import { FiMapPin, FiRefreshCcw } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import {
   Tooltip,
@@ -23,10 +23,10 @@ import { useFetchJobs } from "@/lib/reducers/jobseeker/useFetchJobs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ConfirmationDialog from "../component/ConfirmationDialog";
-import { notification } from 'antd';  // Import notification from Ant Design
+import { notification } from "antd"; // Import notification from Ant Design
 import useAuthStore from "../../store/auth/useAuthStore";
 // const getJobSeekerIdFromLocalStorage = (): string | null => {
-  
+
 //   const userData = localStorage.getItem("userData");
 //   if (userData) {
 //     const parsedData = JSON.parse(userData);
@@ -43,9 +43,7 @@ import useAuthStore from "../../store/auth/useAuthStore";
 //   return null; // Return null if no userData in localStorage
 // };
 
-
 const Jobs: React.FC = () => {
-  
   const { userData } = useAuthStore(); // Truy cập accessToken từ store
   console.log("userData:", userData);
   const itemsPerPage = 3;
@@ -81,29 +79,34 @@ const Jobs: React.FC = () => {
     setSelectedJobId(jobId); // Set the job ID for confirmation
     setIsDialogOpen(true); // Open the confirmation dialog
   };
-  
+
   const confirmFavoriteJob = async () => {
     if (!selectedJobId) return;
-  
+
     const isAlreadyFavorited = favorites.get(selectedJobId); // Check if already favorited
-  
+
     try {
       if (isAlreadyFavorited) {
-        console.log('Removing job from favorites', {
+        console.log("Removing job from favorites", {
           job_id: selectedJobId,
           job_seeker_id: jobSeekerId,
         });
-  
+
         // Post remove favorite action to API
-        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${jobSeekerId}`);
-  
+        await axios.delete(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/favorites/${selectedJobId}/${jobSeekerId}`
+        );
+
         // Show success notification for removal
         notification.success({
-          message: 'Job Removed from Favorites!',
-          description: 'You have successfully removed this job from your favorites.',
-          placement: 'topRight',
+          message: "Job Removed from Favorites!",
+          description:
+            "You have successfully removed this job from your favorites.",
+          placement: "topRight",
         });
-  
+
         // Update favorites state to reflect the removal
         setFavorites((prev) => {
           const updatedFavorites = new Map(prev);
@@ -115,28 +118,33 @@ const Jobs: React.FC = () => {
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/favorites`, {
           job_id: selectedJobId,
           job_seeker_id: jobSeekerId,
-          status: 'saved',
+          status: "saved",
         });
-  
+
         // Show success notification for favoriting
         notification.success({
-          message: 'Job Favorited!',
-          description: 'You have successfully favorited this job.',
-          placement: 'topRight',
+          message: "Job Favorited!",
+          description: "You have successfully favorited this job.",
+          placement: "topRight",
         });
-  
+
         // Update favorite state to reflect the change
         setFavorites((prev) => new Map(prev).set(selectedJobId, true));
       }
-      
+
       // Close the dialog after the operation
       setIsDialogOpen(false);
     } catch (error) {
-      console.error(isAlreadyFavorited ? "Error removing favorite job:" : "Error favoriting job:", error);
+      console.error(
+        isAlreadyFavorited
+          ? "Error removing favorite job:"
+          : "Error favoriting job:",
+        error
+      );
       setIsDialogOpen(false); // Close dialog if error occurs
     }
   };
-  
+
   const cancelFavoriteJob = () => {
     setSelectedJobId(null); // Clear the selected job ID
     setIsDialogOpen(false); // Close the dialog
@@ -150,11 +158,9 @@ const Jobs: React.FC = () => {
     jobListings.forEach(async (job) => {
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_API_BASE_URL
-          }/api/applications?job_id=${
+          `${import.meta.env.VITE_API_BASE_URL}/api/applications?job_id=${
             job.id
-          }&job_seeker_id=${jobSeekerId}`
+          }&job_seeker_id=${userData.job_seeker_id}`
         );
         setAppliedJobs((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -169,11 +175,9 @@ const Jobs: React.FC = () => {
     jobListings.forEach(async (job) => {
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_API_BASE_URL
-          }/api/favorites?job_id=${
+          `${import.meta.env.VITE_API_BASE_URL}/api/favorites?job_id=${
             job.id
-          }&job_seeker_id=${jobSeekerId}`
+          }&job_seeker_id=${userData.job_seeker_id}`
         );
         setFavorites((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -184,7 +188,6 @@ const Jobs: React.FC = () => {
     });
   }, [jobListings]);
 
-  
   useEffect(() => {
     const filtered = jobListings.filter(
       (job) =>
@@ -194,27 +197,32 @@ const Jobs: React.FC = () => {
     setFilteredJobs(filtered);
   }, [jobListings, searchQuery]);
 
- // Function to handle page change and update URL
- const handlePageUrlChange = (page: number) => {
-  setCurrentPageJobs(page);
-  const searchParams = new URLSearchParams(location.search);
-  searchParams.set("page", page.toString()); // Update page in the URL
-  navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
-};
+  // Function to handle page change and update URL
+  const handlePageUrlChange = (page: number) => {
+    setCurrentPageJobs(page);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("page", page.toString()); // Update page in the URL
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
 
-useEffect(() => {
-  // Parse the page number from the URL when component mounts
-  const params = new URLSearchParams(location.search);
-  const pageFromUrl = parseInt(params.get("page") || "1", 10);
-  setCurrentPageJobs(pageFromUrl);
-}, [location]);
+  useEffect(() => {
+    // Parse the page number from the URL when component mounts
+    const params = new URLSearchParams(location.search);
+    const pageFromUrl = parseInt(params.get("page") || "1", 10);
+    setCurrentPageJobs(pageFromUrl);
+  }, [location]);
   return (
-    
     <TooltipProvider>
       <div className="lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
-      <ConfirmationDialog
+        <ConfirmationDialog
           isOpen={isDialogOpen}
-          message={favorites.get(selectedJobId || "") ? "Do you want to remove this job from favorites?" : "Do you want to favorite this job?"}
+          message={
+            favorites.get(selectedJobId || "")
+              ? "Do you want to remove this job from favorites?"
+              : "Do you want to favorite this job?"
+          }
           onConfirm={confirmFavoriteJob}
           onCancel={cancelFavoriteJob}
         />
@@ -225,9 +233,7 @@ useEffect(() => {
               Danh sách công việc
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4">
-
-            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4"></div>
 
             <div className="space-y-4 overflow-y-auto">
               {loading
@@ -290,8 +296,7 @@ useEffect(() => {
                       </div>
                       <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
                         <button
-                                                        onClick={() => handleJobClick(job)} // Navigate on click
-
+                          onClick={() => handleJobClick(job)} // Navigate on click
                           className={`${
                             appliedJobs.get(job.id)
                               ? "bg-gray-400"
@@ -303,18 +308,23 @@ useEffect(() => {
                             : "Ứng tuyển"}
                         </button>
                         <Tooltip>
-      <TooltipTrigger>
-        <FaHeart
-          className={`${
-            favorites.get(job.id) ? "text-red-500" : "text-gray-500"
-          } hover:text-red-500 cursor-pointer transition-colors duration-300`}
-          onClick={() => handleFavoriteJob(job.id)}
-        />
-      </TooltipTrigger>
-      <TooltipContent>
-        {favorites.get(job.id) ? "Đã Yêu thích" : "Yêu thích"} {/* Hiển thị nội dung tooltip tùy theo trạng thái yêu thích */}
-      </TooltipContent>
-    </Tooltip>
+                          <TooltipTrigger>
+                            <FaHeart
+                              className={`${
+                                favorites.get(job.id)
+                                  ? "text-red-500"
+                                  : "text-gray-500"
+                              } hover:text-red-500 cursor-pointer transition-colors duration-300`}
+                              onClick={() => handleFavoriteJob(job.id)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {favorites.get(job.id)
+                              ? "Đã Yêu thích"
+                              : "Yêu thích"}{" "}
+                            {/* Hiển thị nội dung tooltip tùy theo trạng thái yêu thích */}
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   ))}

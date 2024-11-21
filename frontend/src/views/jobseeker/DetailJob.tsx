@@ -29,6 +29,7 @@ import { Upload, Button, UploadFile, UploadProps, message } from "antd"; // Impo
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { FaPaperPlane } from "react-icons/fa";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 const getJobSeekerIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem("userData");
@@ -39,7 +40,7 @@ const getJobSeekerIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 const DetailJob: React.FC = () => {
-  const jobSeekerId = getJobSeekerIdFromLocalStorage();
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [title, setTitle] = useState("");
   const [salaryMin, setSalaryMin] = useState(0);
@@ -107,7 +108,7 @@ const DetailJob: React.FC = () => {
       // Gửi yêu cầu ứng tuyển
       const applicationData = {
         job_id: jobId,
-        job_seeker_id: jobSeekerId,
+        job_seeker_id: userData.job_seeker_id,
         cover_letter: coverLetter, // Lấy giá trị từ textarea
         resume: resumeUrl, // Đường dẫn đã upload
         job_reviewer_id: "67273fea96599e898e7bbd6c",
@@ -203,7 +204,7 @@ const DetailJob: React.FC = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_API_BASE_URL
-          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${jobSeekerId}`
+          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${userData.job_seeker_id}`
         );
 
         // Log full response to check structure
@@ -391,7 +392,7 @@ const DetailJob: React.FC = () => {
             <button className="hidden" />
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Đơn Ứng Tuyển</DialogTitle>
+            <DialogTitle className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">Đơn Ứng Tuyển</DialogTitle>
             <DialogDescription>
               <label className="block text-sm font-medium text-gray-700">
                 Thư xin việc
@@ -400,10 +401,10 @@ const DetailJob: React.FC = () => {
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
                 placeholder="Viết thư xin việc của bạn ở đây"
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                className="mt-1 block w-full border border-green-300 rounded-md p-2 min-h-40"
               />
 
-              <label className="block text-sm font-medium text-gray-700 mt-4">
+              <label className="block text-sm font-medium text-green-700 mt-4">
                 Tải lên tài liệu
               </label>
               <div>
