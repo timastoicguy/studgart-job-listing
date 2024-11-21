@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSort, FaSearch, FaEye, FaCheck, FaTimes } from "react-icons/fa";
@@ -20,8 +21,8 @@ import {
   TableCell,
 } from "@/components/ui/tablechecked";
 import ConfirmationDialog from "../component/ConfirmationDialog";
-import { notification } from 'antd';
-
+import { notification } from "antd";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 // Định nghĩa kiểu dữ liệu cho User
 interface User {
@@ -34,30 +35,33 @@ interface User {
 }
 
 const AddCompanyIdentity = () => {
-  const [accounts, setAccounts] = useState<User[]>([]); // Định rõ kiểu dữ liệu cho accounts
-  const [loading, setLoading] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [limit, setLimit] = useState(10);
+  const { userData } = useAuthStore(); // Lấy thông tin người dùng từ store
+  const [accounts, setAccounts] = useState<User[]>([]); // Danh sách tài khoản
+  const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const [page, setPage] = useState(1); // Trang hiện tại
+  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm
+  const [limit, setLimit] = useState(10); // Số lượng tài khoản mỗi trang
 
-  // Trạng thái cho hộp thoại xác nhận
+  // Trạng thái và dữ liệu liên quan đến hộp thoại xác nhận
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  
+
+  // Xử lý thay đổi từ khóa tìm kiếm
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-    setPage(1); // Reset to first page on new search
+    setPage(1); // Reset về trang đầu tiên khi tìm kiếm
   };
-  
+
+  // Xử lý chuyển đổi trang
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
   };
 
-  // Fetch Accounts Data
+  // Hàm lấy danh sách tài khoản
   const fetchAccounts = async () => {
     try {
       setLoading(true);
@@ -69,11 +73,10 @@ const AddCompanyIdentity = () => {
       if (searchTerm) {
         params.email = searchTerm;
       }
+
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/users`,
-        {
-          params,
-        }
+        { params }
       );
       const { users, totalPages } = response.data.data;
       setAccounts(users);
@@ -86,69 +89,71 @@ const AddCompanyIdentity = () => {
     }
   };
 
+  // Gọi hàm fetchAccounts khi thay đổi trang, giới hạn hoặc từ khóa tìm kiếm
   useEffect(() => {
     fetchAccounts();
   }, [page, limit, searchTerm]);
 
+  // Xử lý khi người dùng nhấn nút phê duyệt
   const handleApprove = (userId: string) => {
-    setSelectedUserId(userId); // Lưu userId để xác nhận
+    setSelectedUserId(userId);
     setConfirmationMessage("Bạn có chắc chắn muốn thêm nhân sự này?");
-    setIsDialogOpen(true); // Mở hộp thoại xác nhận
+    setIsDialogOpen(true);
   };
 
+  // Xác nhận thêm nhân sự vào công ty
   const handleConfirmApprove = async () => {
     if (!selectedUserId) return;
-  
+
     try {
-      const userData = localStorage.getItem("userData");
-      const company_id = userData ? JSON.parse(userData).company_id : null;
-  
+      const company_id = userData.company_id ?? null;
+
       if (!company_id) {
-        console.error("Company ID not found in localStorage");
+        console.error("Company ID not found in user data");
         return;
       }
-  
+
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters`,
-        {
-          params: { user_id: selectedUserId },
-        }
+        { params: { user_id: selectedUserId } }
       );
-  
-      const recruiterId = response.data.data.length > 0 ? response.data.data[0]._id : null;
-  
+
+      const recruiterId =
+        response.data.data.length > 0 ? response.data.data[0]._id : null;
+
       if (!recruiterId) {
         console.error("Recruiter not found for this user.");
         return;
       }
-  
+
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters/${recruiterId}`,
-        { user_id: selectedUserId, company_id },
+        { user_id: selectedUserId, company_id }
       );
-  
+
       // Hiển thị thông báo thành công
       notification.success({
-        message: 'Thành công',
-        description: 'Nhân sự đã được thêm vào công ty.',
-        placement: 'topRight', // Vị trí hiển thị thông báo
+        message: "Thành công",
+        description: "Nhân sự đã được thêm vào công ty.",
+        placement: "topRight",
       });
-  
-      setIsDialogOpen(false); // Đóng hộp thoại xác nhận
+
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error approving employee:", error);
-  
-      // Hiển thị thông báo lỗi nếu có
+
+      // Hiển thị thông báo lỗi
       notification.error({
-        message: 'Lỗi',
-        description: 'Có lỗi xảy ra khi thêm nhân sự.',
-        placement: 'topRight', // Vị trí hiển thị thông báo
+        message: "Lỗi",
+        description: "Có lỗi xảy ra khi thêm nhân sự.",
+        placement: "topRight",
       });
     }
   };
-  
+
+  // Hủy phê duyệt
   const handleCancelApprove = () => {
-    setIsDialogOpen(false); // Đóng hộp thoại xác nhận nếu người dùng từ chối
+    setIsDialogOpen(false);
   };
 
   return (

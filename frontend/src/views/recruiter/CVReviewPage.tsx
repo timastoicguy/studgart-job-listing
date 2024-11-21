@@ -21,15 +21,17 @@ interface CVReviewProps {
 const TypingText: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div
-      className="typing-effect text-lg text-gray-700"
+      className="text-lg text-gray-700"
       style={{
-        fontFamily: '"Patrick Hand", cursive',
+        fontFamily: '"Times New Roman", cursive',
+        cursor: 'none', // This removes the typing cursor effect
       }}
     >
       {text}
     </div>
   );
 };
+
 
 const CVReviewPage: React.FC<CVReviewProps> = ({ data }) => {
   const { summary, score, advantages, downsides } = data;
@@ -91,8 +93,10 @@ const CVReviewPage: React.FC<CVReviewProps> = ({ data }) => {
 
       {/* Downsides */}
       <section>
-        <h2 className="text-2xl font-patrick-hand text-gray-800">Downsides</h2>
+        <h2 className="text-2xl font-patrick-hand text-gray-800"
+        style={{ fontFamily: '"Patrick Hand", cursive' }}>Downsides</h2>
         {downsides.map((down, index) => (
+          
           <TypingText key={index} text={`${index + 1}. ${down}`} />
         ))}
       </section>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import {
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { Spin, notification } from "antd"; // Import notification from antd
+import "@ant-design/icons";
 
 import "@fontsource/dancing-script"; // Font viết tay
 import "@fontsource/patrick-hand"; // Font viết tay khác
@@ -17,7 +19,6 @@ import "@fontsource/patrick-hand"; // Font viết tay khác
 import axios from "axios";
 import ResultCV from "./ResultCV";
 
-// Giả sử bạn đã tạo các component của Shadcn UI
 const PDFReviewModal = ({
   isOpen,
   onClose,
@@ -28,25 +29,34 @@ const PDFReviewModal = ({
   pdfUrl: string;
 }) => {
   const [cvData, setCvData] = useState<any>(null);
-
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [showConfetti, setShowConfetti] = useState(false); // State for confetti
+
+  const openNotification = (type: 'success' | 'error', message: string) => {
+    notification[type]({
+      message: type === 'success' ? 'Thành công' : 'Thất bại',
+      description: message,
+      placement: 'topRight',
+      duration: 3,
+    });
+  };
 
   const assessCV = async () => {
     try {
+
       if (cvData) {
         setModalOpen(true);
       } else {
         const response = await axios.get(pdfUrl, {
-          responseType: "blob", // Để nhận dữ liệu ở định dạng tệp
+          responseType: "blob",
         });
 
-        // Tạo FormData
         const formData = new FormData();
-        formData.append("file", response.data, "uploaded-file.pdf"); // Đặt tên tệp
+        formData.append("file", response.data, "uploaded-file.pdf");
 
-        // Gửi FormData qua Axios
         const apiResponse = await axios.post(
-          "http://localhost:3000/api/evaluate-cv-api",
+          `${import.meta.env.VITE_API_BASE_URL}/api/evaluate-cv-api`,
           formData,
           {
             headers: {
@@ -54,29 +64,34 @@ const PDFReviewModal = ({
             },
           }
         );
-
-        console.log("API Response:", apiResponse.data);
+        setIsLoading(true); // Set loading to true
         setCvData(apiResponse.data.data);
         setModalOpen(true);
+
+        // Show success notification
+        openNotification('success', 'CV của bạn đánh giá hoàn tất!');
       }
     } catch (error) {
       console.error("Error uploading PDF:", error);
+      // Show error notification
+      openNotification('error', 'Đã xảy ra lỗi trong quá trình đánh giá. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false); // Set loading to false when done
     }
   };
 
   const reAssessCV = async () => {
     try {
+      setIsLoading(true); // Set loading to true
       const response = await axios.get(pdfUrl, {
-        responseType: "blob", // Để nhận dữ liệu ở định dạng tệp
+        responseType: "blob",
       });
 
-      // Tạo FormData
       const formData = new FormData();
-      formData.append("file", response.data, "uploaded-file.pdf"); // Đặt tên tệp
+      formData.append("file", response.data, "uploaded-file.pdf");
 
-      // Gửi FormData qua Axios
       const apiResponse = await axios.post(
-        "http://localhost:3000/api/evaluate-cv-api",
+        `${import.meta.env.VITE_API_BASE_URL}/api/evaluate-cv-api`,
         formData,
         {
           headers: {
@@ -85,14 +100,33 @@ const PDFReviewModal = ({
         }
       );
 
-      console.log("API Response:", apiResponse.data);
       setCvData(apiResponse.data.data);
+      console.log(apiResponse.data.data.score.totalScore);
+      checkScore(apiResponse.data.data?.score?.totalScore);
       setModalOpen(true);
+
+      // Show success notification
+      openNotification('success', 'CV của bạn đã đánh giá lại hoàn tất!');
+
     } catch (error) {
       console.error("Error uploading PDF:", error);
+      // Show error notification
+      openNotification('error', 'Đã xảy ra lỗi trong quá trình đánh giá. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false); // Set loading to false when done
     }
   };
+  useEffect(() => {
+    console.log("Confetti state changed:", showConfetti);
+  }, [showConfetti]); // Lắng nghe sự thay đổi của `showConfetti`
 
+  const checkScore = (scoreString: string) => {
+    const [score, total] = scoreString.split("/").map(Number);
+    if ((score / total) * 100 > 70) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+  };
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -102,7 +136,6 @@ const PDFReviewModal = ({
             <DialogClose />
           </DialogHeader>
           <div className="flex">
-            {/* Phần xem trước PDF */}
             <div className="w-2/3 p-4 border-r border-gray-200">
               <Worker
                 workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}
@@ -119,29 +152,22 @@ const PDFReviewModal = ({
               </Worker>
             </div>
 
-            {/* Phần bên phải */}
             <div className="w-1/3 p-4 flex flex-col gap-3">
-              {/* Nút đánh giá CV */}
               <div className="flex flex-col gap-4 mb-6">
                 <button
                   className="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
-                  onClick={() => {
-                    assessCV();
-                  }}
+                  onClick={assessCV}
                 >
                   Xem kết quả CV
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-                  onClick={() => {
-                    reAssessCV();
-                  }}
+                  className="w-full px-4 py-2 text-green-600 bg-white border-2 border-green-600 hover:bg-white-100"
+                  onClick={reAssessCV}
                 >
-                  Đánh giá lại CV
+                  {isLoading ? <Spin /> : "Đánh giá lại CV"}
                 </button>
               </div>
 
-              {/* Khung chat */}
               <div className="flex flex-col gap-2">
                 <div
                   className="tex-xl"
@@ -164,13 +190,17 @@ const PDFReviewModal = ({
           </div>
         </DialogContent>
       </Dialog>
-      {
+
+      {isModalOpen && (
         <ResultCV
           isOpen={isModalOpen}
           onClose={() => setModalOpen(false)}
           data={cvData}
-        ></ResultCV>
-      }
+          isCongratulation={showConfetti}
+        />
+        
+      )}
+
     </>
   );
 };

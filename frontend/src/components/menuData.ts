@@ -29,6 +29,7 @@ export const roleOptions: Record<string, MenuItem[]> = {
   admin: [
     { name: "Tổng quan", label: "Tổng quan", href: "/admin/dashboard" },
     { name: "Tài khoản", label: "Tài khoản", href: "/admin/accountall" },
+    { name: "Giao dịch", label: "Giao dịch", href: "/admin/transactionmanual" },
   ],
   job_seeker: [
     { name: "Tuyển dụng IT", label: "Tuyển dụng IT", href: "/jobseeker/jobs" },

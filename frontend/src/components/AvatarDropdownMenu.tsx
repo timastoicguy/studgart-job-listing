@@ -45,7 +45,6 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
     transactions: [] as any[],
     freeDiamonds: 0,
   });
-  console.log("User data:", formData);
   useEffect(() => {
     if (userData?.id) {
       axios
