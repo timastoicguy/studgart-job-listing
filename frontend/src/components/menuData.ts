@@ -27,17 +27,9 @@ const userId = getUserIdFromLocalStorage();
 // Define menu options for each role
 export const roleOptions: Record<string, MenuItem[]> = {
   admin: [
-    { name: "dashboard", label: "Dashboard", href: "/admin/dashboard" },
-    { name: "settings", label: "Settings", href: "/admin/settings" },
-    { 
-      name: "account", 
-      label: "Account", 
-      href: "/admin/accountall", 
-      dropdownItems: [
-        { name: "account_company", label: "Account Company", href: "/admin/account/company" },
-        { name: "account_jobseeker", label: "Account Jobseeker", href: "/admin/account/jobseeker" },
-      ],
-    },
+    { name: "Tổng quan", label: "Tổng quan", href: "/admin/dashboard" },
+    { name: "Tài khoản", label: "Tài khoản", href: "/admin/accountall" },
+    { name: "Giao dịch", label: "Giao dịch", href: "/admin/transactionmanual" },
   ],
   job_seeker: [
     { name: "Tuyển dụng IT", label: "Tuyển dụng IT", href: "/jobseeker/jobs" },

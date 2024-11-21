@@ -26,10 +26,9 @@ interface FetchRecommendedCompaniesResponse {
 }
 
 // Hàm gọi API để lấy danh sách công ty được gợi ý
-export async function fetchRecommendedCompanies(): Promise<FetchRecommendedCompaniesResponse | null> {
+export async function fetchRecommendedCompanies(userId: string): Promise<FetchRecommendedCompaniesResponse | null> {
   try {
-    const userData = localStorage.getItem("userData");
-    const userId = userData ? JSON.parse(userData).id : null;
+
     // Gửi yêu cầu GET đến backend để lấy dữ liệu công ty
     const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/recruiters?page=1&limit=10&user_id=${userId}`);
 

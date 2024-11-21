@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/tablechecked";
 import ConfirmationDialog from "../component/ConfirmationDialog"; // Import the ConfirmationDialog component
 import { notification } from 'antd';
+import useAuthStore from "@/store/auth/useAuthStore";
+
 
 
 interface Recruiter {
@@ -50,6 +52,7 @@ interface Recruiter {
 }
 
 const CompanyIdentity = () => {
+  const { userData } = useAuthStore(); // Lấy thông tin người dùng từ store
   const [accounts, setAccounts] = useState<Recruiter[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
@@ -63,8 +66,7 @@ const CompanyIdentity = () => {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      const userData = localStorage.getItem("userData");
-      const company_id = userData ? JSON.parse(userData).company_id : null;
+      const company_id = userData.company_id ?? null;
   
       if (!company_id) {
         console.error("Company ID not found in localStorage");
@@ -126,8 +128,7 @@ const CompanyIdentity = () => {
 
   const removeEmployeeFromCompany = async (userId: string, recruiterId: string) => {
     try {
-      const userData = localStorage.getItem("userData");
-      const company_id = userData ? JSON.parse(userData).company_id : null;
+      const company_id = userData.company_id ?? null;
   
       if (!company_id) {
         console.error("Company ID not found in localStorage");
@@ -309,7 +310,7 @@ const CompanyIdentity = () => {
   isOpen={isDialogOpen}
   onConfirm={handleDialogConfirm}
   onCancel={handleDialogCancel}
-  message="Are you sure you want to delete this account?" // Add a custom message
+  message="Bạn có chắc chắn muốn xóa nhân sự này?" // Add a custom message
 />
 
     </div>

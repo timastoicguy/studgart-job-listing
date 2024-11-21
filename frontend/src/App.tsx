@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Login from "./views/auth/Login";
 import MainLayout from "./components/MainLayout";
 import About from "./views/auth/About";
@@ -31,8 +32,20 @@ import PaymentRedirect  from "./views/share/PaymentRedirect";
 
 import AdminDashboard from "./views/admin/Dashboard"; // Adjusted import for AdminDashboard
 import AccountAll from "./views/admin/AccountAll"; // Adjusted import for AccountAll
+import TransactionManual from "./views/admin/TransactionManual"; // Adjusted import for AccountAll
+import useAuthStore from "./store/auth/useAuthStore";
+import { useEffect } from "react";
 
 function App() {
+  const navigate = useNavigate();
+  const { accessToken } = useAuthStore(); // Truy cập accessToken từ store
+  console.log("accessToken:", accessToken);
+  // useEffect(() => {
+  //   if (accessToken) {
+  //     navigate("/jobseeker/jobs");
+  //   }
+  // }, [accessToken, navigate]);
+
   return (
     <div className=" overflow-y-scroll"> {/* Sử dụng thanh cuộn tổng */}
       <Routes>
@@ -42,13 +55,14 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/auth/verify/:token" element={<VerifyEmail />} />
         <Route path="/auth/reset-password/:token" element={<ResetPassWord />} />
-
+        <Route path="/about" element={<About />} />
         {/* Nesting MainLayout for main application routes */}
         <Route path="/" element={<MainLayout />}>
-          <Route path="about" element={<About />} />
+
 
           <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* Nested AdminDashboard */}
           <Route path="/admin/accountall" element={<AccountAll />} /> {/* Nested AccountAll */}
+          <Route path="/admin/transactionmanual" element={<TransactionManual />} /> {/* Nested AccountAll */}
 
           <Route path="/recruiter/postjob" element={<PostJob />} />
           <Route path="/recruiter/jobposted" element={<JobPosted />} />
@@ -57,7 +71,7 @@ function App() {
           <Route path="/recruiter/jobreject" element={<JobReject />} />
           <Route path="/recruiter/jobseekerpending/:jobId" element={<JobseekerPending />} />
 
-          <Route path="jobseeker/jobs" element={<Job />} />
+          <Route path="/jobseeker/jobs" element={<Job />} />
           <Route path="/jobseeker/detailjob/:jobId" element={<DetailJob />} />
           <Route path="/jobseeker/detailCompany/:companyId" element={<DetailCompany />} />
           <Route path="/jobseeker/favoritejobs" element={<FavoriteJobs />} />

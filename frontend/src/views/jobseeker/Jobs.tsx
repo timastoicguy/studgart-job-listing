@@ -24,27 +24,33 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ConfirmationDialog from "../component/ConfirmationDialog";
 import { notification } from 'antd';  // Import notification from Ant Design
-const getJobSeekerIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem("userData");
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.job_seeker_id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
-const getJoUserIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem("userData");
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
+import useAuthStore from "../../store/auth/useAuthStore";
+// const getJobSeekerIdFromLocalStorage = (): string | null => {
+  
+//   const userData = localStorage.getItem("userData");
+//   if (userData) {
+//     const parsedData = JSON.parse(userData);
+//     return parsedData.job_seeker_id || null; // Return user ID or null if not found
+//   }
+//   return null; // Return null if no userData in localStorage
+// };
+// const getJoUserIdFromLocalStorage = (): string | null => {
+//   const userData = localStorage.getItem("userData");
+//   if (userData) {
+//     const parsedData = JSON.parse(userData);
+//     return parsedData.id || null; // Return user ID or null if not found
+//   }
+//   return null; // Return null if no userData in localStorage
+// };
+
 
 const Jobs: React.FC = () => {
+  
+  const { userData } = useAuthStore(); // Truy cập accessToken từ store
+  console.log("userData:", userData);
   const itemsPerPage = 3;
-  const jobSeekerId = getJobSeekerIdFromLocalStorage(); // Replace with dynamic ID
-  const userId = getJoUserIdFromLocalStorage(); // Replace with dynamic ID
+  const jobSeekerId = userData.job_seeker_id; // Replace with dynamic ID
+  const userId = "2222"; // Replace with dynamic ID
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);

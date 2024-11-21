@@ -60,8 +60,6 @@ export default function Header({
     transactions: [] as any[],
     freeDiamonds: 0,
   });
-  console.log("User data:", formData);
-
   useEffect(() => {
     // Fetch user data from localStorage
     fetchNotifications();

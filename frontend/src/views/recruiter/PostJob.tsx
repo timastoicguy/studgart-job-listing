@@ -5,6 +5,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
 import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/postJobs";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 
 const getRecruiterIdFromLocalStorage = (): string | null => {
@@ -16,6 +17,9 @@ const getRecruiterIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 export default function JobListing() {
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const recruiterId = userData?.recruiter_id || ""; // Lấy recruiter_id từ userData
+  console.log("User Data:", userData);
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);
   const [salaryMax, setSalaryMax] = useState(1200);
@@ -48,7 +52,6 @@ export default function JobListing() {
   const [selectedSkill, setSelectedSkill] = useState("");
   const availableSkills = ["JavaScript", "React", "Node.js", "CSS", "HTML"];
 
-  const recruiterId= getRecruiterIdFromLocalStorage() || "";
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Cập nhật giá trị dạng Date từ input
@@ -113,19 +116,18 @@ export default function JobListing() {
   const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>([]); // Array of companies
   useEffect(() => {
     const loadRecommendedCompanies = async () => {
-      const data = await fetchRecommendedCompanies(); // Gọi API để lấy công ty
+      const data = await fetchRecommendedCompanies(userData.id);
 
       if (data && Array.isArray(data.data)) {
-        setRecommendedCompanies(data.data.map(item => item.company)); // Chỉ lấy đối tượng company
-        console.log('Recommended Companies:', data.data); // In dữ liệu các công ty
+        setRecommendedCompanies(data.data.map(item => item.company));
+        console.log('Recommended Companies:', data.data);
       } else {
-        console.error('Error: Invalid data structure', data); // Log lỗi nếu dữ liệu không hợp lệ
+        console.error('Error: Invalid data structure', data);
       }
     };
 
     loadRecommendedCompanies();
-    console.log(recommendedCompanies);
-  }, []);
+  }, [userData]);
   return (
     <div className="flex flex-col gap-8 p-8 md:flex-row justify-center">
       {/* Left Side - Language Selector and Input Fields */}
