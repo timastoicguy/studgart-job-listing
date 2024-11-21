@@ -9,16 +9,17 @@ import axios from "axios";
 import AvatarDropdownMenu from "./AvatarDropdownMenu"; // Import AvatarDropdownMenu component
 import HoverDropdownMenu from "./HoverDropdownMenu"; // Import HoverDropdownMenu component
 import { useParams } from "react-router-dom";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 const url_base = `${import.meta.env.VITE_API_BASE_URL}`;
 interface HeaderProps {
   showSideBar: boolean;
   setShowSideBar: (showSideBar: boolean) => void;
-  userData: { name: string; role: string; id?: string } | null; // Added 'id' as optional
+
   onLogout: () => void;
 }
 
-// Define MenuItem type for the menu
+// Define MenuItem type for the menu  
 // menuData.ts
 
 export interface MenuItem {
@@ -34,10 +35,9 @@ export interface MenuItem {
 export default function Header({
   showSideBar,
   setShowSideBar,
-  userData,
   onLogout,
 }: HeaderProps) {
-
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [badgeCount, setBadgeCount] = useState<number>(0);

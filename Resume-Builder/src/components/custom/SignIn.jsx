@@ -39,53 +39,48 @@ const LoginPage = () => {
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-primary to-blue-300">
             <Card className="w-full max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
                 <CardHeader className="text-center">
-                    <h2 className="text-2xl font-bold">Welcome!</h2>
-                    <p className="text-gray-500">Sign in to your Account</p>
+                    <h2 className="text-2xl font-bold">Chào mừng!</h2>
+                    <p className="text-gray-500">Đăng nhập tài khoản <span className='text-primary font-semibold'>STUGART</span> của bạn</p>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div>
                             <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email Address
+                                Email
                             </Label>
                             <Input
                                 id="email"
                                 type="email"
-                                {...register('email', { required: 'Email is required' })}
+                                {...register('email', { required: 'Email phải nhập' })}
                                 className="mt-1"
-                                placeholder="Enter your email"
+                                placeholder="Nhập email của bạn"
                             />
                             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                         </div>
 
                         <div>
                             <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Password
+                                Mật khẩu
                             </Label>
                             <Input
                                 id="password"
                                 type="password"
-                                {...register('password', { required: 'Password is required' })}
+                                {...register('password', { required: 'Mật khẩu phải nhập ' })}
                                 className="mt-1"
-                                placeholder="Enter your password"
+                                placeholder="Nhập mật khẩu của bạn"
                             />
                             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                         </div>
 
-                        <div className="text-right">
-                            <a href="/forgot-password" className="text-primary hover:underline text-sm">
-                                Forgot Password?
-                            </a>
-                        </div>
 
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading ? (
                                 <span className="flex items-center justify-center">
                                     <Loader2 className="mr-2 animate-spin" />
-                                    Signing In...
+                                    Đang đăng nhập
                                 </span>
                             ) : (
-                                "Sign In"
+                                "Đăng nhập"
                             )}
                         </Button>
                     </form>
@@ -104,13 +99,7 @@ const LoginPage = () => {
                         </button>
                     </div>
                 </CardContent>
-                <CardFooter className="text-center mt-4">
-                    <p className="text-gray-500">Don't have an account?{' '}
-                        <a href="/sign-up" className="text-primary hover:underline">
-                            Sign Up
-                        </a>
-                    </p>
-                </CardFooter>
+                
             </Card>
         </div>
     );

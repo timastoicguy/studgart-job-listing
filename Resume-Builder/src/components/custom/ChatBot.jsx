@@ -303,6 +303,7 @@ const ChatBot = ({ onClose }) => {
                         }
                     }}
                     onPaste={handlePaste}
+                    className="max-h-[70px] resize-none"
                     placeholder="Nhập câu hỏi của bạn..."
                 />
                 <Button

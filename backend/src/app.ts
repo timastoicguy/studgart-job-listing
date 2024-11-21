@@ -40,6 +40,7 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL || "http://localhost:5173",
+      process.env.FRONTEND_URL2 || "http://localhost:5174",
       process.env.BASE_URL || "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import useAuthStore from "@/store/auth/useAuthStore";
 
 interface Job {
   id: string;
@@ -85,6 +86,8 @@ interface FetchJobsReturn {
 }
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
@@ -264,7 +267,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       const response = await fetch(
         `${
           import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=67273fea96599e898e7bbd6c&page=${currentFavertiedPageJobs}&limit=${limit}`
+        }/api/favorites?job_seeker_id=${userData.job_seeker_id}&page=${currentFavertiedPageJobs}&limit=${limit}`
       );
       const result: ApiResponse = await response.json();
   

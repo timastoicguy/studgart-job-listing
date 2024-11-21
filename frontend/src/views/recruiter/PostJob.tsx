@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
 import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/postJobs";
 import useAuthStore from "@/store/auth/useAuthStore";
+import ConfirmationDialog from "../component/ConfirmationDialog";
 
 
 const getRecruiterIdFromLocalStorage = (): string | null => {
@@ -51,6 +52,7 @@ export default function JobListing() {
   const [skills, setSkills] = useState<string[]>([]);
   const [selectedSkill, setSelectedSkill] = useState("");
   const availableSkills = ["JavaScript", "React", "Node.js", "CSS", "HTML"];
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,10 +60,26 @@ export default function JobListing() {
     setApplicationDeadline(new Date(event.target.value));
   };
 
+
+
+  const handleConfirm = async () => {
+    setIsConfirmOpen(false); // Đóng dialog sau khi xác nhận
+    await handleSubmit(); // Gọi hàm submit job
+  };
+
+  const handleCancel = () => {
+    setIsConfirmOpen(false); // Đóng dialog khi hủy
+  };
+
+  const handleOpenConfirm = () => {
+    setIsConfirmOpen(true); // Mở dialog
+  };
+
   const handleSubmit = async () => {
-    const skillsToSend = skills.length > 0 ? skills.map(skill => ({ name: skill, code: skill.toUpperCase() })) : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
-    
-    console.log("recruiterId:", recruiterId);
+    const skillsToSend = skills.length > 0 
+      ? skills.map(skill => ({ name: skill, code: skill.toUpperCase() }))
+      : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
+
     const jobData = {
       title: title.trim(),
       salaryRange: { min: salaryMin, max: salaryMax },
@@ -75,21 +93,16 @@ export default function JobListing() {
       skills: ["skillsToSend"],
       employmentType: [{ name: "full-time", code: "FT" }],
       experienceLevel: [{ name: "entry", code: "JR" }],
-      company: selectedCompany, // Gán companyId vào đây
-      jobCategory: jobCategoryId, // Ensure this is a valid ObjectId
-      recruiter: recruiterId, // Ensure this is a valid ObjectId
+      company: selectedCompany,
+      jobCategory: jobCategoryId,
+      recruiter: recruiterId,
       technologies: skillsToSend,
     };
 
-    console.log("Job Data:", JSON.stringify(jobData, null, 2)); // Log the job data
-  
     try {
-      const result = await postJob(jobData);
-      console.log("Job posted successfully:", result);
-      alert("Job posted successfully!");
+      const result = await postJob(jobData, userData.id);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log("Response:", error.response); // Log full response
         console.error("Error message:", error.message);
       } else {
         console.error("Unexpected error:", error);
@@ -318,14 +331,14 @@ export default function JobListing() {
             className="w-full p-3 border rounded-md"
           />
         </div>
-        <button  onClick={handleSubmit} 
+        <button  onClick={handleOpenConfirm} 
         className="bg-green-500 text-white py-2 px-4 rounded-md">Đăng</button>
       </div>
 
       {/* Right Side - Job Preview */}
       <div className="p-6 bg-gray-50 shadow-md rounded-md border space-y-6">
       <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-      PREVIEW
+      Bản xem trước
       </div>
         {/* Section 1: Job Info and Company */}
         <div className="p-4 bg-white shadow rounded-md border">
@@ -387,6 +400,12 @@ export default function JobListing() {
           <p className="text-sm text-gray-600 whitespace-pre-line">{location}</p>
           
         </div>
+        <ConfirmationDialog
+        isOpen={isConfirmOpen}
+        message="Bạn sẽ tốn 2 diamond cho bài đăng này. Bạn có muốn tiếp tục ?"
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
       </div>
     </div>
   );

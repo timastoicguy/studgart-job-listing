@@ -38,29 +38,29 @@ function Login() {
       <ToastContainer newestOnTop />
       <div className="bg-white p-8 rounded-[24px] shadow-md w-full max-w-4xl flex flex-col sm:flex-row">
         <div className="w-full sm:w-1/2 p-4">
-          <h2 className="text-2xl font-bold text-center mb-6">STUDGART</h2>
+          <h2 className="text-2xl font-bold text-center mb-6 text-green-500">STUDGART</h2>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Username or Email</label>
+            <label className="block text-gray-700 text-sm font-bold mb-2"> Email</label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaEnvelope className="ml-3 text-gray-400" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email"
+                placeholder="Nhập email"
                 className="w-full py-2 px-3 text-gray-700 focus:outline-none"
               />
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Mật khẩu</label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaLock className="ml-3 text-gray-400" />
               <input
                 type={isPasswordVisible ? "text" : "password"} // Toggle password visibility
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Nhập mật khẩu"
                 className="w-full py-2 px-3 text-gray-700 focus:outline-none"
               />
               <button
@@ -79,14 +79,14 @@ function Login() {
             }`}
             disabled={loading}
           >
-            {loading ? <FaSpinner className="animate-spin" /> : "Log In"}
+            {loading ? <FaSpinner className="animate-spin" /> : "Đăng nhập"}
           </button>
           <button
             onClick={handleGoogleLogin}
             className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center mt-4"
           >
             <FaGoogle className="mr-2" />
-            Sign in with Google
+            Đăng nhập với Google
           </button>
         </div>
         <div className="w-full sm:w-1/2 mt-6 sm:mt-0">

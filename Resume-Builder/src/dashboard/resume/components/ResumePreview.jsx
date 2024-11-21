@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { ResumeInfoContext } from '@/context/ResumeInfoContext'
 import { useContext } from 'react'
 import PersonalDetailPreview from './preview/PersonalDetailPreview'
@@ -39,7 +40,7 @@ function ResumePreview({ targetRef }) {
     return (
         <div
             ref={targetRef}
-            className="shadow-lg w-[794px] h-full py-10 border-t-[20px] mx-auto"
+            className="shadow-lg w-[794px] h-full py-10 border-t-[20px] px-5 mx-auto"
             style={{
                 borderColor: resumeInfo?.themeColor,
             }}

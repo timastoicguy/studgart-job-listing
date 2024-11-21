@@ -13,6 +13,7 @@ import { MenuItem } from "./menuData"; // Ensure you're importing the correct Me
 interface HoverDropdownMenuProps {
   link: MenuItem;
   dropdownItems: MenuItem[];
+
 }
 
 const HoverDropdownMenu: React.FC<HoverDropdownMenuProps> = ({ link, dropdownItems }) => {
@@ -26,6 +27,8 @@ const HoverDropdownMenu: React.FC<HoverDropdownMenuProps> = ({ link, dropdownIte
       >
         <DropdownMenuTrigger asChild>
           <NavLink
+           target={link.target || "_self"}
+           rel={link.rel || "noopener noreferrer"}
             to={link.href || "#"} // Ensure fallback for href
             className="text-black font-medium hover:text-green-500 px-2 py-3 rounded-md"
           >

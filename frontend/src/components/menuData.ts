@@ -3,12 +3,15 @@
 
 // Interface for MenuItem
 export interface MenuItem {
-  name: string; // Add this line to include 'name' property
+  name: string;
   label: string;
   action?: () => void;
   href?: string;
   dropdownItems?: MenuItem[];
+  target?: string; // Thêm target
+  rel?: string;    // Thêm rel
 }
+
 
 // Function to get user data from localStorage
 const getUserIdFromLocalStorage = (): string | null => {
@@ -34,10 +37,15 @@ export const roleOptions: Record<string, MenuItem[]> = {
   job_seeker: [
     { name: "Tuyển dụng IT", label: "Tuyển dụng IT", href: "/jobseeker/jobs" },
     { name: "Việc làm đã lưu", label: "Việc làm đã lưu", href: `/jobseeker/favoritejobs` },
-
+    { 
+      name: "Tạo CV tự động", 
+      label: `Tạo CV tự động`, 
+      href: `http://${import.meta.env.VITE_REACT_BASE_URL2}`,
+      target: "_blank", // Mở trong tab mới
+      rel: "noopener noreferrer", // Bảo mật
+    },
   ],
   recruiter: [
-
     { name: "post_job", label: "Đăng bài tuyển dụng", href: "/recruiter/postjob" },
     { name: "my_jobs", label: "Bài đã đăng", href: "/recruiter/jobposted" },
   ],

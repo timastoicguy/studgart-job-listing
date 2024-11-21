@@ -71,6 +71,14 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
         .catch((error) => console.error("Error fetching user data:", error));
     }
   }, [userData?.id]);
+  const ranks = [
+    { name: "BRONZE", symbol: "🥉" }, // Rank bronze
+    { name: "SILVER", symbol: "🥈" }, // Rank silver
+    { name: "GOLD", symbol: "🥇" }, // Rank gold
+    { name: "PLATINUM", symbol: "🏆" }, // Rank platinum
+    { name: "DIAMOND", symbol: "💎" }, // Top rank
+  ];
+  const userRank = ranks.find((r) => r.name === formData.rank); // Tìm rank phù hợp
 
   return (
     <DropdownMenu>
@@ -80,12 +88,20 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
             <img className="w-10 h-10 rounded-full" src={formData.profilePicture} alt="avatar" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="bg-white rounded-md shadow-md min-w-[200px]">
           <DropdownMenuLabel>Thông tin tài khoản</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <NavLink to={`/profile/${userData.id}`}>Thông tin cá nhân</NavLink>
+
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <span className="text-sm px-2">
+      Rank: {userRank ? `${userRank.symbol} ${userRank.name}` : "Unknown"}
+    </span>
+          <br />
+
+          <span className="text-sm px-2">Kim cương: {formData.diamonds}</span>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onLogout}>Đăng xuất</DropdownMenuItem>
         </DropdownMenuContent>

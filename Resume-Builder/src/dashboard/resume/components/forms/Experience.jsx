@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import React, { useContext, useEffect, useState } from 'react'
@@ -17,6 +18,7 @@ function Experience() {
 
     useEffect(() => {
         resumeInfo?.experience.length > 0 && setExperinceList(resumeInfo?.experience)
+        console.log(resumeInfo)
 
     }, [])
 
@@ -60,7 +62,7 @@ function Experience() {
     useEffect(() => {
         setResumeInfo({
             ...resumeInfo,
-            Experience: experinceList
+            experience: experinceList
         });
 
     }, [experinceList]);

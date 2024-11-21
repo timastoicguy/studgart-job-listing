@@ -14,17 +14,12 @@ import {
 import { Favorite, useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
 import { notification } from 'antd';
 import ConfirmationDialog from '../component/ConfirmationDialog';
+import useAuthStore from '@/store/auth/useAuthStore';
 
-const getUserIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem('userData');
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
 
 const FavoriteJobs: React.FC = () => {
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+
   const [currentFavertiedPage, setCurrentFavertiedPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for confirmation
@@ -66,9 +61,11 @@ const FavoriteJobs: React.FC = () => {
   // Xử lý xác nhận xóa
   const confirmRemoveFavoriteJob = async () => {
     if (!selectedJobId) return;
+    console.log("selectedJobId:", selectedJobId);
+    console.log("AAAAAAAA:", userData.job_seeker_id);
 
-    const userId = getUserIdFromLocalStorage();
-    if (!userId) {
+
+    if (!userData) {
       notification.error({
         message: 'Lỗi người dùng',
         description: 'Không tìm thấy thông tin người dùng trong localStorage.',
@@ -80,7 +77,7 @@ const FavoriteJobs: React.FC = () => {
     try {
       // Gửi yêu cầu xóa công việc yêu thích
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${userId}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${userData.job_seeker_id}`
       );
 
       // Loại bỏ công việc khỏi danh sách hiện tại mà không cần tải lại
@@ -116,7 +113,7 @@ const FavoriteJobs: React.FC = () => {
     <TooltipProvider>
       <ConfirmationDialog
         isOpen={isDialogOpen}
-        message={favorites.get(selectedJobId || "") ? "Do you want to remove this job from favorites?" : "Do you want to favorite this job?"}
+        message={favorites.get(selectedJobId || "") ? "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?" : "Do you want to favorite this job?"}
         onConfirm={confirmRemoveFavoriteJob}
         onCancel={cancelRemoveFavoriteJob}
       />

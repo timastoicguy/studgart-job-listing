@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import './App.css';
 import { Navigate, Outlet } from 'react-router-dom';
 import Header from './components/custom/Header';
