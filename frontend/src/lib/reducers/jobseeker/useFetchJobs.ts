@@ -156,6 +156,18 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       return null;
     }
   };
+  const fetchCompanyData = async (userId: string): Promise<any | null> => {
+    try {
+      const response = await axios.get<{ data: User }>(`${import.meta.env.VITE_API_BASE_URL}/api/companies/${userId}`);
+
+      console.log("User Data:3323", response.data);
+      return response.data.data; // Assuming data is nested within response
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  };
+  
   
   const fetchRecommendedJobs = async () => {
     const query = searchParams.toString();
@@ -260,7 +272,6 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   };
   
 
-
   const fetchFaveritedJobs = async () => {
     setLoading(true);
     try {
@@ -272,54 +283,63 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       const result: ApiResponse = await response.json();
   
       if (!result.error && Array.isArray(result.data?.docs)) {
-        const formattedJobs = result.data.docs.map((job: any) => {
-          const jobDetails = job.job_id; // Truy cập vào job_id để lấy thông tin
+        // Fetch avatar for each favorite job
+        const formattedJobs = await Promise.all(
+          result.data.docs.map(async (favorite: any) => {
+            const jobDetails = favorite.job_id;
   
-          // Log ra ID của favorite và job_id
-          console.log("Favorite ID:", job._id);
-          console.log("Job ID:", jobDetails?._id);
+            // Default avatar
+            let avatar = jobDetails?.company?.logo || 
+                         "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
   
-          return {
-            id_job: jobDetails?._id,
-            id: job._id,
-            title: jobDetails?.title || "",
-            company: jobDetails?.company?.company_name || "",
-            location: jobDetails?.location?.[0]?.name || "",
-            salary: jobDetails?.salaryRange
-              ? formatSalary(
-                  jobDetails.salaryRange.min,
-                  jobDetails.salaryRange.max
-                )
-              : "N/A",
-            techStack: Array.isArray(jobDetails?.technologies)
-              ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
-              : "",
-            timePosted: jobDetails?.postedDate
-              ? new Date(jobDetails.postedDate).toLocaleDateString()
-              : "N/A",
-            avatar: jobDetails?.company?.avatar || "",
-            isHot: jobDetails?.isUrgent || false,
-            isNew: jobDetails?.postedDate
-              ? Date.now() - new Date(jobDetails.postedDate).getTime() <
-                7 * 24 * 60 * 60 * 1000
-              : false,
-          };
-        });
+            // Fetch user profile picture if company user_id exists
+            if (jobDetails?.company) {
+              const companyData = await fetchCompanyData(jobDetails.company);
+              console.log("Company Data: ", companyData);
+              avatar = companyData?.user_id?.profilePicture || avatar;
+            }
+  
+            return {
+              id_job: jobDetails?._id || "",
+              id: favorite._id || "",
+              title: jobDetails?.title || "N/A",
+              company: jobDetails?.company?.company_name || "Unknown",
+              location: jobDetails?.location?.[0]?.name || "Unknown",
+              salary: jobDetails?.salaryRange
+                ? formatSalary(
+                    jobDetails.salaryRange.min,
+                    jobDetails.salaryRange.max
+                  )
+                : "N/A",
+              techStack: Array.isArray(jobDetails?.technologies)
+                ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
+                : "N/A",
+              timePosted: jobDetails?.postedDate
+                ? new Date(jobDetails.postedDate).toLocaleDateString()
+                : "Unknown",
+              avatar, // Resolved avatar
+              isHot: jobDetails?.isUrgent || false,
+              isNew: jobDetails?.postedDate
+                ? Date.now() - new Date(jobDetails.postedDate).getTime() <
+                  7 * 24 * 60 * 60 * 1000
+                : false,
+            };
+          })
+        );
   
         setFavertiedJobs(formattedJobs);
         setTotalFavertiedPagesJobs(result.data.totalPages);
       } else {
-        console.warn(
-          "No valid job data found or result.data.docs is not an array"
-        );
-        setFavertiedJobs([]); // Reset danh sách về mảng rỗng nếu không có dữ liệu
+        console.warn("No valid job data found or result.data.docs is not an array");
+        setFavertiedJobs([]); // Reset list to empty array if no data
       }
     } catch (error) {
-      console.error("Failed to fetch jobs:", error);
+      console.error("Failed to fetch favorite jobs:", error);
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   useEffect(() => {
