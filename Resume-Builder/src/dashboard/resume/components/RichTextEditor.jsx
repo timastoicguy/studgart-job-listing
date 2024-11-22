@@ -12,14 +12,14 @@ function RichTextEditor({ onRichTextEditorChange, index, defaultValue, handleExp
   const [loading, setLoading] = useState(false);
   const GenerateSummeryFromAI = async () => {
 
-    if (!resumeInfo?.Experience[index]?.title) {
+    if (!resumeInfo?.experience[index]?.title) {
       toast('Please Add Position Title');
       return;
     }
     setLoading(true)
 
     const payload = {
-      jobTitle: resumeInfo?.Experience[index]?.title,
+      jobTitle: resumeInfo?.experience[index]?.title,
       firstName: resumeInfo?.firstName,
       lastName: resumeInfo?.lastName,
     }
@@ -29,6 +29,7 @@ function RichTextEditor({ onRichTextEditorChange, index, defaultValue, handleExp
     }
     try {
       const result = await AIApi.GetExperienceAIForCV(payload);
+
       setValue(result?.data?.data?.experienceDetails);
       handleExperienceDeatail(result?.data?.data?.experienceDetails, 'workSummery', index)
       setLoading(false);
