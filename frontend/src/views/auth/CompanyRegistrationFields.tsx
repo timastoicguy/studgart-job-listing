@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -18,6 +19,14 @@ interface CompanyRegistrationFieldsProps {
   setAddress: React.Dispatch<React.SetStateAction<string>>; // Setter for address
   bio: string; // Bio field
   setBio: React.Dispatch<React.SetStateAction<string>>; // Setter for bio
+  companyName: string; // Company Name
+  setCompanyName: React.Dispatch<React.SetStateAction<string>>; // Setter for company name
+  companySize: string; // Company Size
+  setCompanySize: React.Dispatch<React.SetStateAction<string>>; // Setter for company size
+  contactEmail: string; // Contact Email
+  setContactEmail: React.Dispatch<React.SetStateAction<string>>; // Setter for contact email
+  contactPhone: string; // Contact Phone
+  setContactPhone: React.Dispatch<React.SetStateAction<string>>; // Setter for contact phone
   loading: boolean;
 }
 
@@ -38,6 +47,14 @@ const CompanyRegistrationFields: React.FC<CompanyRegistrationFieldsProps> = ({
   setAddress,
   bio,
   setBio,
+  companyName,
+  setCompanyName,
+  companySize,
+  setCompanySize,
+  contactEmail,
+  setContactEmail,
+  contactPhone,
+  setContactPhone,
   loading,
 }) => {
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
@@ -180,6 +197,68 @@ const CompanyRegistrationFields: React.FC<CompanyRegistrationFieldsProps> = ({
           className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
+          disabled={loading}
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyName">
+          Company Name
+        </label>
+        <input
+          type="text"
+          id="companyName"
+          placeholder="Company Name"
+          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          disabled={loading}
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companySize">
+          Company Size
+        </label>
+        <select
+          id="companySize"
+          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
+          value={companySize}
+          onChange={(e) => setCompanySize(e.target.value)}
+          disabled={loading}
+        >
+          <option value="">Select company size</option>
+          <option value="Small">Small</option>
+          <option value="Medium">Medium</option>
+          <option value="Large">Large</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="contactEmail">
+          Contact Email
+        </label>
+        <input
+          type="email"
+          id="contactEmail"
+          placeholder="Contact Email"
+          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
+          value={contactEmail}
+          onChange={(e) => setContactEmail(e.target.value)}
+          disabled={loading}
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="contactPhone">
+          Contact Phone
+        </label>
+        <input
+          type="text"
+          id="contactPhone"
+          placeholder="Contact Phone"
+          className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:shadow-outline"
+          value={contactPhone}
+          onChange={(e) => setContactPhone(e.target.value)}
           disabled={loading}
         />
       </div>

@@ -51,7 +51,7 @@ const JobSeekerRegistrationFields: React.FC<JobSeekerRegistrationFieldsProps> = 
           <input
             type={showPassword ? "text" : "password"}
             id="password"
-            placeholder="Minimum length is 8 characters"
+            placeholder="Gồm chữ hoa,thường,số,ký tự đặc biệt"
             className="w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
