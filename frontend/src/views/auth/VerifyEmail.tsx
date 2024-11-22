@@ -19,7 +19,6 @@ const VerifyEmail: React.FC = () => {
         if (response.status === 200) {
           setVerified(true);
           toast.success("Email verified successfully!");
-          localStorage.removeItem("userEmail");
         }
       } catch (error) {
         toast.error("Verification failed. Please try again.");

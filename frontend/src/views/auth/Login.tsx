@@ -28,7 +28,6 @@ function Login() {
     console.log("Google Login clicked");
   };
 
-  // Toggle the password visibility
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
@@ -57,7 +56,7 @@ function Login() {
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaLock className="ml-3 text-gray-400" />
               <input
-                type={isPasswordVisible ? "text" : "password"} // Toggle password visibility
+                type={isPasswordVisible ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập mật khẩu"
@@ -65,10 +64,10 @@ function Login() {
               />
               <button
                 type="button"
-                onClick={togglePasswordVisibility} // Toggle visibility when the icon is clicked
+                onClick={togglePasswordVisibility}
                 className="mr-3"
               >
-                {isPasswordVisible ? <FaEyeSlash /> : <FaEye />} {/* Change icon based on visibility state */}
+                {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
           </div>
@@ -88,12 +87,23 @@ function Login() {
             <FaGoogle className="mr-2" />
             Đăng nhập với Google
           </button>
+          <div className="mb-4 text-center">
+            <p className="text-gray-600">
+              Chưa có tài khoản?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="text-green-500 font-bold hover:underline"
+              >
+                Đăng ký ngay
+              </button>
+            </p>
+          </div>
         </div>
         <div className="w-full sm:w-1/2 mt-6 sm:mt-0">
           <img
             src="/images/Right_Side_Image.webp"
             alt="Illustration"
-            className="hidden sm:block h-full w-full object-cover rounded-lg" // Hide image on small screens, show on larger screens
+            className="hidden sm:block h-full w-full object-cover rounded-lg"
           />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { register } from '../../lib/reducers/auth/Register';
+import { register } from "../../lib/reducers/auth/Register";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import JobSeekerRegistrationFields from "./JobSeekerRegistrationFields";
 import CompanyRegistrationFields from "./CompanyRegistrationFields";
@@ -16,8 +16,12 @@ const Register: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [address, setAddress] = useState<string>("");  // New state for address
-  const [bio, setBio] = useState<string>("");          // New state for bio
+  const [address, setAddress] = useState<string>(""); // New state for address
+  const [bio, setBio] = useState<string>(""); // New state for bio
+  const [companyName, setCompanyName] = useState<string>(""); // State for company name
+  const [companySize, setCompanySize] = useState<string>(""); // State for company size
+  const [contactEmail, setContactEmail] = useState<string>(""); // State for contact email
+  const [contactPhone, setContactPhone] = useState<string>(""); // State for contact phone
   const [role, setRole] = useState<string>("job_seeker"); // Default to job_seeker
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -34,8 +38,12 @@ const Register: React.FC = () => {
         username,
         fullName,
         phone,
-        address,   // Include address
-        bio        // Include bio
+        address, // Include address
+        bio, // Include bio
+        companyName, // Include company name
+        companySize, // Include company size
+        contactEmail, // Include contact email
+        contactPhone, // Include contact phone
       };
       console.log("Data being sent:", registerData);
       const response = await register(registerData);
@@ -63,25 +71,19 @@ const Register: React.FC = () => {
       <ToastContainer newestOnTop />
       <div className="bg-white p-8 rounded-[24px] shadow-md w-full max-w-sm">
         <div className="text-center mb-6">
-          <img className="h-[50px]" src="/images/FPT_Logo.svg" alt="FPT Logo" />
-          <h2 className="text-2xl font-bold">STUDGART</h2>
+          <img className="" src="..\public\images\logo.png" alt="STUDGART Logo" />
+          <h2 className="text-2xl font-bold text-green-500">STUDGART</h2>
         </div>
 
         <Tabs defaultValue="job_seeker" onValueChange={setRole}>
           <TabsList>
-            <TabsTrigger value="job_seeker">
-              Người tìm việc
-            </TabsTrigger>
-            <TabsTrigger value="company">
-              Công ty
-            </TabsTrigger>
-            <TabsTrigger value="recruiter">
-              Nhà Tuyển Dụng
-            </TabsTrigger>
+            <TabsTrigger value="job_seeker">Người tìm việc</TabsTrigger>
+            <TabsTrigger value="company">Công ty</TabsTrigger>
+            <TabsTrigger value="recruiter">Nhà Tuyển Dụng</TabsTrigger>
           </TabsList>
 
           <TabsContent value="job_seeker">
-            <JobSeekerRegistrationFields 
+            <JobSeekerRegistrationFields
               email={email}
               setEmail={setEmail}
               password={password}
@@ -95,7 +97,7 @@ const Register: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="company">
-            <CompanyRegistrationFields 
+            <CompanyRegistrationFields
               email={email}
               setEmail={setEmail}
               password={password}
@@ -108,16 +110,24 @@ const Register: React.FC = () => {
               setFullName={setFullName}
               phone={phone}
               setPhone={setPhone}
-              address={address}           // Pass address
-              setAddress={setAddress}     // Pass setter for address
-              bio={bio}                   // Pass bio
-              setBio={setBio}             // Pass setter for bio
+              address={address}
+              setAddress={setAddress}
+              bio={bio}
+              setBio={setBio}
+              companyName={companyName}
+              setCompanyName={setCompanyName}
+              companySize={companySize}
+              setCompanySize={setCompanySize}
+              contactEmail={contactEmail}
+              setContactEmail={setContactEmail}
+              contactPhone={contactPhone}
+              setContactPhone={setContactPhone}
               loading={loading}
             />
           </TabsContent>
 
           <TabsContent value="recruiter">
-            <JobPosterRegistrationFields 
+            <JobPosterRegistrationFields
               email={email}
               setEmail={setEmail}
               password={password}
@@ -130,10 +140,10 @@ const Register: React.FC = () => {
               setFullName={setFullName}
               phone={phone}
               setPhone={setPhone}
-              address={address}           // Pass address
-              setAddress={setAddress}     // Pass setter for address
-              bio={bio}                   // Pass bio
-              setBio={setBio}             // Pass setter for bio
+              address={address}
+              setAddress={setAddress}
+              bio={bio}
+              setBio={setBio}
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               loading={loading}
@@ -142,21 +152,21 @@ const Register: React.FC = () => {
         </Tabs>
 
         <button
-          className="bg-[#007acc] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center mt-4"
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center mt-4"
           onClick={handleSubmit}
           disabled={loading}
         >
           {loading && <FaSpinner className="mr-2 animate-spin" />}
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Đang đăng ký..." : "Đăng ký"}
         </button>
 
         <div className="text-center mt-4">
-          Already have an account?{" "}
+          Bạn đã có tài khoản ?{" "}
           <Link
             to="/login"
-            className="font-bold text-sm text-[#007acc] hover:text-blue-800"
+            className="font-bold text-sm text-green-600 hover:text-green-800"
           >
-            Sign in
+            Đăng nhập
           </Link>
         </div>
       </div>
