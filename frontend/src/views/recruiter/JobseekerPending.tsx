@@ -33,6 +33,7 @@ const JobseekerPending = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [usernames, setUsernames] = useState<Record<string, string>>({});
+  const [emails, setEmails] = useState<Record<string, string>>({});
   console.log("jobId: ", accounts);
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -52,6 +53,7 @@ const JobseekerPending = () => {
           }
         );
         setAccounts(response.data.data.docs);
+        console.log("response.data.data.docs: ", accounts);
 
         console.log("##########: ", accounts);
         setTotalPages(response.data.data.totalPages);
@@ -68,13 +70,17 @@ const JobseekerPending = () => {
   }, [page, limit]);
 
   const fetchUsername = async (userId: string) => {
+    console.log("Fetching username for userId:", accounts);
     if (!userId || usernames[userId]) return; // Nếu đã có username hoặc không có userId, không gọi API
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`
       );
+      console.log("Fetched username:", response);
       const username = response.data.data.username || "Unknown";
+      const email = response.data.data.email || "Unknown";
       setUsernames((prev) => ({ ...prev, [userId]: username })); // Cập nhật state với username mới
+      setEmails((prev) => ({ ...prev, [userId]: email })); // Cập nhật state với username mới
     } catch (error) {
       console.error(`Error fetching username for userId ${userId}:`, error);
     }
@@ -84,9 +90,10 @@ const JobseekerPending = () => {
   useEffect(() => {
     accounts.forEach((account) => {
       const userId = account.job_seeker_id?.user_id;
+
       if (userId) fetchUsername(userId);
     });
-  }, [accounts]);
+  }, []);
 
   const handleAccept = async (applicationId: string, userId: string) => {
     try {
@@ -318,7 +325,7 @@ const JobseekerPending = () => {
                     <TableCell>
                       {userId ? usernames[userId] || "Đang tải..." : "null"}
                     </TableCell>
-                    <TableCell>{account.role || "null"}</TableCell>
+                    <TableCell> {userId ? emails[userId] || "Đang tải..." : "null"}</TableCell>
                     <TableCell>
                       {account.applied_at
                         ? new Date(account.applied_at).toLocaleString("en-GB")
