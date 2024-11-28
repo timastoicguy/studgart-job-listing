@@ -94,7 +94,7 @@ const handleLogin = async (
       admin: "/admin/accountall",
     };
 
-    const redirectPath = roleRedirectPath[userRole] || "/login";
+    const redirectPath = roleRedirectPath[userRole] || "/jobseeker/jobs";
     setPage(redirectPath);
     navigate(redirectPath);
   } catch (error) {

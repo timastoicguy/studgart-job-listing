@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import useAuthStore from "@/store/auth/useAuthStore";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
@@ -75,18 +76,12 @@ interface FetchJobsReturn {
   handlePageChange: (page: number) => void;
   handleFavertiedPageChange: (page: number) => void;
 }
-const getRecruiterIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem('userData');
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.recruiter_id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
+
 
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [topCompanies, setTopCompanies] = useState<Company[]>([]);
@@ -122,12 +117,13 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
             id: company.company._id,
             name: company.company.company_name,
             avatar: "", // If avatar is available in the API response, use it here
-            location: company.company.company_address,
+            location: company.company.contact_email,
             openings: company.jobCount,
           })
         );
 
         setTopCompanies(formattedTopCompanies);
+
       } else {
         console.error("Failed to fetch top companies:", result);
         setTopCompanies([]);
@@ -162,7 +158,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
           salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
           techStack: job.technologies.map((tech: any) => tech.name).join(", "),
           timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "",
+          avatar: job.avatar || "",
           isHot: job.isUrgent,
           applicationDeadline: new Date(job.applicationDeadline),
           isNew:
@@ -171,6 +167,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         }));
 
         setRecommendedJobs(formattedRecommendedJobs);
+
       } else {
         console.error("No jobs found or incorrect format:", result);
         setRecommendedJobs([]);
@@ -194,10 +191,10 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       if (!query.has("limit")) {
         query.set("limit", limit.toString());
       }
-  const a=getRecruiterIdFromLocalStorage();
+
       // Add recruiter to query if not already present
       if (!query.has("recruiter")) {
-        query.set("recruiter", `${a}`); // Giá trị recruiter mặc định
+        query.set("recruiter", `${userData.recruiter_id}`); // Giá trị recruiter mặc định
       }
   
       const queryString = query.toString();
@@ -242,7 +239,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       const response = await fetch(
         `${
           import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=67273fea96599e898e7bbd6c&page=${currentFavertiedPageJobs}&limit=${limit}`
+        }/api/favorites?job_seeker_id=${userData.jobSeekerId}&page=${currentFavertiedPageJobs}&limit=${limit}`
       );
       const result: ApiResponse = await response.json();
   

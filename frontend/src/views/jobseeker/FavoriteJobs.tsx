@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -15,10 +16,12 @@ import { Favorite, useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
 import { notification } from 'antd';
 import ConfirmationDialog from '../component/ConfirmationDialog';
 import useAuthStore from '@/store/auth/useAuthStore';
+import { useNavigate } from 'react-router-dom';
 
 
 const FavoriteJobs: React.FC = () => {
   const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const navigate = useNavigate();
 
   const [currentFavertiedPage, setCurrentFavertiedPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
@@ -57,6 +60,10 @@ const FavoriteJobs: React.FC = () => {
     setIsDialogOpen(true); // Hiển thị dialog xác nhận
   };
 
+  const handleJobClick = (job: any) => {
+    console.log("Job clicked:", job.id_job);
+    navigate(`/jobseeker/detailjob/${job.id_job}`, { state: { job } });
+  };
   
   // Xử lý xác nhận xóa
   const confirmRemoveFavoriteJob = async () => {
@@ -151,7 +158,10 @@ const FavoriteJobs: React.FC = () => {
                           </div>
                       <Tooltip>
                         <TooltipTrigger>
-                          <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer">
+                          <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
+                          onClick={() => handleJobClick(job)} // Navigate on click
+                          >
+                            
                             {job.title}
                           </h3>
                         </TooltipTrigger>
@@ -243,9 +253,9 @@ const FavoriteJobs: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-sm">{job.title}</h3>
                     <p className="text-gray-600">{job.techStack}</p>
-                    <p className="text-gray-600 flex items-center">
-                      <FiMapPin className="mr-1" /> {job.location}
-                    </p>
+                    <p className="text-gray-600 flex items-center w-[100px] truncate">
+                        <FiMapPin className="mr-1" /> {job.location}
+                      </p>
                     <span className="text-sm text-red-500">{job.salary}</span>
                   </div>
                 </div>

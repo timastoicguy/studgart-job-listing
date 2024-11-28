@@ -127,7 +127,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
               id: company.company._id,
               name: company.company.company_name,
               avatar: avatar?.profilePicture || company.company.logo || "", // Use user profile picture or company logo
-              location: company.company.company_address,
+              location: company.company.contact_email,
               openings: company.jobCount,
             };
           })
@@ -167,7 +167,19 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       return null;
     }
   };
-  
+  const fetchUserAvatar = async (userId: string): Promise<string> => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`
+      );
+      const data = await response.json();
+      return data.data?.profilePicture || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
+
+    } catch (error) {
+      console.error(`Failed to fetch avatar for user ${userId}:`, error);
+      return "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"; // Fallback avatar
+    }
+  };
   
   const fetchRecommendedJobs = async () => {
     const query = searchParams.toString();
@@ -178,31 +190,39 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         }/api/group/jobs/suggestions/?page=${page}&limit=5&${query}`
       );
       const result: RecommendedApiResponse = await response.json();
-
-      // const avatar = await fetchUserData(company.company.user_id); // Fetch user data based on user_id
-
+  
       if (
         !result.error &&
         result.data &&
         result.data.jobs &&
         Array.isArray(result.data.jobs)
       ) {
-        const formattedRecommendedJobs = result.data.jobs.map((job: any) => ({
-          id: job._id,
-          title: job.title,
-          company: job.company?.company_name || "",
-          location: job.location[0]?.name || "",
-          salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
-          techStack: job.technologies.map((tech: any) => tech.name).join(", "),
-          timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png",
-          isHot: job.isUrgent,
-          isNew:
-            new Date().getTime() - new Date(job.postedDate).getTime() <
-            7 * 24 * 60 * 60 * 1000,
-        }));
-
+        const formattedRecommendedJobs = await Promise.all(
+          result.data.jobs.map(async (job: any) => {
+            const companyId = job.company?.user_id;
+            const avatar = companyId
+              ? await fetchUserAvatar(companyId)
+              : "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
+  
+            return {
+              id: job._id,
+              title: job.title,
+              company: job.company?.company_name || "",
+              location: job.location[0]?.name || "",
+              salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
+              techStack: job.technologies.map((tech: any) => tech.name).join(", "),
+              timePosted: new Date(job.postedDate).toLocaleDateString(),
+              avatar,
+              isHot: job.isUrgent,
+              isNew:
+                new Date().getTime() - new Date(job.postedDate).getTime() <
+                7 * 24 * 60 * 60 * 1000,
+            };
+          })
+        );
+  
         setRecommendedJobs(formattedRecommendedJobs);
+        console.log("Recommended Jobs: ", formattedRecommendedJobs);
       } else {
         console.error("No jobs found or incorrect format:", result);
         setRecommendedJobs([]);
@@ -233,7 +253,6 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       );
       const result: ApiResponse = await response.json();
   
-      console.log("Job Data Response: ", result);
   
       if (!result.error) {
         // Fetch avatar for each company
