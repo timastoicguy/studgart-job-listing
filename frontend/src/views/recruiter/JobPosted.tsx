@@ -49,6 +49,7 @@ const JobPosted: React.FC = () => {
     loading,
     handlePageChange,
   } = useFetchJobs(currentPageJobs);
+  console.log("jobListings: ", jobListings);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -250,7 +251,7 @@ useEffect(() => {
                     <div>
                       <h3 className="font-bold text-sm">{job.title}</h3>
                       <p className="text-gray-600">{job.techStack}</p>
-                      <p className="text-gray-600 flex items-center">
+                      <p className="text-gray-600 flex items-center w-[100px] truncate">
                         <FiMapPin className="mr-1" /> {job.location}
                       </p>
                       <span className="text-sm text-red-500">{job.salary}</span>
@@ -281,9 +282,9 @@ useEffect(() => {
                   />
                   <div>
                     <h3 className="font-bold text-sm">{company.name}</h3>
-                    <p className="text-gray-600 flex items-center">
-                      <FiMapPin className="mr-1" /> {company.location}
-                    </p>
+                    <p className="text-gray-600 flex items-center w-[100px] truncate">
+                        <FiMapPin className="mr-1" /> {company.location}
+                      </p>
                     <span className="text-sm text-red-500">
                       {company.openings} công việc đang tuyển
                     </span>

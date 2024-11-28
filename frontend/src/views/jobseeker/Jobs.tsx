@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
@@ -45,7 +46,6 @@ import useAuthStore from "../../store/auth/useAuthStore";
 
 const Jobs: React.FC = () => {
   const { userData } = useAuthStore(); // Truy cập accessToken từ store
-  console.log("userData:", userData);
   const itemsPerPage = 3;
   const jobSeekerId = userData.job_seeker_id; // Replace with dynamic ID
   const userId = "2222"; // Replace with dynamic ID
@@ -70,6 +70,7 @@ const Jobs: React.FC = () => {
     loading,
     handlePageChange,
   } = useFetchJobs(currentPageJobs);
+  console.log("jobListings: ", jobListings);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -397,9 +398,10 @@ const Jobs: React.FC = () => {
                     <div>
                       <h3 className="font-bold text-sm">{job.title}</h3>
                       <p className="text-gray-600">{job.techStack}</p>
-                      <p className="text-gray-600 flex items-center">
+                      <p className="text-gray-600 flex items-center w-[100px] truncate">
                         <FiMapPin className="mr-1" /> {job.location}
                       </p>
+
                       <span className="text-sm text-red-500">{job.salary}</span>
                     </div>
                   </div>

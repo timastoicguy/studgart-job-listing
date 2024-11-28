@@ -17,18 +17,24 @@ const Preview = ({ account, userId }: { account: any; userId: any }) => {
     }
   };
   const handleReview = async (applicationId: string, userId: string) => {
+    // Check if the application is already reviewed
+    if (account.application_status === "reviewed"|| account.application_status === "accepted"|| account.application_status === "rejected") {
+      console.log("Application is already reviewed, no action taken.");
+      return;
+    }
+  
     try {
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/applications/${applicationId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
         {
           application_status: "reviewed",
         }
       );
-
+  
       if (response.status === 200) {
         handleViewResume(response.data.data.resume);
+  
+        // Send notification after ensuring the status is updated
         await sendNotification(
           userId,
           "application_status",
@@ -41,7 +47,7 @@ const Preview = ({ account, userId }: { account: any; userId: any }) => {
       console.error("Error reviewing application:", error);
     }
   };
-
+  
   return (
     //   <button
     //     className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
