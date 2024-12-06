@@ -152,7 +152,7 @@ const handleConfirmPayment = async () => {
   const payload = {
     userId: userData?.id || userId,
     amount: selectedAmount,
-    urlImage: uploadedUrl || "https://example.com/payment-proof.jpg", // Dữ liệu ảnh cần cập nhật
+    urlImage: uploadedUrl || null, // Dữ liệu ảnh cần cập nhật
   };
   console.log("Payload:", payload);
 

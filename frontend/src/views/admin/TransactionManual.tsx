@@ -29,6 +29,7 @@ interface Transaction {
   user_id: string;
   email: string;
   amount: string;
+  diamonds: string;
   paymentMethod: string;
   status: string;
   createdAt: string;
@@ -57,7 +58,7 @@ const TransactionManual = () => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
-  };  
+  };
   // Fetch Transactions Data
   const fetchUserEmail = async (userId: string): Promise<string> => {
     try {
@@ -70,17 +71,19 @@ const TransactionManual = () => {
       return "N/A"; // Trả về "N/A" nếu xảy ra lỗi
     }
   };
-  
+
   const fetchTransactions = async () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/payments?page=${page}&limit=${limit}`
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/payments?page=${page}&limit=${limit}`
       );
-  
+
       const data = response.data?.data;
       console.log("Data:", data);
-  
+
       if (data) {
         // Dùng Promise.all để lấy email cho tất cả user_id
         const updatedTransactions = await Promise.all(
@@ -92,7 +95,7 @@ const TransactionManual = () => {
             };
           })
         );
-  
+
         setTransactions(updatedTransactions); // Cập nhật danh sách giao dịch
         setTotalPages(data.totalPages);
       }
@@ -107,23 +110,20 @@ const TransactionManual = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchTransactions();
   }, [page, limit, searchTerm]);
-  
 
   const handleApprove = (transactionId: string) => {
     setSelectedUserId(transactionId); // Lưu transactionId để xác nhận
-    setConfirmationMessage(
-      "Bạn có chắc chắn muốn xác nhận giao dịch này?"
-    );
+    setConfirmationMessage("Bạn có chắc chắn muốn xác nhận giao dịch này?");
     setIsDialogOpen(true); // Mở hộp thoại xác nhận
   };
-  
+
   const handleConfirmApprove = async () => {
     if (!selectedUserId) return; // Không thực hiện nếu không có transactionId
-  
+
     try {
       setLoading(true); // Bắt đầu trạng thái loading
       const response = await axios.post(
@@ -138,16 +138,18 @@ const TransactionManual = () => {
           },
         }
       );
-  
+
       const { data, error } = response.data;
       if (!error) {
         // Cập nhật danh sách giao dịch sau khi xác nhận thành công
         setTransactions((prevTransactions) =>
           prevTransactions.map((transaction) =>
-            transaction._id === selectedUserId ? { ...transaction, status: "completed" } : transaction
+            transaction._id === selectedUserId
+              ? { ...transaction, status: "completed" }
+              : transaction
           )
         );
-  
+
         // Hiển thị thông báo thành công
         notification.success({
           message: "Thành công",
@@ -164,7 +166,7 @@ const TransactionManual = () => {
       }
     } catch (error) {
       console.error("Error approving transaction:", error);
-  
+
       // Hiển thị thông báo lỗi nếu có
       notification.error({
         message: "Lỗi",
@@ -177,7 +179,7 @@ const TransactionManual = () => {
       setSelectedUserId(null); // Reset transactionId
     }
   };
-  
+
   const handleCancelApprove = () => {
     setIsDialogOpen(false); // Đóng hộp thoại xác nhận nếu người dùng từ chối
   };
@@ -191,12 +193,10 @@ const TransactionManual = () => {
       });
       return;
     }
-  
+
     // Mở tab mới để hiển thị hình ảnh
     window.open(urlImage, "_blank", "noopener,noreferrer");
   };
-  
-  
 
   return (
     <div className="px-2 py-4 md:px-4 rounded bg-white shadow-lg max-w-6xl mx-auto">
@@ -283,21 +283,30 @@ const TransactionManual = () => {
                   <TableCell>{(page - 1) * limit + index + 1}</TableCell>
                   <TableCell>{transaction.email || "N/A"}</TableCell>
                   <TableCell>
-  {transaction.createdAt 
-    ? format(new Date(transaction.createdAt), "dd/MM/yyyy HH:mm:ss")
-    : "N/A"}
-</TableCell>
+                    {transaction.createdAt
+                      ? format(
+                          new Date(transaction.createdAt),
+                          "dd/MM/yyyy HH:mm:ss"
+                        )
+                      : "N/A"}
+                  </TableCell>
                   <TableCell>{transaction.paymentMethod || "N/A"}</TableCell>
-                  <TableCell>{transaction.amount || "N/A"}</TableCell>
+                  <TableCell>
+                    {transaction.amount || transaction.diamonds}
+                  </TableCell>
                   <TableCell>{transaction.status || "N/A"}</TableCell>
                   <TableCell>
-                  <button
-  className={`text-blue-500 mx-1 ${!transaction.urlImage ? "cursor-not-allowed opacity-50" : "hover:text-blue-700"}`}
-  onClick={() => handleViewImage(transaction.urlImage)}
-  disabled={!transaction.urlImage} // Vô hiệu hóa nếu không có URL hình ảnh
->
-  <FaEye title="Xem" size={18} />
-</button>
+                    <button
+                      className={`text-blue-500 mx-1 ${
+                        !transaction.urlImage
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:text-blue-700"
+                      }`}
+                      onClick={() => handleViewImage(transaction.urlImage)}
+                      disabled={!transaction.urlImage} // Vô hiệu hóa nếu không có URL hình ảnh
+                    >
+                      <FaEye title="Xem" size={18} />
+                    </button>
 
                     <button
                       className="text-green-500 hover:text-green-700 mx-1"

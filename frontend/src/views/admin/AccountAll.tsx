@@ -29,6 +29,7 @@ const AccountAll = () => {
         },
       });
       const data = response.data.data;
+      console.log(data);
       setAccounts(data.users); // Set account data
       setTotalPages(data.totalPages); // Set total pages for pagination
     } catch (error) {
@@ -141,7 +142,7 @@ const AccountAll = () => {
       </TableHead>
       <TableHead className="w-[100px] text-black">
         <div className="flex justify-between items-center">
-          Thời gian đăng ký <FaSort />
+          Diamonds <FaSort />
         </div>
       </TableHead>
       <TableHead className="w-[100px] text-black">
@@ -170,7 +171,7 @@ const AccountAll = () => {
         </TableCell>
         <TableCell>{account.email}</TableCell>
         <TableCell>{account.role}</TableCell>
-        <TableCell>{new Date(account.createdAt).toLocaleDateString()}</TableCell>
+        <TableCell>{account.diamonds+account.freeDiamonds}</TableCell>
         <TableCell>{account.username}</TableCell>
         <TableCell>{account.isActive ? "Active" : "Inactive"}</TableCell>
 

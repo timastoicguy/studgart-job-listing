@@ -9,8 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem
 } from "./ui/dropdown-menu"; // Adjust the import path as necessary
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 // In your `menuData.ts`
 interface MenuItem {
@@ -24,13 +25,11 @@ const menuData: MenuItem[] = [
   { name: "Logout", href: "/logout" },
 ];
 
-interface AvatarDropdownMenuProps {
-    userData: { id?: string; name: string; role: string }; // Make id optional
-    onLogout: () => void;
-  }
-  
-const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLogout }) => {
+
+const AvatarDropdownMenu: React.FC = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const {userData, logout}  = useAuthStore();
   const [formData, setFormData] = useState({
     profilePicture: "",
     email: "",
@@ -46,9 +45,10 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
     freeDiamonds: 0,
   });
   useEffect(() => {
-    if (userData?.id) {
+
+    if (userData?._id) {
       axios
-        .get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userData?.id}`)
+        .get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userData?._id}`)
         .then((response) => {
           if (response.data.data) {
             setFormData({
@@ -60,7 +60,7 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
               bio: response.data.data.bio || "",
               balance: response.data.data.balance || 0,
               rank: response.data.data.rank || "",
-              diamonds: response.data.data.diamonds || 0,
+              diamonds: response.data.data.diamonds+response.data.data.freeDiamonds || 0,
               totalSpent: response.data.data.totalSpent || 0,
               transactions: response.data.data.transactions || [],
               freeDiamonds: response.data.data.freeDiamonds || 0,
@@ -70,7 +70,7 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
         })
         .catch((error) => console.error("Error fetching user data:", error));
     }
-  }, [userData?.id]);
+  }, [userData?._id]);
   const ranks = [
     { name: "BRONZE", symbol: "🥉" }, // Rank bronze
     { name: "SILVER", symbol: "🥈" }, // Rank silver
@@ -78,8 +78,11 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
     { name: "PLATINUM", symbol: "🏆" }, // Rank platinum
     { name: "DIAMOND", symbol: "💎" }, // Top rank
   ];
-  const userRank = ranks.find((r) => r.name === formData.rank); // Tìm rank phù hợp
-
+  const userRank = ranks.find((r) => r?.name === formData?.rank); // Tìm rank phù hợp
+ const handelLogOut = () => {
+    logout();
+    navigate('/job');
+  }
   return (
     <DropdownMenu>
       <div onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
@@ -92,7 +95,7 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
           <DropdownMenuLabel>Thông tin tài khoản</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <NavLink to={`/profile/${userData.id}`}>Thông tin cá nhân</NavLink>
+            <NavLink to={`/profile/${userData?._id ?? ""}`}>Thông tin cá nhân</NavLink>
 
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -103,7 +106,7 @@ const AvatarDropdownMenu: React.FC<AvatarDropdownMenuProps> = ({ userData, onLog
 
           <span className="text-sm px-2">Kim cương: {formData.diamonds}</span>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onLogout}>Đăng xuất</DropdownMenuItem>
+          <DropdownMenuItem onClick={handelLogOut}>Đăng xuất</DropdownMenuItem>
         </DropdownMenuContent>
       </div>
     </DropdownMenu>

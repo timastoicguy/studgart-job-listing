@@ -67,7 +67,7 @@ const CompanyIdentity = () => {
     try {
       setLoading(true);
       const company_id = userData.company_id ?? null;
-  
+  console.log("Company ID:", userData.company_id);
       if (!company_id) {
         console.error("Company ID not found in localStorage");
         setAccounts([]);
@@ -128,7 +128,8 @@ const CompanyIdentity = () => {
 
   const removeEmployeeFromCompany = async (userId: string, recruiterId: string) => {
     try {
-      const company_id = userData.company_id ?? null;
+      const company_id = userData._id ?? null;
+
   
       if (!company_id) {
         console.error("Company ID not found in localStorage");

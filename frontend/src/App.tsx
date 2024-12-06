@@ -37,22 +37,16 @@ import useAuthStore from "./store/auth/useAuthStore";
 import { useEffect } from "react";
 
 function App() {
-  const navigate = useNavigate();
-  const { accessToken } = useAuthStore(); // Truy cập accessToken từ store
-  console.log("accessToken:", accessToken);
-  // useEffect(() => {
-  //   if (accessToken) {
-  //     navigate("/jobseeker/jobs");
-  //   }
-  // }, [accessToken, navigate]);
+
 
   return (
     <div className=" overflow-y-scroll"> {/* Sử dụng thanh cuộn tổng */}
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/job" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/passwordreset" element={<PasswordReset />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/job" element={<About />} />
         <Route path="/auth/verify/:token" element={<VerifyEmail />} />
         <Route path="/auth/reset-password/:token" element={<ResetPassWord />} />
         <Route path="/about" element={<About />} />

@@ -15,11 +15,9 @@ const url_base = `${import.meta.env.VITE_API_BASE_URL}`;
 interface HeaderProps {
   showSideBar: boolean;
   setShowSideBar: (showSideBar: boolean) => void;
-
-  onLogout: () => void;
 }
 
-// Define MenuItem type for the menu  
+// Define MenuItem type for the menu
 // menuData.ts
 
 export interface MenuItem {
@@ -35,7 +33,6 @@ export interface MenuItem {
 export default function Header({
   showSideBar,
   setShowSideBar,
-  onLogout,
 }: HeaderProps) {
   const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [showNotifications, setShowNotifications] = useState(false);
@@ -62,6 +59,7 @@ export default function Header({
   });
   useEffect(() => {
     // Fetch user data from localStorage
+    console.log("header", userData)
     fetchNotifications();
 
     socket.emit("joinNotification", { userId: userData?.id });
@@ -69,23 +67,23 @@ export default function Header({
       setNotifications((prevNotifications) => [data, ...prevNotifications]);
       console.log("Notification received:", data);
       setBadgeCount((prev) => prev + 1); // Increment badge count for new notifications
-// Check if the audio file exists and log its path
-const audioPath = "/audio/notification.mp3"; // Path to your audio file
-console.log("Audio file path:", audioPath);
+      // Check if the audio file exists and log its path
+      const audioPath = "/audio/notification.mp3"; // Path to your audio file
+      console.log("Audio file path:", audioPath);
 
-// Check if the audio file is loading
-const audio = new Audio(audioPath);
-audio.onloadstart = () => {
-  console.log("Audio file started loading...");
-};
-audio.onerror = (error) => {
-  console.error("Error loading audio file:", error);
-};
+      // Check if the audio file is loading
+      const audio = new Audio(audioPath);
+      audio.onloadstart = () => {
+        console.log("Audio file started loading...");
+      };
+      audio.onerror = (error) => {
+        console.error("Error loading audio file:", error);
+      };
 
-// Play sound notification
-audio.play().catch((error) => {
-  console.error("Error playing audio:", error);
-});
+      // Play sound notification
+      audio.play().catch((error) => {
+        console.error("Error playing audio:", error);
+      });
     });
 
     return () => {
@@ -140,10 +138,13 @@ audio.play().catch((error) => {
   };
 
   useEffect(() => {
-    if (userData?.id) {
+
+    if (userData?._id) {
+
       axios
-        .get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userData?.id}`)
+        .get(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userData?._id}`)
         .then((response) => {
+          console.log("userData", response);
           if (response.data.data) {
             setFormData({
               profilePicture: response.data.data.profilePicture || "",
@@ -160,11 +161,10 @@ audio.play().catch((error) => {
               freeDiamonds: response.data.data.freeDiamonds || 0,
             });
           }
-
         })
         .catch((error) => console.error("Error fetching user data:", error));
     }
-  }, [userData?.id]);
+  }, [userData?._id]);
 
   const markAllAsRead = async () => {
     try {
@@ -201,9 +201,9 @@ audio.play().catch((error) => {
     }
   };
 
-  if (!userData) {
-    return null; // Return null if no user data is found
-  }
+  // if (!userData) {
+  //   return null; // Return null if no user data is found
+  // }
 
   return (
     <div className="sticky w-full left-0 top-0 z-50">
@@ -219,18 +219,9 @@ audio.play().catch((error) => {
             </span>
           </button>
           <div className="flex items-center">
-          <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
+            <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
 
-            <span
-              className="ml-2 text-lg font-semibold text-green-500"
-              onClick={async () => {
-                await axios.post(`${url_base}/api/notifications`, {
-                  userId: userData?.id,
-                  type: "nothing",
-                  content: "Hello world",
-                });
-              }}
-            >
+            <span className="ml-2 text-lg font-semibold text-green-500">
               STUDGART
             </span>
           </div>
@@ -322,7 +313,7 @@ audio.play().catch((error) => {
           </div>
 
           {/* Avatar and Profile Dropdown */}
-          <AvatarDropdownMenu userData={userData} onLogout={onLogout} />
+          <AvatarDropdownMenu />
         </div>
       </div>
     </div>

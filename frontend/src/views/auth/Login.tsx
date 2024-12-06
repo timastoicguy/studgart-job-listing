@@ -12,11 +12,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for password visibility
   const navigate = useNavigate();
-  const { setLoading, loading } = useAuthStore();
+  const { setLoading, loading, login } = useAuthStore();
 
   const onLogin = async () => {
+    console.log("Login clicked", email, password);
     if (!email || !password) {
+
       toast.error("Please fill in all fields.");
+      await login(email, password);
       return;
     }
     await handleLogin(email, password, navigate, (path: string) => {
