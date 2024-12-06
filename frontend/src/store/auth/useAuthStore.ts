@@ -5,13 +5,15 @@ import { toast } from "sonner";
 
 // Cấu hình API client
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_API + "/api/auth/", // Thay bằng URL API của bạn
+  baseURL: import.meta.env.VITE_API_BASE_URL + "/api/auth/", // Thay bằng URL API của bạn
 });
 
 // Interceptor để xử lý lỗi 401 (hết hạn phiên)
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response},
   (error) => {
+    console.log(error);
     if (error.response && error.response.status === 401) {
       useAuthStore.getState().logout();
     }
@@ -38,6 +40,7 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => void;
+  checkAuth1: () => void;
   fetchCurrentUser: () => Promise<void>;
 }
 
@@ -94,25 +97,39 @@ const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   checkAuth: () => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const token = localStorage.getItem('accessToken');
+    if (token && !get().isAuthenticated) {
+      console.log(token)
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        set({ accessToken: token, isAuthenticated: true });
+        get().fetchCurrentUser();
+    } else if (!token) {
+        set({ accessToken: null, isAuthenticated: false, userData: null });
+    }
+},
+
+checkAuth1: () => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+ 
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       set({ accessToken: token, isAuthenticated: true });
       get().fetchCurrentUser();
-    } else {
-      get().logout();
-    }
-  },
+  } else if (!token) {
+      set({ accessToken: null, isAuthenticated: false, userData: null });
+  }
+},
 
-  fetchCurrentUser: async () => {
+fetchCurrentUser: async () => {
     try {
-      const response = await apiClient.get("/current-user");
-      set({ userData: response.data?.data?.user });
+      console.log(apiClient);
+        const response = await apiClient.get('/current-user');
+        set({ userData: response.data?.data?.user });
     } catch (error) {
-      console.error("Fetch user error:", error);
-      get().logout();
+        console.error('Fetch user error:', error);
+        get().logout();
     }
-  },
+},
 }));
 
 export default useAuthStore;

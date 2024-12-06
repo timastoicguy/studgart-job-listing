@@ -15,8 +15,8 @@ interface Job {
   techStack: string;
   timePosted: string;
   avatar: string;
-  isHot: boolean;
-  isNew: boolean;
+  isHot?: boolean;
+  isNew?: boolean;
 }
 export interface Favorite {
   id: string;
@@ -28,8 +28,8 @@ export interface Favorite {
   techStack: string;
   timePosted: string;
   avatar: string;
-  isHot: boolean;
-  isNew: boolean;
+  isHot?: boolean;
+  isNew?: boolean;
 }
 
 
@@ -134,7 +134,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         );
   
         setTopCompanies(formattedTopCompanies);
-        console.log("User Data1111:", formattedTopCompanies);
+        //console.log("User Data1111:", formattedTopCompanies);
       } else {
         console.error("Failed to fetch top companies:", result);
         setTopCompanies([]);
@@ -160,7 +160,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     try {
       const response = await axios.get<{ data: User }>(`${import.meta.env.VITE_API_BASE_URL}/api/companies/${userId}`);
 
-      console.log("User Data:3323", response.data);
+      //console.log("User Data:3323", response.data);
       return response.data.data; // Assuming data is nested within response
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -222,7 +222,6 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         );
   
         setRecommendedJobs(formattedRecommendedJobs);
-        console.log("Recommended Jobs: ", formattedRecommendedJobs);
       } else {
         console.error("No jobs found or incorrect format:", result);
         setRecommendedJobs([]);
@@ -246,7 +245,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       }
   
       const queryString = query.toString();
-      console.log(queryString);
+      //console.log(queryString);
   
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/jobs?${queryString}`
@@ -314,7 +313,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
             // Fetch user profile picture if company user_id exists
             if (jobDetails?.company) {
               const companyData = await fetchCompanyData(jobDetails.company);
-              console.log("Company Data: ", companyData);
+              //console.log("Company Data: ", companyData);
               avatar = companyData?.user_id?.profilePicture || avatar;
             }
   

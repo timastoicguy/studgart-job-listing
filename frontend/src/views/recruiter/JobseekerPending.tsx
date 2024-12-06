@@ -22,8 +22,12 @@ import {
 import { useParams } from "react-router-dom";
 import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
 import Preview from "./Prevew";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 const JobseekerPending = () => {
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+
+
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,7 +38,6 @@ const JobseekerPending = () => {
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [usernames, setUsernames] = useState<Record<string, string>>({});
   const [emails, setEmails] = useState<Record<string, string>>({});
-  console.log("jobId: ", accounts);
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -53,9 +56,7 @@ const JobseekerPending = () => {
           }
         );
         setAccounts(response.data.data.docs);
-        console.log("response.data.data.docs: ", accounts);
 
-        console.log("##########: ", accounts);
         setTotalPages(response.data.data.totalPages);
         // Gửi thông báo
       } catch (error) {
@@ -70,13 +71,11 @@ const JobseekerPending = () => {
   }, [page, limit]);
 
   const fetchUsername = async (userId: string) => {
-    console.log("Fetching username for userId:", accounts);
     if (!userId || usernames[userId]) return; // Nếu đã có username hoặc không có userId, không gọi API
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`
       );
-      console.log("Fetched username:", response);
       const username = response.data.data.username || "Unknown";
       const email = response.data.data.email || "Unknown";
       setUsernames((prev) => ({ ...prev, [userId]: username })); // Cập nhật state với username mới
@@ -91,26 +90,29 @@ const JobseekerPending = () => {
   useEffect(() => {
     accounts.forEach((account) => {
       const userId = account.job_seeker_id?.user_id;
-      console.log("accounts: ", userId);
       if (userId) fetchUsername(userId);
     });
 
   }, [accounts]);
-  console.log("AAAAAAAAAAA: ", accounts);
 
   const handleAccept = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/applications/${applicationId}`,
-        {
-          application_status: "accepted",
-        }
+        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
+        { application_status: "accepted" }
       );
-
+  
       if (response.status === 200) {
         console.log("Application accepted");
+        const jobId = response.data.data.job_id;
+  
+        // Fetch job details to get the company name
+        const jobResponse = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`
+        );
+        const companyName = jobResponse.data.data?.company?.company_name || "Công ty";
+  
+        // Update the UI
         setAccounts((prevAccounts) =>
           prevAccounts.map((account) =>
             account._id === applicationId
@@ -118,10 +120,12 @@ const JobseekerPending = () => {
               : account
           )
         );
+  
+        // Send notification with company name
         await sendNotification(
           userId,
           "application_status",
-          "Công ty XYZ đã chấp nhận hồ sơ của bạn."
+          `,Công ty ${companyName} đã chấp nhận hồ sơ của bạn.`
         );
       } else {
         console.error("Error accepting application");
@@ -130,20 +134,26 @@ const JobseekerPending = () => {
       console.error("Error accepting application:", error);
     }
   };
-
+  
   const handleReject = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/applications/${applicationId}`,
-        {
-          application_status: "rejected",
-        }
+        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
+        { application_status: "rejected" }
       );
-
+  
       if (response.status === 200) {
         console.log("Application rejected");
+        const jobId = response.data.data.job_id;
+  
+        // Fetch job details to get the company name
+        const jobResponse = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`
+        );
+        console.log(jobResponse);
+        const companyName = jobResponse.data.data?.company?.company_name || "Công ty";
+  
+        // Update the UI
         setAccounts((prevAccounts) =>
           prevAccounts.map((account) =>
             account._id === applicationId
@@ -151,10 +161,12 @@ const JobseekerPending = () => {
               : account
           )
         );
+  
+        // Send notification with company name
         await sendNotification(
           userId,
           "application_status",
-          `Công ty XYZ đã từ chối hồ sơ của bạn.`
+          `${companyName} đã từ chối hồ sơ của bạn.`
         );
       } else {
         console.error("Error rejecting application");
@@ -163,6 +175,7 @@ const JobseekerPending = () => {
       console.error("Error rejecting application:", error);
     }
   };
+  
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {

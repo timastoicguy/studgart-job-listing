@@ -129,7 +129,8 @@ export default function JobListing() {
   const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>([]); // Array of companies
   useEffect(() => {
     const loadRecommendedCompanies = async () => {
-      const data = await fetchRecommendedCompanies(userData.id);
+      const data = await fetchRecommendedCompanies(userData._id);
+      console.log('Data:', data);
 
       if (data && Array.isArray(data.data)) {
         setRecommendedCompanies(data.data.map(item => item.company));

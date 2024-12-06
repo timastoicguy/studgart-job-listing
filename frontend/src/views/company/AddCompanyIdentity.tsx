@@ -106,7 +106,9 @@ const AddCompanyIdentity = () => {
     if (!selectedUserId) return;
 
     try {
-      const company_id = userData.company_id ?? null;
+      const company_id = userData._id ?? null;
+      console.log("Company ID:", userData);
+      
 
       if (!company_id) {
         console.error("Company ID not found in user data");
@@ -128,8 +130,10 @@ const AddCompanyIdentity = () => {
 
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters/${recruiterId}`,
-        { user_id: selectedUserId, company_id }
+        { params: { user_id: selectedUserId } }
+        
       );
+
 
       // Hiển thị thông báo thành công
       notification.success({
@@ -204,12 +208,8 @@ const AddCompanyIdentity = () => {
                   Số điện thoại <FaSort />
                 </div>
               </TableHead>
-              <TableHead className="w-[100px] text-black">
-                <div className="flex justify-between items-center">
-                  Địa chỉ <FaSort />
-                </div>
-              </TableHead>
-              <TableHead className="w-[60px] text-black">
+
+              <TableHead className="w-[160px] text-black">
                 <div className="flex justify-between items-center">
                   Giới thiệu <FaSort />
                 </div>
@@ -242,7 +242,6 @@ const AddCompanyIdentity = () => {
                   <TableCell>{account.username || "N/A"}</TableCell>
                   <TableCell>{account.email || "N/A"}</TableCell>
                   <TableCell>{account.phone || "N/A"}</TableCell>
-                  <TableCell>{account.address || "N/A"}</TableCell>
                   <TableCell>{account.bio || "N/A"}</TableCell>
                   <TableCell>
                     <button className="text-green-500 hover:text-green-700 mx-1"

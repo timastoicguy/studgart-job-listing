@@ -22,6 +22,7 @@ const handleLogin = async (
   setPage: (page: string) => void
 ) => {
   const authStore = useAuthStore.getState();
+
   authStore.setLoading(true);
 
   try {
@@ -52,7 +53,7 @@ const handleLogin = async (
       role: userRole,
       id: userId,
     };
-    console.log("User Data: ", userData);
+
 
     if (userRole === "job_seeker") {
       const jobSeekerResponse = await axios.get(
@@ -62,7 +63,7 @@ const handleLogin = async (
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-      console.log("Recuiter Response", jobSeekerResponse);
+
 
       userData.job_seeker_id = jobSeekerResponse.data?.data?.jobSeekers[0]?._id;
     } else if (userRole === "recruiter") {
@@ -91,10 +92,10 @@ const handleLogin = async (
       job_seeker: "/jobseeker/jobs",
       recruiter: "/recruiter/postjob",
       company: "/company/companyidentity",
-      admin: "/admin/accountall",
+      admin: "/admin/dashboard",
     };
 
-    const redirectPath = roleRedirectPath[userRole] || "/jobseeker/jobs";
+    const redirectPath = roleRedirectPath[userRole] || "/login";
     setPage(redirectPath);
     navigate(redirectPath);
   } catch (error) {

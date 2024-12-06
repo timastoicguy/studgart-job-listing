@@ -6,6 +6,7 @@ import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
 import axios from "axios";
 
 const Preview = ({ account, userId }: { account: any; userId: any }) => {
+  
   const [isModalOpen, setModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
 
@@ -17,29 +18,32 @@ const Preview = ({ account, userId }: { account: any; userId: any }) => {
     }
   };
   const handleReview = async (applicationId: string, userId: string) => {
-    // Check if the application is already reviewed
-    if (account.application_status === "reviewed"|| account.application_status === "accepted"|| account.application_status === "rejected") {
-      console.log("Application is already reviewed, no action taken.");
-      return;
-    }
-  
     try {
+      // Always fetch the application to get the resume for viewing
       const response = await axios.put(
         `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
         {
           application_status: "reviewed",
         }
       );
+
   
       if (response.status === 200) {
         handleViewResume(response.data.data.resume);
+        console.log(response);
   
-        // Send notification after ensuring the status is updated
-        await sendNotification(
-          userId,
-          "application_status",
-          "Công ty XYZ đã xem xét hồ sơ của bạn."
-        );
+        // Only send a notification if the application status is not already processed
+        if (
+          account.application_status !== "reviewed" &&
+          account.application_status !== "accepted" &&
+          account.application_status !== "rejected"
+        ) {
+          await sendNotification(
+            userId,
+            "application_status",
+            `Công ty XYZ đã xem xét hồ sơ của bạn.`
+          );
+        }
       } else {
         console.error("Error reviewing application");
       }

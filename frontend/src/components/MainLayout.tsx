@@ -13,28 +13,28 @@ export default function MainLayout() {
   const [isMinimized, setIsMinimized] = useState<boolean>(false); // State to manage minimize status
   
   // Get the userData from Zustand store
-  const userData = useAuthStore((state) => state.userData);
+  //const {userData} = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation(); // Get current route
 
   // Effect to redirect to login if user is not authenticated
+  // useEffect(() => {
+  //   console.log(userData);
+  //   if (!userData) {
+  //    // navigate("/login"); // Redirect to login if no user data is found in Zustand store
+  //   }
+  // }, [userData, navigate]);
+
+
+  const { checkAuth: checkAuth1 ,userData} = useAuthStore();
+
   useEffect(() => {
-    if (!userData) {
-      navigate("/login"); // Redirect to login if no user data is found in Zustand store
-    }
-  }, [userData, navigate]);
+    checkAuth1();
+  }, [checkAuth1, navigate]);
 
   // Wait until userData is loaded to render the layout
-  if (!userData) {
-    return null; // or a loading spinner, depending on your preference
-  }
 
   // Handle logout
-  const onLogout = () => {
-    useAuthStore.getState().setUserData(null); // Clear userData in Zustand store
-    useAuthStore.getState().setTokens("", ""); // Optionally clear tokens too
-    navigate("/login"); // Redirect to login page after logout
-  };
 
   // Determine if sidebar should be shown based on the current route
   const shouldShowSidebar = location.pathname === "/about" || location.pathname.startsWith("/jobseeker/jobs");
@@ -61,12 +61,17 @@ export default function MainLayout() {
     setIsMinimized(false); // Reset minimize state when closing the chat
   };
 
+
+  if (!userData) {
+    return null; // or a loading spinner, depending on your preference
+  }
+
+
   return (
     <div className="w-full min-h-screen bg-custom">
       <Header
         showSideBar={showSidebar}
         setShowSideBar={setShowSidebar}
-        onLogout={onLogout} // Pass onLogout function to Header
       />
 
       {/* Only render Sidebar when on specified pages like About or Jobs */}

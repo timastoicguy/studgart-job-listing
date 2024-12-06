@@ -1,17 +1,40 @@
 import { RadialBarChart, RadialBar, Legend, ResponsiveContainer } from "recharts";
-import React from 'react';
-import { FaGem, FaTrophy, FaMedal, FaStar, FaCoins } from 'react-icons/fa'; // Import icons
+import React from "react";
 
-export function OverviewChart() {
-    // Mock data với các sắc thái của màu sắc phù hợp với từng cấp độ rank
-    const mockRadialChartData = [
-        { name: 'Kim cương', value: 10, fill: '#4B0082', icon: <FaGem /> },   // Màu tím đậm
-        { name: 'Bạch kim', value: 100, fill: '#D3D3D3', icon: <FaTrophy /> },  // Màu xám sáng
-        { name: 'Vàng', value: 300, fill: '#FFD700', icon: <FaMedal /> },      // Màu vàng ánh kim
-        { name: 'Bạc', value: 200, fill: '#A9A9A9', icon: <FaStar /> },        // Màu xám đậm
-        { name: 'Đồng', value: 200, fill: '#CD7F32', icon: <FaCoins /> },      // Màu đồng
-    ];
-    const mockTotalClaims = mockRadialChartData.reduce((acc, item) => acc + item.value, 0);
+interface Account {
+  role: string;
+  name: string;
+  total: number;
+}
+
+interface OverviewChartProps {
+  accounts: Account[];
+}
+
+export function OverviewChart({ accounts }: OverviewChartProps) {
+  // Dữ liệu biểu đồ Radial Bar
+
+  const radialChartData = [
+    {
+      name: "Company",
+      value: accounts.find((acc) => acc.role === "company")?.total || 0 ,
+      fill: "#006400", // Xanh lá cây đậm
+    },
+    {
+      name: "Recruiter",
+      value: accounts.find((acc) => acc.role === "recruiter")?.total || 0,
+      fill: "#32CD32", // Xanh lá cây vừa
+    },
+    {
+      name: "Job Seeker",
+      value: accounts.find((acc) => acc.role === "job_seeker")?.total || 0,
+      fill: "#90EE90", // Xanh lá cây nhạt
+    },
+  ];
+  
+
+  // Tổng số tài khoản
+  const totalAccounts = radialChartData.reduce((acc, item) => acc + item.value, 0);
 
     return (
         <div className="bg-white shadow-lg pb-4 rounded-md">
@@ -28,7 +51,7 @@ export function OverviewChart() {
                         barSize={15}
                         startAngle={-90}
                         endAngle={270}
-                        data={mockRadialChartData}
+                        data={radialChartData}
                     >
                         <RadialBar
                             label={{ position: 'insideStart', fill: '#fff' }}
@@ -45,7 +68,7 @@ export function OverviewChart() {
                             fontWeight="bold" 
                             fill="#333"
                         >
-                            {mockTotalClaims}
+                            {totalAccounts}
                         </text>
                         <text 
                             x={"50%"} 
@@ -70,10 +93,9 @@ export function OverviewChart() {
 
             {/* Rank Icons */}
             <div className="mt-4 flex justify-center gap-4">
-                {mockRadialChartData.map((rank, index) => (
+                {radialChartData.map((rank, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                        <div className="text-xl">{rank.icon}</div>
-                        <div>{rank.name}</div>
+
                     </div>
                 ))}
             </div>

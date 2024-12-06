@@ -120,7 +120,7 @@ const FavoriteJobs: React.FC = () => {
     <TooltipProvider>
       <ConfirmationDialog
         isOpen={isDialogOpen}
-        message={favorites.get(selectedJobId || "") ? "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?" : "Do you want to favorite this job?"}
+        message={favorites.get(selectedJobId || "") ? "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?" : "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?"}
         onConfirm={confirmRemoveFavoriteJob}
         onCancel={cancelRemoveFavoriteJob}
       />

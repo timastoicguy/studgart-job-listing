@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 // Token expiration times
 export const TOKEN_EXPIRATION = {
-  ACCESS_TOKEN: "15m", // 15 minutes
+  ACCESS_TOKEN: "3h", // 3 hours
   REFRESH_TOKEN: "7d", // 7 days
   EMAIL_VERIFICATION: "5m", // 5 minutes
   PASSWORD_RESET: "5m", // 1 hour
