@@ -26,7 +26,7 @@ export default function MainLayout() {
   // }, [userData, navigate]);
 
 
-  const { checkAuth: checkAuth1 ,userData} = useAuthStore();
+  const { checkAuth1 ,userData} = useAuthStore();
 
   useEffect(() => {
     checkAuth1();

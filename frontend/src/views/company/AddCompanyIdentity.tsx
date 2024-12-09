@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
@@ -35,7 +36,7 @@ interface User {
 }
 
 const AddCompanyIdentity = () => {
-  const { userData } = useAuthStore(); // Lấy thông tin người dùng từ store
+  const { userData ,roleIDs} = useAuthStore(); // Lấy thông tin người dùng từ store
   const [accounts, setAccounts] = useState<User[]>([]); // Danh sách tài khoản
   const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
   const [totalPages, setTotalPages] = useState(1); // Tổng số trang
@@ -97,64 +98,71 @@ const AddCompanyIdentity = () => {
   // Xử lý khi người dùng nhấn nút phê duyệt
   const handleApprove = (userId: string) => {
     setSelectedUserId(userId);
-    setConfirmationMessage("Bạn có chắc chắn muốn thêm nhân sự này?");
+    setConfirmationMessage("Bạn có chắc chắn muốn thêm người tuyển dụng này?");
     setIsDialogOpen(true);
   };
 
-  // Xác nhận thêm nhân sự vào công ty
+  // Xác nhận thêm người tuyển dụng vào công ty
   const handleConfirmApprove = async () => {
     if (!selectedUserId) return;
-
+  
     try {
-      const company_id = userData._id ?? null;
-      console.log("Company ID:", userData);
-      
-
+      const company_id = roleIDs?.company_id ?? null;
+      console.log("Company ID:", company_id);
+  
       if (!company_id) {
         console.error("Company ID not found in user data");
         return;
       }
-
+  
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters`,
         { params: { user_id: selectedUserId } }
       );
-
+  
       const recruiterId =
         response.data.data.length > 0 ? response.data.data[0]._id : null;
-
+      console.log("Recruiter ID:", recruiterId);
+  
       if (!recruiterId) {
         console.error("Recruiter not found for this user.");
         return;
       }
-
+  
+      // Dữ liệu PATCH sẽ được log ra để kiểm tra
+      const patchData = {
+        user_id: selectedUserId,
+        company_id: company_id,
+        status: "unlock",
+      };
+  
+      console.log("Data to be patched:", patchData);
+  
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters/${recruiterId}`,
-        { params: { user_id: selectedUserId } }
-        
+        patchData
       );
-
-
+  
       // Hiển thị thông báo thành công
       notification.success({
         message: "Thành công",
         description: "Nhân sự đã được thêm vào công ty.",
         placement: "topRight",
       });
-
+  
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Error approving employee:", error);
-
+  
       // Hiển thị thông báo lỗi
       notification.error({
         message: "Lỗi",
-        description: "Có lỗi xảy ra khi thêm nhân sự.",
+        description: "Có lỗi xảy ra khi thêm người tuyển dụng.",
         placement: "topRight",
       });
     }
   };
-
+  
   // Hủy phê duyệt
   const handleCancelApprove = () => {
     setIsDialogOpen(false);
@@ -164,9 +172,9 @@ const AddCompanyIdentity = () => {
     <div className="px-2 py-4 md:px-4 rounded bg-white shadow-lg max-w-6xl mx-auto">
       <div className="mb-4 text-black">
         <h2 className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-          Thông tin nhân sự
+          Thông tin người tuyển dụng
         </h2>
-        <p className="mb-2">Đây là danh sách nhân sự</p>
+        <p className="mb-2">Đây là danh sách người tuyển dụng</p>
         <div className="flex flex-col md:flex-row items-start mb-4">
           <div className="flex flex-row md:flex-row items-center">
             <div className="relative flex-grow">
@@ -246,7 +254,7 @@ const AddCompanyIdentity = () => {
                   <TableCell>
                     <button className="text-green-500 hover:text-green-700 mx-1"
                       onClick={() => handleApprove(account._id)}>
-                      <FaCheck title="Thêm nhân sự" size={18} />
+                      <FaCheck title="Thêm người tuyển dụng" size={18} />
                     </button>
                   </TableCell>
                 </TableRow>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { TotalTransChart } from "@/components/admin/TotalTransChart";

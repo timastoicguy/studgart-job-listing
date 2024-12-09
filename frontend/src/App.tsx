@@ -35,10 +35,26 @@ import AccountAll from "./views/admin/AccountAll"; // Adjusted import for Accoun
 import TransactionManual from "./views/admin/TransactionManual"; // Adjusted import for AccountAll
 import useAuthStore from "./store/auth/useAuthStore";
 import { useEffect } from "react";
+import { notification } from "antd";
 
 function App() {
+  // const navigate = useNavigate();
+  // const { accessToken } = useAuthStore();
 
+  // useEffect(() => {
+  //   const excludedPaths = ["/login", "/register", "/job","/passwordreset","/auth/verify/:token","/auth/reset-password/:token"]; // Các đường dẫn bỏ qua
+  //   const currentPath = window.location.pathname;
 
+  //   if (!accessToken && !excludedPaths.some((path) => currentPath.startsWith(path))) {
+  //     // Hiển thị thông báo và chuyển hướng người dùng
+  //     notification.warning({
+  //       message: "Chú ý",
+  //       description: "Vui lòng đăng nhập để tiếp tục sử dụng!",
+  //       placement: "topRight",
+  //     });
+  //     navigate("/login");
+  //   }
+  // }, [accessToken, navigate]);
   return (
     <div className=" overflow-y-scroll"> {/* Sử dụng thanh cuộn tổng */}
       <Routes>

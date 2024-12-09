@@ -40,7 +40,7 @@ const getJobSeekerIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 const DetailJob: React.FC = () => {
-  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [title, setTitle] = useState("");
   const [salaryMin, setSalaryMin] = useState(0);
@@ -108,7 +108,7 @@ const DetailJob: React.FC = () => {
       // Gửi yêu cầu ứng tuyển
       const applicationData = {
         job_id: jobId,
-        job_seeker_id: userData.job_seeker_id,
+        job_seeker_id: roleIDs?.job_seeker_id,
         cover_letter: coverLetter, // Lấy giá trị từ textarea
         resume: resumeUrl, // Đường dẫn đã upload
         job_reviewer_id: "67273fea96599e898e7bbd6c",

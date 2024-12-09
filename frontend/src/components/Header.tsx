@@ -62,7 +62,7 @@ export default function Header({
     console.log("header", userData)
     fetchNotifications();
 
-    socket.emit("joinNotification", { userId: userData?.id });
+    socket.emit("joinNotification", { userId: userData?._id });
     socket.on("notification", (data) => {
       setNotifications((prevNotifications) => [data, ...prevNotifications]);
       console.log("Notification received:", data);
@@ -98,7 +98,7 @@ export default function Header({
     setLoading(true);
     try {
       const response = await axios.get(
-        `${url_base}/api/notifications/${userData?.id}?page=${page}&limit=10`
+        `${url_base}/api/notifications/${userData?._id}?page=${page}&limit=10`
       );
       const newNotifications = response.data.notifications.docs;
 

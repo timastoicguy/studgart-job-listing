@@ -8,10 +8,11 @@ export interface JobData {
   responsibilities: string[];
   requirements: string[];
   skills: string[];
+  isUrgent?: boolean;
   benefits: string[];
   location: { name: string; code: string }[];
   salaryRange: { min: number; max: number };
-  company: string;
+  company?: string;
   jobCategory: string;
   recruiter: string;
   technologies: { name: string; code: string }[];
@@ -23,6 +24,7 @@ export interface JobData {
 export const postJob = async (jobData: JobData, userId: string): Promise<any> => {
   try {
 
+    console.log(jobData)
     console.log(userId)
     // Fetch the user's diamond status
     const respons1 = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/payments/check-diamonds/${userId}`);

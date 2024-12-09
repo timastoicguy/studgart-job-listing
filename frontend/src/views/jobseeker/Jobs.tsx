@@ -28,9 +28,9 @@ import { notification } from "antd"; // Import notification from Ant Design
 import useAuthStore from "../../store/auth/useAuthStore";
 
 const Jobs: React.FC = () => {
-  const { userData } = useAuthStore(); // Truy cập accessToken từ store
+  const { userData,roleIDs } = useAuthStore(); // Truy cập accessToken từ store
   const itemsPerPage = 3;
-  const jobSeekerId = userData?.job_seeker_id ?? ""; // Replace with dynamic ID
+  const jobSeekerId = roleIDs?.job_seeker_id ?? ""; // Replace with dynamic ID
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);

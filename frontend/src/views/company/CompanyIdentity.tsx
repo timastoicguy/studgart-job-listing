@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
@@ -52,7 +53,7 @@ interface Recruiter {
 }
 
 const CompanyIdentity = () => {
-  const { userData } = useAuthStore(); // Lấy thông tin người dùng từ store
+  const { userData,roleIDs } = useAuthStore(); // Lấy thông tin người dùng từ store
   const [accounts, setAccounts] = useState<Recruiter[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
@@ -66,8 +67,8 @@ const CompanyIdentity = () => {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      const company_id = userData.company_id ?? null;
-  console.log("Company ID:", userData.company_id);
+      const company_id = roleIDs?.company_id ?? null;
+  console.log("Company ID:", roleIDs);
       if (!company_id) {
         console.error("Company ID not found in localStorage");
         setAccounts([]);
@@ -152,7 +153,7 @@ const CompanyIdentity = () => {
   
       console.log("Employee removed from company:", response.data);
   
-      // Hiển thị thông báo thành công khi xóa nhân sự
+      // Hiển thị thông báo thành công khi xóa người tuyển dụng
       notification.success({
         message: 'Thành công',
         description: 'Nhân sự đã được xóa khỏi công ty.',
@@ -164,7 +165,7 @@ const CompanyIdentity = () => {
       // Hiển thị thông báo lỗi nếu có
       notification.error({
         message: 'Lỗi',
-        description: 'Có lỗi xảy ra khi xóa nhân sự khỏi công ty.',
+        description: 'Có lỗi xảy ra khi xóa người tuyển dụng khỏi công ty.',
         placement: 'topRight', // Vị trí hiển thị thông báo
       });
     }
@@ -201,9 +202,9 @@ const CompanyIdentity = () => {
     <div className="px-2 py-4 md:px-4 rounded bg-white shadow-lg max-w-6xl mx-auto">
       <div className="mb-4 text-black">
         <h2 className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-          Thông tin nhân sự
+          Thông tin người tuyển dụng
         </h2>
-        <p className="mb-2">Đây là danh sách nhân sự</p>
+        <p className="mb-2">Đây là danh sách người tuyển dụng của công ty bạn</p>
         <div className="flex flex-col md:flex-row items-start mb-4">
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
             <div className="relative flex-grow">
@@ -222,7 +223,7 @@ const CompanyIdentity = () => {
                 className="bg-green-500 text-white p-2 rounded"
                 onClick={handleAddEmployeeClick}
               >
-                Thêm nhân sự
+                Thêm người tuyển dụng
               </button>
             </div>
           </div>
@@ -311,7 +312,7 @@ const CompanyIdentity = () => {
   isOpen={isDialogOpen}
   onConfirm={handleDialogConfirm}
   onCancel={handleDialogCancel}
-  message="Bạn có chắc chắn muốn xóa nhân sự này?" // Add a custom message
+  message="Bạn có chắc chắn muốn xóa người tuyển dụng này?" // Add a custom message
 />
 
     </div>

@@ -19,10 +19,9 @@ function Login() {
     if (!email || !password) {
 
       toast.error("Please fill in all fields.");
-      await login(email, password);
       return;
     }
-    await handleLogin(email, password, navigate, (path: string) => {
+    handleLogin(email, password, navigate, (path: string) => {
       console.log("Navigated to:", path);
     });
   };
@@ -83,13 +82,7 @@ function Login() {
           >
             {loading ? <FaSpinner className="animate-spin" /> : "Đăng nhập"}
           </button>
-          <button
-            onClick={handleGoogleLogin}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center mt-4"
-          >
-            <FaGoogle className="mr-2" />
-            Đăng nhập với Google
-          </button>
+
           <div className="mb-4 text-center">
             <p className="text-gray-600">
               Chưa có tài khoản?{" "}

@@ -83,7 +83,7 @@ interface FetchJobsReturn {
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [topCompanies, setTopCompanies] = useState<Company[]>([]);
@@ -130,7 +130,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         );
   
         setTopCompanies(formattedTopCompanies);
-        console.log("User Data1111:", formattedTopCompanies);
+
       } else {
         console.error("Failed to fetch top companies:", result);
         setTopCompanies([]);
@@ -209,7 +209,6 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         );
   
         setRecommendedJobs(formattedRecommendedJobs);
-        console.log("Recommended Jobs: ", formattedRecommendedJobs);
       } else {
         console.error("No jobs found or incorrect format:", result);
         setRecommendedJobs([]);
@@ -236,7 +235,8 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
 
       // Add recruiter to query if not already present
       if (!query.has("recruiter")) {
-        query.set("recruiter", `${userData.recruiter_id}`); // Giá trị recruiter mặc định
+        query.set("recruiter", `${roleIDs?.recruiter_id}`); // Giá trị recruiter mặc định
+        console.log(roleIDs);
       }
   
       const queryString = query.toString();
@@ -286,70 +286,10 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   };
   
 
-  const fetchFaveritedJobs = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=${userData.jobSeekerId}&page=${currentFavertiedPageJobs}&limit=${limit}`
-      );
-      const result: ApiResponse = await response.json();
-  
-      if (!result.error && Array.isArray(result.data?.docs)) {
-        const formattedJobs = result.data.docs.map((job: any) => {
-          const jobDetails = job.job_id; // Truy cập vào job_id để lấy thông tin
-  
-          // Log ra ID của favorite và job_id
-          console.log("Favorite ID:", job._id);
-          console.log("Job ID:", jobDetails?._id);
-  
-          return {
-            id_job: jobDetails?._id,
-            id: job._id,
-            title: jobDetails?.title || "",
-            company: jobDetails?.company?.company_name || "",
-            location: jobDetails?.location?.[0]?.name || "",
-            salary: jobDetails?.salaryRange
-              ? formatSalary(
-                  jobDetails.salaryRange.min,
-                  jobDetails.salaryRange.max
-                )
-              : "N/A",
-            techStack: Array.isArray(jobDetails?.technologies)
-              ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
-              : "",
-            timePosted: jobDetails?.postedDate
-              ? new Date(jobDetails.postedDate).toLocaleDateString()
-              : "N/A",
-            avatar: jobDetails?.company?.avatar || "",
-            isHot: jobDetails?.isUrgent || false,
-            isNew: jobDetails?.postedDate
-              ? Date.now() - new Date(jobDetails.postedDate).getTime() <
-                7 * 24 * 60 * 60 * 1000
-              : false,
-          };
-        });
-  
-        setFavertiedJobs(formattedJobs);
-        setTotalFavertiedPagesJobs(result.data.totalPages);
-      } else {
-        console.warn(
-          "No valid job data found or result.data.docs is not an array"
-        );
-        setFavertiedJobs([]); // Reset danh sách về mảng rỗng nếu không có dữ liệu
-      }
-    } catch (error) {
-      console.error("Failed to fetch jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   
 
   useEffect(() => {
-    // Re-fetch jobs and related data when searchParams, page or favorite page changes
-    fetchFaveritedJobs();
+
     fetchJobs();
 
     fetchTopCompanies();

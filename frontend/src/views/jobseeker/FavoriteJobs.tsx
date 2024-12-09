@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const FavoriteJobs: React.FC = () => {
-  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const navigate = useNavigate();
 
   const [currentFavertiedPage, setCurrentFavertiedPage] = useState(1);
@@ -69,7 +69,7 @@ const FavoriteJobs: React.FC = () => {
   const confirmRemoveFavoriteJob = async () => {
     if (!selectedJobId) return;
     console.log("selectedJobId:", selectedJobId);
-    console.log("AAAAAAAA:", userData.job_seeker_id);
+    console.log("AAAAAAAA:", roleIDs?.job_seeker_id);
 
 
     if (!userData) {
@@ -84,7 +84,7 @@ const FavoriteJobs: React.FC = () => {
     try {
       // Gửi yêu cầu xóa công việc yêu thích
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${userData.job_seeker_id}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${ roleIDs?.job_seeker_id}`
       );
 
       // Loại bỏ công việc khỏi danh sách hiện tại mà không cần tải lại

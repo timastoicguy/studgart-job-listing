@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
@@ -84,8 +85,6 @@ const JobseekerPending = () => {
       console.error(`Error fetching username for userId ${userId}:`, error);
     }
   };
-
-  // Gọi API lấy username khi accounts thay đổi
   // Gọi API lấy username khi accounts thay đổi
   useEffect(() => {
     accounts.forEach((account) => {
@@ -125,7 +124,7 @@ const JobseekerPending = () => {
         await sendNotification(
           userId,
           "application_status",
-          `,Công ty ${companyName} đã chấp nhận hồ sơ của bạn.`
+          `${userData.username},Công ty ${companyName} đã chấp nhận hồ sơ của bạn.`
         );
       } else {
         console.error("Error accepting application");
@@ -166,7 +165,7 @@ const JobseekerPending = () => {
         await sendNotification(
           userId,
           "application_status",
-          `${companyName} đã từ chối hồ sơ của bạn.`
+           `${userData.username},Công ty ${companyName} đã từ chối hồ sơ của bạn.`
         );
       } else {
         console.error("Error rejecting application");
