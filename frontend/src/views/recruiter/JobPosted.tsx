@@ -49,7 +49,6 @@ const JobPosted: React.FC = () => {
     loading,
     handlePageChange,
   } = useFetchJobs(currentPageJobs);
-  console.log("jobListings: ", jobListings);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>

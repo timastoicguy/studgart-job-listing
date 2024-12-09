@@ -114,24 +114,6 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
         />
       </div>
 
-      {/* Category Filter */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">
-          Ngành nghề
-        </label>
-        <Select onValueChange={setCategory}>
-          <SelectTrigger>
-            <SelectValue placeholder="Chọn ngành nghề" />
-          </SelectTrigger>
-          <SelectContent>
-            {["all", "it", "marketing", "finance"].map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Experience Level Filter */}
       <div className="mb-4">

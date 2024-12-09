@@ -86,7 +86,7 @@ interface FetchJobsReturn {
 }
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
-  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
@@ -296,7 +296,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       const response = await fetch(
         `${
           import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=${userData.job_seeker_id}&page=${currentFavertiedPageJobs}&limit=${limit}`
+        }/api/favorites?job_seeker_id=${roleIDs?.job_seeker_id}&page=${currentFavertiedPageJobs}&limit=${limit}`
       );
       const result: ApiResponse = await response.json();
   

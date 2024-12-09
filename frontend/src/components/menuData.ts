@@ -50,8 +50,8 @@ export const roleOptions: Record<string, MenuItem[]> = {
     { name: "my_jobs", label: "Bài đã đăng", href: "/recruiter/jobposted" },
   ],
   company: [
-    { name: "Danh sách nhân sự", label: "Danh sách nhân sự", href: "/company/companyidentity" },
-    { name: "Thêm nhân sự", label: "Thêm nhân sự", href: "/company/addcompanyidentity" },
+    { name: "Danh sách nhà tuyển dụng", label: "Danh sách nhà tuyển dụng", href: "/company/companyidentity" },
+    { name: "Thêm nhà tuyển dụng", label: "Thêm nhà tuyển dụng", href: "/company/addcompanyidentity" },
   ],
 };
 
