@@ -10,6 +10,7 @@ import {
   getPromtForExperienceDetailAI,
   promtForChatBotAI,
   getPromtForGenInfoFromCvAI,
+  getPromptForCoverLetter,
 } from "../utils/constant";
 class ChatGPTService {
   private openai: OpenAI;
@@ -106,6 +107,17 @@ class ChatGPTService {
     ]);
     return { error: null, data: JSON.parse(responseContent) };
   }
+
+  async genCoverLeter(cvText: string, lg: string) {
+    const prompt = getPromptForCoverLetter(lg); // Insert the prompt here
+    const responseContent = await this.getChatGPTReply([
+      { role: "system", content: prompt },
+      { role: "user", content: cvText },
+    ]);
+
+    return { error: null, data: responseContent };
+  }
+
   async genSumaryAIForCV(info: any) {
     const prompt = getPromtForSummaryAI(info); // Insert the prompt here
     const responseContent = await this.getChatGPTReply([
