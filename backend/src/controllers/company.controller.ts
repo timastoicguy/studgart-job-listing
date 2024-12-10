@@ -51,12 +51,12 @@ export const getCompanyById = async (req: Request, res: Response) => {
 
 // Update a company by ID
 export const updateCompany = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
   try {
-    const updatedCompany = await Company.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updatedCompany = await Company.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     if (!updatedCompany) {
       return res.status(404).json({ error: "Company not found", data: null });
     }
@@ -68,8 +68,9 @@ export const updateCompany = async (req: Request, res: Response) => {
 
 // Delete a company by ID
 export const deleteCompany = async (req: Request, res: Response) => {
+  const id = req.params.id;
   try {
-    const deletedCompany = await Company.findByIdAndDelete(req.params.id);
+    const deletedCompany = await Company.findByIdAndDelete(id);
     if (!deletedCompany) {
       return res.status(404).json({ error: "Company not found", data: null });
     }
