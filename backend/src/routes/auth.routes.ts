@@ -10,6 +10,7 @@ import {
   googleCallback,
   resendVerificationEmail,
   getCurrentUser,
+  changePassword,
 } from "../controllers/auth.controller";
 import { body } from "express-validator";
 import { OAuth2Client } from "google-auth-library";
@@ -321,6 +322,8 @@ router.post(
   [body("newPassword").isLength({ min: 6 })],
   resetPassword
 );
+
+router.post("/change-password", changePassword);
 
 /**
  * @swagger
