@@ -12,7 +12,7 @@ export interface JobData {
   benefits: string[];
   location: { name: string; code: string }[];
   salaryRange: { min: number; max: number };
-  company?: string;
+  company?: any;
   jobCategory: string;
   recruiter: string;
   technologies: { name: string; code: string }[];
@@ -21,47 +21,89 @@ export interface JobData {
   applicationDeadline: Date;
 }
 
-export const postJob = async (jobData: JobData, userId: string): Promise<any> => {
+export const postJob = async (jobData: JobData, company: any, userId: string): Promise<any> => {
   try {
+    console.log("Company Data:", company);
+    console.log("User ID:", userId);
 
-    console.log(jobData)
-    console.log(userId)
-    // Fetch the user's diamond status
-    const respons1 = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/payments/check-diamonds/${userId}`);
-    
-    // Check if diamonds are greater than or equal to 2
-    if (respons1.data.diamonds < 2) {
-      throw new Error('Not enough diamonds');
+    const requiredDiamonds = 2; // Số diamonds yêu cầu để đăng tin
+
+    // Trường hợp company == null, thực hiện logic cho tài khoản cá nhân
+    if (!company) {
+      const response1 = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/check-diamonds/${userId}`
+      );
+
+      if (response1.data.data.diamonds+response1.data.data.freeDiamonds < requiredDiamonds) {
+        throw new Error('Not enough diamonds');
+      }
+
+      const paymentResponse = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/pay-diamond`,
+        {
+          userId,
+          requiredDiamonds,
+          description: 'Payment for premium feature',
+        }
+      );
+
+      if (!paymentResponse.data.data) {
+        throw new Error('Payment failed');
+      }
+    } 
+    // Trường hợp company khác null, kiểm tra và trừ tiền từ tài khoản công ty
+    else {
+
+      const companyResponse = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/companies/${company}`
+      );
+
+      const companyUserId = companyResponse.data.data.user_id._id;
+      console.log("Company User ID:", companyUserId);
+      if (!companyUserId) {
+        throw new Error('Company userId not found');
+      }
+
+
+      const response2 = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/check-diamonds/${companyUserId}`
+      );
+      console.log(response2.data.data); // Log lỗi khi kiểm tra tại khoa
+      if (response2.data.data.diamonds+response2.data.data.freeDiamonds < requiredDiamonds) {
+
+        notification.error({
+          message: 'Đăng tin không thành công',
+          description: `Số diamonds của công ty bạn không đủ để đăng tin!`,
+          placement: 'topRight',
+        });
+        
+      }
+
+      const companyPaymentResponse = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/payments/pay-diamond`,
+        {
+          userId: companyUserId,
+          requiredDiamonds,
+          description: 'Payment for premium feature',
+        }
+      );
+
+      if (!companyPaymentResponse.data.data) {
+        throw new Error('Company payment failed');
+      }
     }
 
-    // If diamonds are sufficient, call the payment API
-    const requiredDiamonds = 2; // The amount of diamonds required for posting a job
-    const paymentResponse = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/payments/pay-diamond`, {
-      userId,
-      requiredDiamonds,
-      description: 'Payment for premium feature'
+    // Tiến hành đăng tin sau khi thanh toán thành công
+    const jobResponse = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/jobs`, jobData);
+    console.log("Job posted successfully:", jobResponse.data);
+    notification.success({
+      message: 'Trạng thái đăng tin',
+      description: `Tin tuyển dụng của bạn đã được đăng thành công!`,
+      placement: 'topRight',
     });
-
-    // Handle payment response
-    if (paymentResponse.data.data) {
-      console.log('Payment successful:', paymentResponse.data);
-      notification.success({
-        message: 'Trạng thái thanh toán',
-        description: `Bạn đã thanh toán thành công`, // Mô tả thông báo
-        placement: 'topRight', // Vị trí hiển thị
-      });
-      // Proceed to post the job after successful payment
-      const jobResponse = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/jobs`, jobData);
-      console.log("Job posted successfully:", jobResponse.data);
-      return jobResponse.data;
-    } else {
-      throw new Error('Payment failed');
-    }
+    return jobResponse.data;
   } catch (error) {
     console.error("Error posting job:", error);
-    if (axios.isAxiosError(error)) {
-      console.error("Axios error data:", error.response?.data);
-    }
-    throw error; 
   }
 };
+

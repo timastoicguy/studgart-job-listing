@@ -30,7 +30,7 @@ export interface JobData {
   title: string;
   salaryRange: { min: number; max: number };
   currency: string; // Make sure to add this field if it's expected
-  deadline: string; // Add this field if it's expected
+  applicationDeadline: string; // Add this field if it's expected
   description: string;
   requirements: string[];
   benefits: string[];

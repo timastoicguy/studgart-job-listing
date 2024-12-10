@@ -26,6 +26,7 @@ import axios from "axios";
 import ConfirmationDialog from "../component/ConfirmationDialog";
 import { notification } from "antd"; // Import notification from Ant Design
 import useAuthStore from "../../store/auth/useAuthStore";
+import Footer from "@/components/Footer";
 
 const Jobs: React.FC = () => {
   const { userData,roleIDs } = useAuthStore(); // Truy cập accessToken từ store
@@ -148,7 +149,7 @@ const Jobs: React.FC = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/applications?job_id=${
             job.id
-          }&job_seeker_id=${userData?.job_seeker_id}`
+          }&job_seeker_id=${roleIDs?.job_seeker_id}`
         );
         setAppliedJobs((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -165,7 +166,7 @@ const Jobs: React.FC = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/favorites?job_id=${
             job.id
-          }&job_seeker_id=${userData.job_seeker_id}`
+          }&job_seeker_id=${roleIDs?.job_seeker_id}`
         );
         setFavorites((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -440,7 +441,9 @@ const Jobs: React.FC = () => {
           </div>
         </aside>
       </div>
+      <Footer />
     </TooltipProvider>
+    
   );
 };
 

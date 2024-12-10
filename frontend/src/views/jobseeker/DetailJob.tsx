@@ -164,7 +164,7 @@ const DetailJob: React.FC = () => {
         setSalaryMin(response.salaryRange?.min ?? 0);
         setSalaryMax(response.salaryRange?.max ?? 0);
         setCurrency(response.currency || "VNĐ"); // Ensure currency is set correctly
-        setDeadline(response.deadline || "N/A"); // Ensure deadline is set correctly
+        setDeadline(response.applicationDeadline || "N/A"); // Ensure deadline is set correctly
         setJobDescription(response.description || "");
 
         // Process `requirements` and `benefits`

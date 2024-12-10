@@ -94,6 +94,17 @@ function Login() {
               </button>
             </p>
           </div>
+          <div className="mb-4 text-center">
+            <p className="text-gray-600">
+              Bạn quên mật khẩu?{" "}
+              <button
+                onClick={() => navigate("/password-reset")}
+                className="text-green-500 font-bold hover:underline"
+              >
+                Lấy lại mật khẩu
+              </button>
+            </p>
+          </div>
         </div>
         <div className="w-full sm:w-1/2 mt-6 sm:mt-0">
           <img

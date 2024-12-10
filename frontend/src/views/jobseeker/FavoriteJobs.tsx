@@ -17,6 +17,7 @@ import { notification } from 'antd';
 import ConfirmationDialog from '../component/ConfirmationDialog';
 import useAuthStore from '@/store/auth/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import Footer from '@/components/Footer';
 
 
 const FavoriteJobs: React.FC = () => {
@@ -285,6 +286,7 @@ const FavoriteJobs: React.FC = () => {
           </div>
         </aside>
       </div>
+      <Footer/>
     </TooltipProvider>
   );
 };
