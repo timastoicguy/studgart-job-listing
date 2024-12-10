@@ -75,6 +75,28 @@ export const evaluateSingleCV = async (req: Request, res: Response) => {
   }
 };
 
+export const genCoverLeter = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    // Extract text from the PDF
+
+    const pdfText = await pdfParse(req.file.buffer);
+    // Send the extracted text to the OpenAI API
+
+    const response = await chatGPTService.genCoverLeter(
+      pdfText.text,
+      "English"
+    );
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to process the file" });
+  }
+};
+
 export const genSumaryAIForCV = async (req: Request, res: Response) => {
   const data = req.body;
 

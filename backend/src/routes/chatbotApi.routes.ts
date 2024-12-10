@@ -8,6 +8,7 @@ import {
   chatWithGPTUsingPDFFIle,
   genInfoFromCVUsingGPTByPDF,
   genInfoFromCVUsingGPTByImage,
+  genCoverLeter,
 } from "../controllers/chatbotApi.controller";
 import { upload } from "../utils/multer";
 import Chat from "../models/chat.model";
@@ -134,6 +135,7 @@ router.get("/chatbot-api", getInitialQuestion);
  *                   nullable: true
  */
 router.post("/evaluate-cv-api", upload.single("file"), evaluateSingleCV);
+router.post("/gen-cover-letter", upload.single("file"), genCoverLeter);
 router.post("/chatbot-api-pdf", upload.single("file"), chatWithGPTUsingPDFFIle);
 
 router.post("/gen-info-pdf", upload.single("file"), genInfoFromCVUsingGPTByPDF);
