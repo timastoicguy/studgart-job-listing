@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock, FaSpinner, FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaLock,
+  FaSpinner,
+  FaGoogle,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAuthStore from "@/store/auth/useAuthStore";
@@ -17,7 +24,6 @@ function Login() {
   const onLogin = async () => {
     console.log("Login clicked", email, password);
     if (!email || !password) {
-
       toast.error("Please fill in all fields.");
       return;
     }
@@ -39,9 +45,14 @@ function Login() {
       <ToastContainer newestOnTop />
       <div className="bg-white p-8 rounded-[24px] shadow-md w-full max-w-4xl flex flex-col sm:flex-row">
         <div className="w-full sm:w-1/2 p-4">
-          <h2 className="text-2xl font-bold text-center mb-6 text-green-500">STUDGART</h2>
+          <h2 className="text-2xl font-bold text-center mb-6 text-green-500">
+            STUDGART
+          </h2>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2"> Email</label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              {" "}
+              Email
+            </label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaEnvelope className="ml-3 text-gray-400" />
               <input
@@ -54,7 +65,9 @@ function Login() {
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Mật khẩu</label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Mật khẩu
+            </label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaLock className="ml-3 text-gray-400" />
               <input
@@ -94,14 +107,14 @@ function Login() {
               </button>
             </p>
           </div>
+
           <div className="mb-4 text-center">
             <p className="text-gray-600">
-              Bạn quên mật khẩu?{" "}
               <button
-                onClick={() => navigate("/password-reset")}
+                onClick={() => navigate("/passwordreset")}
                 className="text-green-500 font-bold hover:underline"
               >
-                Lấy lại mật khẩu
+                Quên mật khẩu
               </button>
             </p>
           </div>

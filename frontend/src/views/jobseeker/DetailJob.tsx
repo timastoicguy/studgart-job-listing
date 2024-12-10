@@ -23,7 +23,10 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog"; // Importing Dialog components
-import { fetchDetailJobData, fetchUserData } from "@/lib/reducers/jobseeker/jobDetail";
+import {
+  fetchDetailJobData,
+  fetchUserData,
+} from "@/lib/reducers/jobseeker/jobDetail";
 import { useNavigate, useParams } from "react-router-dom";
 import { Upload, Button, UploadFile, UploadProps, message } from "antd"; // Importing UploadFile
 import { UploadOutlined } from "@ant-design/icons";
@@ -40,7 +43,7 @@ const getJobSeekerIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 const DetailJob: React.FC = () => {
-  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [title, setTitle] = useState("");
   const [salaryMin, setSalaryMin] = useState(0);
@@ -153,7 +156,7 @@ const DetailJob: React.FC = () => {
       console.log(jobId);
       if (!jobId) return; // Check if jobId is available
       const response = await fetchDetailJobData(jobId);
-      const response2 = await fetchUserData(response?.company.user_id||"");
+      const response2 = await fetchUserData(response?.company.user_id || "");
 
       // Check if response contains data
       if (response) {
@@ -204,17 +207,17 @@ const DetailJob: React.FC = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_API_BASE_URL
-          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${userData.job_seeker_id}`
+          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${
+            userData.job_seeker_id
+          }`
         );
 
         // Log full response to check structure
         console.log("Application status response:", response.data);
-        console.log("SSSS",response.data.data.docs);
+        console.log("SSSS", response.data.data.docs);
 
         // Kiểm tra trong trường 'docs' thay vì toàn bộ 'response.data'
         if (response.data.data.docs && response.data.data.docs.length > 0) {
-
-
           console.log("response.data.data.docs[0]");
           setIsApplied(true);
           setLastAppliedTime(
@@ -392,7 +395,9 @@ const DetailJob: React.FC = () => {
             <button className="hidden" />
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">Đơn Ứng Tuyển</DialogTitle>
+            <DialogTitle className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
+              Đơn Ứng Tuyển
+            </DialogTitle>
             <DialogDescription>
               <label className="block text-sm font-medium text-gray-700">
                 Thư xin việc
@@ -408,13 +413,15 @@ const DetailJob: React.FC = () => {
                 Tải lên tài liệu
               </label>
               <div>
-                <Upload
-                  {...uploadProps}
-                  accept=".pdf" // Chỉ cho phép chọn tệp PDF
-                  onChange={({ fileList }) => setFileList(fileList)} // Cập nhật danh sách tệp
-                >
-                  <Button icon={<UploadOutlined />}>Tải lên CV</Button>
-                </Upload>
+                <div className="flex justify-start gap-2">
+                  <Upload
+                    {...uploadProps}
+                    accept=".pdf" // Chỉ cho phép chọn tệp PDF
+                    onChange={({ fileList }) => setFileList(fileList)} // Cập nhật danh sách tệp
+                  >
+                    <Button icon={<UploadOutlined />}>Tải lên CV</Button>
+                  </Upload>
+                </div>
                 {fileList.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">Tệp đã chọn:</p>

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import { Upload, Button, UploadFile, UploadProps, message, Modal } from "antd"; // Import Ant Design components
 import { UploadOutlined } from "@ant-design/icons";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const InfoForm = () => {
   const { userId } = useParams();
@@ -28,7 +29,7 @@ const InfoForm = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAvatarUploadVisible, setIsAvatarUploadVisible] = useState(false); // To manage avatar upload visibility
   const [avatar, setAvatar] = useState<string | null>(null); // Store the uploaded avatar
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const ranks = [
     { name: "BRONZE", symbol: "🥉" }, // Rank bronze
     { name: "SILVER", symbol: "🥈" }, // Rank silver
@@ -311,7 +312,10 @@ const InfoForm = () => {
               )}
             </div>
             <div className="flex space-x-4">
-              <button className="bg-green-500 text-white px-4 py-2 rounded-md mt-4">
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-md mt-4"
+                onClick={() => setIsModalOpen(true)}
+              >
                 Đổi mật khẩu
               </button>
 
@@ -323,6 +327,12 @@ const InfoForm = () => {
               </button>
             </div>
           </div>
+
+          {/* Modal Component */}
+          <ChangePasswordModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
 
           <div className="lg:col-span-2 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -45,7 +45,7 @@ const userSchema = new Schema<IUser>({
   updatedAt: { type: Date, default: Date.now },
   googleId: { type: String },
   balance: { type: Number, default: 0 },
-  rank: { type: String, default: "Sắt" },
+  rank: { type: String, default: "Đồng" },
   diamonds: { type: Number, default: 0 },
   totalSpent: { type: Number, default: 0 },
   transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }],

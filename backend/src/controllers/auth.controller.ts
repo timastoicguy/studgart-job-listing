@@ -334,6 +334,33 @@ export const resetPassword = async (
     res.status(400).json({ error: "Invalid or expired token", data: null });
   }
 };
+
+export const changePassword = async (
+  req: Request,
+  res: Response<ApiResponse<string>>
+) => {
+  const { oldPassword, newPassword, userID } = req.body;
+
+  try {
+    const user = await User.findById(userID);
+
+    if (!user)
+      return res.status(404).json({ error: "User not found", data: null });
+
+    const isOldPassword = await bcrypt.compare(oldPassword, user.passwordHash);
+
+    if (!isOldPassword) {
+      return res.status(200).json({ error: "isNotOldPassword", data: null });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await user.save();
+    res.status(200).json({ error: null, data: "Password reset successfully." });
+  } catch {
+    res.status(400).json({ error: "Invalid or expired token", data: null });
+  }
+};
 export const googleCallback = (
   req: Request,
   res: Response<ApiResponse<{ accessToken: string }>>

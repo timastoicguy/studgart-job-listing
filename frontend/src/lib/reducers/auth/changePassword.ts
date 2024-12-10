@@ -1,11 +1,17 @@
 // PasswordNew.ts (logic)
 import axios from "axios";
 
-export const passwordNew = async (token: string, newPassword: string) => {
+export const changePassword = async (
+  oldPassword: string,
+  newPassword: string,
+  userID: string
+) => {
   try {
     const response = await axios.post(
-      `${import.meta.env.VITE_API_BASE_URL}/api/auth/reset-password/${token}`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/change-password/`,
       {
+        oldPassword: oldPassword,
+        userID: userID,
         newPassword: newPassword,
       },
       {
