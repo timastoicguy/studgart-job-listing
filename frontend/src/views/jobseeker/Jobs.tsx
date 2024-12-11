@@ -30,7 +30,7 @@ import Footer from "@/components/Footer";
 
 const Jobs: React.FC = () => {
   const { userData,roleIDs } = useAuthStore(); // Truy cập accessToken từ store
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const jobSeekerId = roleIDs?.job_seeker_id ?? ""; // Replace with dynamic ID
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -315,7 +315,7 @@ const Jobs: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <div className="text-center text-gray-600 mt-4">
+                <div className="text-center text-gray-600 mt-4 h-screen flex flex-col ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"

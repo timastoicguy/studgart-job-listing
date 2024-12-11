@@ -30,43 +30,34 @@ import { useNavigate, useParams } from "react-router-dom";
 const DetailCompany: React.FC = () => {
   const { companyId } = useParams<{ companyId: string }>(); // Get jobId from URL
   const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
-  const [companyLink, setcompanyLink] = useState("https://www.ca-adv.vn/vi/");
-  const [salaryMin, setSalaryMin] = useState(750);
-  const [salaryMax, setSalaryMax] = useState(1200);
-  const [currency, setCurrency] = useState("USD");
-  const [deadline, setDeadline] = useState("2025-12-14");
-  const [jobDescription, setJobDescription] = useState(`
-  - Understand requirements, analyze, design, build and optimize E-commerce products for the company.
-  - Participate in the maintenance and upgrade of the website's features.
-  - Write well designed, testable, efficient code; Create website layout/user interface by using standard HTML/CSS/JS practices.
-  - Perform work as requested by the manager.`);
-  const [requirements, setRequirements] = useState(`
-  - Good command in English
-  - Bachelor's degree in related field
-  - Experience with PHP (Laravel, WordPress, CodeIgniter), knowledge of Bootstrap, Sass, ReactJS / NodeJS...is an advantage
-  - Proficient in using MySQL/PostgreSQL/MariaDB for database administration
-  - Master the knowledge and experience of HTML 5, CSS 3, JS`);
-  const [benefits, setBenefits] = useState(`
-  - Salary: Negotiable based on experience and track records
-  - A friendly, dynamic and professional environment with great chances to learn new skills and gain valuable experience
-  - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
-  - Periodic and regular evaluations for salary raises in accordance with performances.`);
-  const [location, setLocation] = useState(
-    "Lầu 21, Centec Tower, 72-74 Nguyễn Thị Minh Khai, Quận 3, Hồ Chí Minh"
-  );
-  const [companyName, setCompanyName] = useState("CA Advance");
-  const [companyLogo, setCompanyLogo] = useState(
-    "https://via.placeholder.com/48"
-  );
-  const [companyAddress, setCompanyAddress] = useState(
-    "Lầu 21, Centec Tower, 72-74 Nguyễn Thị Minh Khai, Quận 3, Thành phố Hồ Chí Minh"
-  );
-  const [industry, setIndustry] = useState("Quảng cáo truyền thông");
-  const [companySize, setCompanySize] = useState("100-499 nhân viên");
-  const [nationality, setNationality] = useState("Japan");
-  const [introCompany, setIntroCompany] = useState(
-    "Công ty CA ADVANCE VIETNAM là một công ty đi đầu trong lĩnh vực Internet Marketing, trực thuộc tập đoàn Cyber Agent- một trong những tập đoàn hàng đầu của Nhật bản."
-  );
+  interface Job {
+    _id: string;
+    title: string;
+    company: {
+      logo: string;
+      company_name: string;
+      contact_email: string;
+      contact_phone: string;
+      _id: string;
+    };
+    salaryRange: {
+      min: number;
+      max: number;
+    };
+    location: Array<{ name: string; code: string }>;
+    description: string;
+    responsibilities: string[];
+    requirements: string[];
+    skills: string[];
+    employmentType: Array<{ name: string; code: string }>;
+    experienceLevel: Array<{ name: string; code: string }>;
+    applicationDeadline: string;
+    benefits: string[];
+  }
+  
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
+  
+
 
   const [companyData, setCompanyData] = useState<any>(null);
   const fetchUserData = async (userId: string) => {
@@ -81,7 +72,32 @@ const DetailCompany: React.FC = () => {
       return null;
     }
   };
-
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/group/jobs/suggestions/?page=1&limit=5`);
+      const data = await response.json();
+      
+      const jobsWithCompanyLogo = await Promise.all(data.data.jobs.map(async (job: Job) => {
+     console.log("Job:", job.company);
+        const companyResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/companies/${job.company._id}`);
+        console.log("Job111:", companyResponse.data.data.user_id.profilePicture);
+        const logo = companyResponse.data.data.user_id.profilePicture; // Profile picture URL from the user_id
+  
+        return {
+          ...job,
+          company: {
+            ...job.company,
+            logo,
+          },
+        };
+      }));
+  
+      setRelatedJobs(jobsWithCompanyLogo);
+    };
+  
+    fetchJobs();
+  }, []);
+  
   useEffect(() => {
     const fetchCompanyAndUser = async () => {
       try {
@@ -90,7 +106,6 @@ const DetailCompany: React.FC = () => {
             `${import.meta.env.VITE_API_BASE_URL}/api/companies/${companyId}`
           );
           const companyData = companyResponse.data.data;
-          console.log("BBB", companyData);
 
           setCompanyData({
             name: companyData.company_name,
@@ -103,7 +118,10 @@ const DetailCompany: React.FC = () => {
             logo:
               companyData.user_id.profilePicture ||
               "https://via.placeholder.com/48",
-          });
+          }
+        
+        
+        );
           
           
         }
@@ -365,15 +383,15 @@ const DetailCompany: React.FC = () => {
                   className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md shadow-sm"
                 >
                   <img
-                    src={job.logo}
+                    src={job.company.logo || "default-logo.png"}
                     alt={`${job.company} logo`}
                     className="w-12 h-12 object-cover"
                   />
                   <div>
                     <h3 className="font-bold">{job.title}</h3>
-                    <p className="text-gray-500 text-sm">{job.company}</p>
+                    <p className="text-gray-500 text-sm">{job.company.contact_email}</p>
                     <p className="text-red-500 text-sm font-semibold">
-                      {job.salary}
+                    {job.salaryRange.min} - {job.salaryRange.max} VNĐ
                     </p>
                   </div>
                 </li>
@@ -387,44 +405,5 @@ const DetailCompany: React.FC = () => {
 };
 
 // Sample data for related jobs
-const relatedJobs = [
-  {
-    title: "Software Engineer",
-    company: "WATA Solutions",
-    salary: "8,000,000 - 35,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  {
-    title: "Backend Developer",
-    company: "Tech Innovators",
-    salary: "10,000,000 - 40,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Design Hub",
-    salary: "9,000,000 - 30,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  {
-    title: "Backend Developer",
-    company: "Tech Innovators",
-    salary: "10,000,000 - 40,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Design Hub",
-    salary: "9,000,000 - 30,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Design Hub",
-    salary: "9,000,000 - 30,000,000 VND",
-    logo: "https://via.placeholder.com/48",
-  },
-  // Add more jobs as needed
-];
 
 export default DetailCompany;
