@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -14,17 +15,14 @@ import {
 import { Favorite, useFetchJobs } from '@/lib/reducers/jobseeker/useFetchJobs';
 import { notification } from 'antd';
 import ConfirmationDialog from '../component/ConfirmationDialog';
+import useAuthStore from '@/store/auth/useAuthStore';
+import { useNavigate } from 'react-router-dom';
 
-const getUserIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem('userData');
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
 
 const FavoriteJobs: React.FC = () => {
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const navigate = useNavigate();
+
   const [currentFavertiedPage, setCurrentFavertiedPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for confirmation
@@ -62,13 +60,19 @@ const FavoriteJobs: React.FC = () => {
     setIsDialogOpen(true); // Hiển thị dialog xác nhận
   };
 
+  const handleJobClick = (job: any) => {
+    console.log("Job clicked:", job.id_job);
+    navigate(`/jobseeker/detailjob/${job.id_job}`, { state: { job } });
+  };
   
   // Xử lý xác nhận xóa
   const confirmRemoveFavoriteJob = async () => {
     if (!selectedJobId) return;
+    console.log("selectedJobId:", selectedJobId);
+    console.log("AAAAAAAA:", roleIDs?.job_seeker_id);
 
-    const userId = getUserIdFromLocalStorage();
-    if (!userId) {
+
+    if (!userData) {
       notification.error({
         message: 'Lỗi người dùng',
         description: 'Không tìm thấy thông tin người dùng trong localStorage.',
@@ -80,7 +84,7 @@ const FavoriteJobs: React.FC = () => {
     try {
       // Gửi yêu cầu xóa công việc yêu thích
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${userId}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/favorites/${selectedJobId}/${ roleIDs?.job_seeker_id}`
       );
 
       // Loại bỏ công việc khỏi danh sách hiện tại mà không cần tải lại
@@ -116,7 +120,7 @@ const FavoriteJobs: React.FC = () => {
     <TooltipProvider>
       <ConfirmationDialog
         isOpen={isDialogOpen}
-        message={favorites.get(selectedJobId || "") ? "Do you want to remove this job from favorites?" : "Do you want to favorite this job?"}
+        message={favorites.get(selectedJobId || "") ? "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?" : "Bạn có muốn xóa bỏ công việc này khỏi danh sách yêu thích?"}
         onConfirm={confirmRemoveFavoriteJob}
         onCancel={cancelRemoveFavoriteJob}
       />
@@ -154,7 +158,10 @@ const FavoriteJobs: React.FC = () => {
                           </div>
                       <Tooltip>
                         <TooltipTrigger>
-                          <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer">
+                          <h3 className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
+                          onClick={() => handleJobClick(job)} // Navigate on click
+                          >
+                            
                             {job.title}
                           </h3>
                         </TooltipTrigger>
@@ -246,9 +253,9 @@ const FavoriteJobs: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-sm">{job.title}</h3>
                     <p className="text-gray-600">{job.techStack}</p>
-                    <p className="text-gray-600 flex items-center">
-                      <FiMapPin className="mr-1" /> {job.location}
-                    </p>
+                    <p className="text-gray-600 flex items-center w-[100px] truncate">
+                        <FiMapPin className="mr-1" /> {job.location}
+                      </p>
                     <span className="text-sm text-red-500">{job.salary}</span>
                   </div>
                 </div>

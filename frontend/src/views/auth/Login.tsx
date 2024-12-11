@@ -1,91 +1,130 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaSpinner, FaGoogle } from "react-icons/fa";
-import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import useLoginStore from '../../lib/reducers/auth/loginStore';
-import { useNavigate } from 'react-router-dom';
-import { setPage } from '../../store/navigationSlice';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaEnvelope,
+  FaLock,
+  FaSpinner,
+  FaGoogle,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import useAuthStore from "@/store/auth/useAuthStore";
+import handleLogin from "@/lib/reducers/auth/handleLogin";
 
 function Login() {
-  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for password visibility
   const navigate = useNavigate();
-  const {
-    email, password, loading, setEmail, setPassword, handleLogin
-  } = useLoginStore();
+  const { setLoading, loading, login } = useAuthStore();
+
+  const onLogin = async () => {
+    console.log("Login clicked", email, password);
+    if (!email || !password) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    handleLogin(email, password, navigate, (path: string) => {
+      console.log("Navigated to:", path);
+    });
+  };
 
   const handleGoogleLogin = () => {
     console.log("Google Login clicked");
   };
 
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <ToastContainer newestOnTop />
-      <div className="bg-white p-8 rounded-[24px] shadow-md w-full max-w-4xl flex">
-        <div className="w-1/2 p-4">
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold mb-6">STUDGART</h2>
-          </div>
+      <div className="bg-white p-8 rounded-[24px] shadow-md w-full max-w-4xl flex flex-col sm:flex-row">
+        <div className="w-full sm:w-1/2 p-4">
+          <h2 className="text-2xl font-bold text-center mb-6 text-green-500">
+            STUDGART
+          </h2>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              Username or primary email
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              {" "}
+              Email
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaEnvelope className="ml-3 text-gray-400" />
               <input
                 type="email"
-                id="email"
-                placeholder="Username or primary email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Nhập email"
+                className="w-full py-2 px-3 text-gray-700 focus:outline-none"
               />
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Password
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Mật khẩu
             </label>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
               <FaLock className="ml-3 text-gray-400" />
               <input
-                type="password"
-                id="password"
-                placeholder="Password"
+                type={isPasswordVisible ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Nhập mật khẩu"
+                className="w-full py-2 px-3 text-gray-700 focus:outline-none"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="mr-3"
+              >
+                {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
           </div>
           <button
-            onClick={() => handleLogin(navigate, setPage)}
-            className={`bg-[#007acc] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center ${loading ? 'cursor-not-allowed' : ''}`}
+            onClick={onLogin}
+            className={`w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg ${
+              loading ? "cursor-not-allowed" : ""
+            }`}
             disabled={loading}
           >
-            {loading ? <FaSpinner className="mr-2 animate-spin" /> : "Log In"}
+            {loading ? <FaSpinner className="animate-spin" /> : "Đăng nhập"}
           </button>
-          <button
-            onClick={handleGoogleLogin}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full flex items-center justify-center mt-4"
-          >
-            <FaGoogle className="mr-2" />
-            Sign in with Google
-          </button>
-          <div className="text-center mt-4">
-            <Link to="/passwordreset" className="inline-block align-baseline font-bold text-sm text-[#007acc] hover:text-blue-800">
-              Forgot password?
-            </Link>
+
+          <div className="mb-4 text-center">
+            <p className="text-gray-600">
+              Chưa có tài khoản?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="text-green-500 font-bold hover:underline"
+              >
+                Đăng ký ngay
+              </button>
+            </p>
           </div>
-          <div className="text-center mt-4">
-            <Link to="/register" className="inline-block align-baseline font-bold text-sm text-[#007acc] hover:text-blue-800">
-              Register now
-            </Link>
+
+          <div className="mb-4 text-center">
+            <p className="text-gray-600">
+              <button
+                onClick={() => navigate("/passwordreset")}
+                className="text-green-500 font-bold hover:underline"
+              >
+                Quên mật khẩu
+              </button>
+            </p>
           </div>
         </div>
-        <div className="w-1/2 ml-4">
-          <img src="/images/Right_Side_Image.webp" alt="Right Side Image" className="h-full w-full object-cover rounded-lg" />
+        <div className="w-full sm:w-1/2 mt-6 sm:mt-0">
+          <img
+            src="/images/Right_Side_Image.webp"
+            alt="Illustration"
+            className="hidden sm:block h-full w-full object-cover rounded-lg"
+          />
         </div>
       </div>
     </div>

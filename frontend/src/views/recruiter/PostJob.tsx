@@ -4,8 +4,12 @@ import { postJob } from "@/lib/reducers/recruiter/jobService";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiSend, FiHeart, FiMapPin, FiTrash2 } from "react-icons/fi";
-import { fetchRecommendedCompanies,Company } from "@/lib/reducers/recruiter/postJobs";
-
+import {
+  fetchRecommendedCompanies,
+  Company,
+} from "@/lib/reducers/recruiter/postJobs";
+import useAuthStore from "@/store/auth/useAuthStore";
+import ConfirmationDialog from "../component/ConfirmationDialog";
 
 const getRecruiterIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem("userData");
@@ -16,11 +20,16 @@ const getRecruiterIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 export default function JobListing() {
+  const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
+  const recruiterId = roleIDs?.recruiter_id || ""; // Lấy recruiter_id từ userData
+  console.log("User Data:", userData);
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
   const [salaryMin, setSalaryMin] = useState(750);
   const [salaryMax, setSalaryMax] = useState(1200);
   const [currency, setCurrency] = useState("VNĐ");
-  const [applicationDeadline, setApplicationDeadline] = useState(new Date("2025-12-14"));
+  const [applicationDeadline, setApplicationDeadline] = useState(
+    new Date("2025-12-14")
+  );
   const [jobDescription, setJobDescription] = useState(`
     - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
     - Participate in the maintenance and upgrade of the website's features.
@@ -39,54 +48,72 @@ export default function JobListing() {
     - Periodic and regular evaluations for salary raises in accordance with performances.`);
   const [location, setLocation] = useState("HCM");
   const [companyId, setCompanyId] = useState("60df7992fc13ae1af000006c"); // Update with actual ObjectId
-  const [jobCategoryId, setJobCategoryId] = useState("60df7992fc13ae1af000006d"); // Update with actual ObjectId
+  const [jobCategoryId, setJobCategoryId] = useState(
+    "60df7992fc13ae1af000006d"
+  ); // Update with actual ObjectId
 
   const [companyName, setCompanyName] = useState("CA Advance");
   const [companyLogo, setCompanyLogo] = useState("/path/to/company-logo.png");
-  const [companyAddress, setCompanyAddress] = useState("Lầu 21, Centec Tower, 72-74 đường Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh");
+  const [companyAddress, setCompanyAddress] = useState(
+    "Lầu 21, Centec Tower, 72-74 đường Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh"
+  );
   const [skills, setSkills] = useState<string[]>([]);
   const [selectedSkill, setSelectedSkill] = useState("");
   const availableSkills = ["JavaScript", "React", "Node.js", "CSS", "HTML"];
-
-  const recruiterId= getRecruiterIdFromLocalStorage() || "";
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Cập nhật giá trị dạng Date từ input
     setApplicationDeadline(new Date(event.target.value));
   };
 
+  const handleConfirm = async () => {
+    setIsConfirmOpen(false); // Đóng dialog sau khi xác nhận
+    await handleSubmit(); // Gọi hàm submit job
+  };
+
+  const handleCancel = () => {
+    setIsConfirmOpen(false); // Đóng dialog khi hủy
+  };
+
+  const handleOpenConfirm = () => {
+    setIsConfirmOpen(true); // Mở dialog
+  };
+
   const handleSubmit = async () => {
-    const skillsToSend = skills.length > 0 ? skills.map(skill => ({ name: skill, code: skill.toUpperCase() })) : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
-    
-    console.log("recruiterId:", recruiterId);
+    const skillsToSend =
+      skills.length > 0
+        ? skills.map((skill) => ({ name: skill, code: skill.toUpperCase() }))
+        : [{ name: "DEFAULT_SKILL", code: "DEFAULT" }];
+
     const jobData = {
       title: title.trim(),
       salaryRange: { min: salaryMin, max: salaryMax },
       currency,
       applicationDeadline,
+      isUrgent: true,
       description: jobDescription,
-      responsibilities: jobDescription.split("\n").filter(line => line.trim() !== ""),
-      requirements: requirements.split("\n").filter(line => line.trim() !== ""),
-      benefits: benefits.split("\n").filter(line => line.trim() !== ""),
+      responsibilities: jobDescription
+        .split("\n")
+        .filter((line) => line.trim() !== ""),
+      requirements: requirements
+        .split("\n")
+        .filter((line) => line.trim() !== ""),
+      benefits: benefits.split("\n").filter((line) => line.trim() !== ""),
       location: [{ name: location, code: "HCM" }],
       skills: ["skillsToSend"],
       employmentType: [{ name: "full-time", code: "FT" }],
       experienceLevel: [{ name: "entry", code: "JR" }],
-      company: selectedCompany, // Gán companyId vào đây
-      jobCategory: jobCategoryId, // Ensure this is a valid ObjectId
-      recruiter: recruiterId, // Ensure this is a valid ObjectId
+      company: selectedCompany,
+      jobCategory: jobCategoryId,
+      recruiter: recruiterId,
       technologies: skillsToSend,
     };
 
-    console.log("Job Data:", JSON.stringify(jobData, null, 2)); // Log the job data
-  
     try {
-      const result = await postJob(jobData);
-      console.log("Job posted successfully:", result);
-      alert("Job posted successfully!");
+      const result = await postJob(jobData, userData._id || "");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log("Response:", error.response); // Log full response
         console.error("Error message:", error.message);
       } else {
         console.error("Unexpected error:", error);
@@ -94,8 +121,7 @@ export default function JobListing() {
       alert("Failed to post job!");
     }
   };
-  
-  
+
   const addSkill = () => {
     if (selectedSkill && !skills.includes(selectedSkill.toUpperCase())) {
       setSkills((prevSkills) => [...prevSkills, selectedSkill.toUpperCase()]);
@@ -106,33 +132,35 @@ export default function JobListing() {
   const removeSkill = (skill: string) => {
     setSkills((prevSkills) => prevSkills.filter((s) => s !== skill));
   };
-    const [employeeType, setEmployeeType] = useState("");
-    const [experienceLevel, setExperienceLevel] = useState("");
+  const [employeeType, setEmployeeType] = useState("");
+  const [experienceLevel, setExperienceLevel] = useState("");
 
-    const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>([]); // Array of companies
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>(
+    []
+  ); // Array of companies
   useEffect(() => {
     const loadRecommendedCompanies = async () => {
-      const data = await fetchRecommendedCompanies(); // Gọi API để lấy công ty
+      const data = await fetchRecommendedCompanies(userData._id);
+      console.log("Data:", data);
 
       if (data && Array.isArray(data.data)) {
-        setRecommendedCompanies(data.data.map(item => item.company)); // Chỉ lấy đối tượng company
-        console.log('Recommended Companies:', data.data); // In dữ liệu các công ty
+        setRecommendedCompanies(data.data.map((item) => item.company));
+        console.log("Recommended Companies:", data.data);
       } else {
-        console.error('Error: Invalid data structure', data); // Log lỗi nếu dữ liệu không hợp lệ
+        console.error("Error: Invalid data structure", data);
       }
     };
 
     loadRecommendedCompanies();
-    console.log(recommendedCompanies);
-  }, []);
+  }, [userData]);
   return (
     <div className="flex flex-col gap-8 p-8 md:flex-row justify-center">
       {/* Left Side - Language Selector and Input Fields */}
       <div className="p-6 bg-white shadow-md rounded-md border">
-      <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-      Thêm công việc
-      </div>
+        <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
+          Thêm công việc
+        </div>
 
         {/* Job Title */}
         <div className="mb-6">
@@ -144,11 +172,13 @@ export default function JobListing() {
             className="w-full p-3 border rounded-md"
           />
         </div>
-        
+
         {/* Salary Range */}
         <div className="mb-6 grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-semibold mb-1">Khoảng lương từ</label>
+            <label className="block text-sm font-semibold mb-1">
+              Khoảng lương từ
+            </label>
             <input
               type="number"
               value={salaryMin}
@@ -166,42 +196,45 @@ export default function JobListing() {
             />
           </div>
           <div>
-          <label className="block text-sm font-semibold mb-1">Công ty</label>
-          <select
-  value={selectedCompany}
-  onChange={(e) => setSelectedCompany(e.target.value)}
-  className="w-full p-3 border rounded-md"
->
-  <option value="">Chọn công ty</option>
-  {recommendedCompanies
-    .filter((item) => item) // Filter out null or undefined `company`
-    .map((item) => (
-      <option key={item._id} value={item._id}>
-        {item.company_name}
-      </option>
-    ))}
-  {recommendedCompanies.length === 0 && (
-    <option value="">Không có công ty nào</option>
-  )}
-</select>
-
+            <label className="block text-sm font-semibold mb-1">Công ty</label>
+            <select
+              value={selectedCompany}
+              onChange={(e) => setSelectedCompany(e.target.value)}
+              className="w-full p-3 border rounded-md"
+            >
+              <option value="">Chọn công ty</option>
+              {recommendedCompanies
+                .filter((item) => item) // Filter out null or undefined `company`
+                .map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.company_name}
+                  </option>
+                ))}
+              {recommendedCompanies.length === 0 && (
+                <option value="">Không có công ty nào</option>
+              )}
+            </select>
           </div>
         </div>
-        
+
         {/* Deadline */}
         <div className="mb-6">
-        <label className="block text-sm font-semibold mb-1">Thời gian hết hạn</label>
-        <input
-          type="date"
-          value={applicationDeadline.toISOString().split("T")[0]} // Hiển thị giá trị theo định dạng YYYY-MM-DD
-          onChange={handleDateChange}
-          className="w-full p-3 border rounded-md"
-        />
-      </div>
+          <label className="block text-sm font-semibold mb-1">
+            Thời gian hết hạn
+          </label>
+          <input
+            type="date"
+            value={applicationDeadline.toISOString().split("T")[0]} // Hiển thị giá trị theo định dạng YYYY-MM-DD
+            onChange={handleDateChange}
+            className="w-full p-3 border rounded-md"
+          />
+        </div>
 
         {/* Job Description */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Mô tả công việc</label>
+          <label className="block text-sm font-semibold mb-1">
+            Mô tả công việc
+          </label>
           <textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
@@ -212,7 +245,9 @@ export default function JobListing() {
 
         {/* Job Requirements */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Yêu cầu ứng viên</label>
+          <label className="block text-sm font-semibold mb-1">
+            Yêu cầu ứng viên
+          </label>
           <textarea
             value={requirements}
             onChange={(e) => setRequirements(e.target.value)}
@@ -232,52 +267,53 @@ export default function JobListing() {
           />
         </div>
         <div className="mb-6">
-      <label className="block text-sm font-semibold mb-1">Kỹ năng</label>
-      
-      <div className="flex items-center gap-2">
-        <select
-          value={selectedSkill}
-          onChange={(e) => setSelectedSkill(e.target.value)}
-          className="flex-1 p-3 border rounded-md"
-        >
-          <option value="">Chọn kỹ năng</option>
-          {availableSkills.map((skill) => (
-            <option key={skill} value={skill}>
-              {skill}
-            </option>
-          ))}
-        </select>
-        
-        <button
-          onClick={addSkill}
-          className="bg-green-500 text-white py-2 px-4 rounded-md"
-        >
-          Thêm
-        </button>
-      </div>
+          <label className="block text-sm font-semibold mb-1">Kỹ năng</label>
 
-      <h4 className="font-bold mt-4">Danh sách kỹ năng</h4>
-      <div className="flex flex-wrap gap-2">
-        {skills.map((skill) => (
-          <div
-            key={skill}
-            className="flex items-center px-3 py-1 bg-gray-200 rounded-full text-gray-700"
-          >
-            <span className="mr-2">{skill}</span>
-            <button
-              onClick={() => removeSkill(skill)}
-              className="text-gray-500 hover:text-red-300 transition" // Light red on hover
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedSkill}
+              onChange={(e) => setSelectedSkill(e.target.value)}
+              className="flex-1 p-3 border rounded-md"
             >
-              <FiTrash2 className="w-4 h-4" /> {/* Trash Icon */}
+              <option value="">Chọn kỹ năng</option>
+              {availableSkills.map((skill) => (
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={addSkill}
+              className="bg-green-500 text-white py-2 px-4 rounded-md"
+            >
+              Thêm
             </button>
           </div>
-        ))}
-      </div>
 
-    </div>
+          <h4 className="font-bold mt-4">Danh sách kỹ năng</h4>
+          <div className="flex flex-wrap gap-2">
+            {skills.map((skill) => (
+              <div
+                key={skill}
+                className="flex items-center px-3 py-1 bg-gray-200 rounded-full text-gray-700"
+              >
+                <span className="mr-2">{skill}</span>
+                <button
+                  onClick={() => removeSkill(skill)}
+                  className="text-gray-500 hover:text-red-300 transition" // Light red on hover
+                >
+                  <FiTrash2 className="w-4 h-4" /> {/* Trash Icon */}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
         {/* New Field: Employee Type */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Loại nhân viên</label>
+          <label className="block text-sm font-semibold mb-1">
+            Loại nhân viên
+          </label>
           <select
             value={employeeType}
             onChange={(e) => setEmployeeType(e.target.value)}
@@ -293,7 +329,9 @@ export default function JobListing() {
 
         {/* New Field: Experience Level */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Kinh nghiệm</label>
+          <label className="block text-sm font-semibold mb-1">
+            Kinh nghiệm
+          </label>
           <select
             value={experienceLevel}
             onChange={(e) => setExperienceLevel(e.target.value)}
@@ -308,7 +346,9 @@ export default function JobListing() {
 
         {/* Job Location */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-1">Địa điểm làm việc</label>
+          <label className="block text-sm font-semibold mb-1">
+            Địa điểm làm việc
+          </label>
           <input
             type="text"
             value={location}
@@ -316,21 +356,29 @@ export default function JobListing() {
             className="w-full p-3 border rounded-md"
           />
         </div>
-        <button  onClick={handleSubmit} 
-        className="bg-green-500 text-white py-2 px-4 rounded-md">Đăng</button>
+        <button
+          onClick={handleOpenConfirm}
+          className="bg-green-500 text-white py-2 px-4 rounded-md"
+        >
+          Đăng
+        </button>
       </div>
 
       {/* Right Side - Job Preview */}
       <div className="p-6 bg-gray-50 shadow-md rounded-md border space-y-6">
-      <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-      PREVIEW
-      </div>
+        <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
+          Bản xem trước
+        </div>
         {/* Section 1: Job Info and Company */}
         <div className="p-4 bg-white shadow rounded-md border">
           <div className="flex items-center justify-between mb-4">
             {/* Company Logo */}
             <div className="flex items-center">
-              <img src={companyLogo} alt="Company Logo" className="w-16 h-16 mr-4" />
+              <img
+                src={companyLogo}
+                alt="Company Logo"
+                className="w-16 h-16 mr-4"
+              />
               <div>
                 <h2 className="text-lg font-bold">{title}</h2>
                 <p className="text-gray-600">{companyName}</p>
@@ -345,13 +393,14 @@ export default function JobListing() {
               <FiHeart className="text-gray-400 w-6 h-6" />
             </div>
           </div>
-
           <p className="text-red-500 text-lg font-bold">
             {salaryMin} {currency} - {salaryMax} {currency}
           </p>
           <p className="text-gray-400 mt-1">10 minutes ago</p>
-
-          <p className="text-gray-500 mt-2">Hết hạn: {applicationDeadline.toDateString()}</p> {/* Hiển thị định dạng ngày đọc được */}
+          <p className="text-gray-500 mt-2">
+            Hết hạn: {applicationDeadline.toDateString()}
+          </p>{" "}
+          {/* Hiển thị định dạng ngày đọc được */}
         </div>
 
         {/* Section 2: Job Details */}
@@ -359,15 +408,21 @@ export default function JobListing() {
           <h3 className="font-bold">Chi tiết tuyển dụng</h3>
 
           <h4 className="font-bold mt-4">Mô tả công việc</h4>
-          <p className="text-sm text-gray-600 whitespace-pre-line">{jobDescription}</p>
+          <p className="text-sm text-gray-600 whitespace-pre-line">
+            {jobDescription}
+          </p>
 
           <h4 className="font-bold mt-4">Yêu cầu ứng viên</h4>
-          <p className="text-sm text-gray-600 whitespace-pre-line">{requirements}</p>
+          <p className="text-sm text-gray-600 whitespace-pre-line">
+            {requirements}
+          </p>
 
           <h4 className="font-bold mt-4">Quyền lợi</h4>
-          <p className="text-sm text-gray-600 whitespace-pre-line">{benefits}</p>
-            {/* Display New Fields */}
-        {/* Job Info... */}
+          <p className="text-sm text-gray-600 whitespace-pre-line">
+            {benefits}
+          </p>
+          {/* Display New Fields */}
+          {/* Job Info... */}
           <h3 className="font-bold">Kỹ năng</h3>
           <ul className="text-gray-700">
             {skills.map((skill) => (
@@ -382,9 +437,16 @@ export default function JobListing() {
           <p className="text-sm text-gray-600">{experienceLevel}</p>
 
           <h4 className="font-bold mt-4">Địa điểm làm việc</h4>
-          <p className="text-sm text-gray-600 whitespace-pre-line">{location}</p>
-          
+          <p className="text-sm text-gray-600 whitespace-pre-line">
+            {location}
+          </p>
         </div>
+        <ConfirmationDialog
+          isOpen={isConfirmOpen}
+          message="Bạn sẽ tốn 2 diamond cho bài đăng này. Bạn có muốn tiếp tục ?"
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
       </div>
     </div>
   );

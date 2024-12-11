@@ -1,8 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import useAuthStore from "@/store/auth/useAuthStore";
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { User } from "../jobseeker/useFetchJobs";
+import axios from "axios";
 
 interface Job {
   id: string;
@@ -75,18 +78,12 @@ interface FetchJobsReturn {
   handlePageChange: (page: number) => void;
   handleFavertiedPageChange: (page: number) => void;
 }
-const getRecruiterIdFromLocalStorage = (): string | null => {
-  const userData = localStorage.getItem('userData');
-  if (userData) {
-    const parsedData = JSON.parse(userData);
-    return parsedData.recruiter_id || null; // Return user ID or null if not found
-  }
-  return null; // Return null if no userData in localStorage
-};
+
 
 
 export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const { userData,roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [topCompanies, setTopCompanies] = useState<Company[]>([]);
@@ -115,19 +112,25 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         `${import.meta.env.VITE_API_BASE_URL}/api/companies-top/top?size=5`
       );
       const result = await response.json();
-
+  
       if (!result.error && result.data && result.data.topCompanies) {
-        const formattedTopCompanies = result.data.topCompanies.map(
-          (company: any) => ({
-            id: company.company._id,
-            name: company.company.company_name,
-            avatar: "", // If avatar is available in the API response, use it here
-            location: company.company.company_address,
-            openings: company.jobCount,
+        // Map over the companies to format and fetch additional user data
+        const formattedTopCompanies = await Promise.all(
+          result.data.topCompanies.map(async (company: any) => {
+            const avatar = await fetchUserData(company.company.user_id); // Fetch user data based on user_id
+
+            return {
+              id: company.company._id,
+              name: company.company.company_name,
+              avatar: avatar?.profilePicture || company.company.logo || "", // Use user profile picture or company logo
+              location: company.company.contact_email,
+              openings: company.jobCount,
+            };
           })
         );
-
+  
         setTopCompanies(formattedTopCompanies);
+
       } else {
         console.error("Failed to fetch top companies:", result);
         setTopCompanies([]);
@@ -135,6 +138,31 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     } catch (error) {
       console.error("Failed to fetch top companies:", error);
       setTopCompanies([]);
+    }
+  };
+  
+
+   const fetchUserData = async (userId: string): Promise<User | null> => {
+    try {
+      const response = await axios.get<{ data: User }>(`${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`);
+
+      return response.data.data; // Assuming data is nested within response
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  };
+  const fetchUserAvatar = async (userId: string): Promise<string> => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`
+      );
+      const data = await response.json();
+      return data.data?.profilePicture || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
+
+    } catch (error) {
+      console.error(`Failed to fetch avatar for user ${userId}:`, error);
+      return "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"; // Fallback avatar
     }
   };
 
@@ -147,29 +175,39 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         }/api/group/jobs/suggestions/?page=${page}&limit=5&${query}`
       );
       const result: RecommendedApiResponse = await response.json();
-
+  
       if (
         !result.error &&
         result.data &&
         result.data.jobs &&
         Array.isArray(result.data.jobs)
       ) {
-        const formattedRecommendedJobs = result.data.jobs.map((job: any) => ({
-          id: job._id,
-          title: job.title,
-          company: job.company?.company_name || "",
-          location: job.location[0]?.name || "",
-          salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
-          techStack: job.technologies.map((tech: any) => tech.name).join(", "),
-          timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "",
-          isHot: job.isUrgent,
-          applicationDeadline: new Date(job.applicationDeadline),
-          isNew:
-            new Date().getTime() - new Date(job.postedDate).getTime() <
-            7 * 24 * 60 * 60 * 1000,
-        }));
-
+        const formattedRecommendedJobs = await Promise.all(
+          result.data.jobs.map(async (job: any) => {
+            const companyId = job.company?.user_id;
+            const avatar = companyId
+              ? await fetchUserAvatar(companyId)
+              : "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
+  
+            return {
+              id: job._id,
+              title: job.title,
+              company: job.company?.company_name || "",
+              location: job.location[0]?.name || "",
+              salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
+              techStack: job.technologies.map((tech: any) => tech.name).join(", "),
+              timePosted: new Date(job.postedDate).toLocaleDateString(),
+              avatar,
+              isHot: job.isUrgent,
+              applicationDeadline: new Date(job.applicationDeadline),
+              isNew:
+                new Date().getTime() - new Date(job.postedDate).getTime() <
+                7 * 24 * 60 * 60 * 1000,
+                
+            };
+          })
+        );
+  
         setRecommendedJobs(formattedRecommendedJobs);
       } else {
         console.error("No jobs found or incorrect format:", result);
@@ -184,7 +222,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     setLoading(true);
     try {
       const query = new URLSearchParams(searchParams);
-      
+  
       // Add page to query if not already present
       if (!query.has("page")) {
         query.set("page", currentPageJobs.toString());
@@ -194,37 +232,49 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       if (!query.has("limit")) {
         query.set("limit", limit.toString());
       }
-  const a=getRecruiterIdFromLocalStorage();
+
       // Add recruiter to query if not already present
       if (!query.has("recruiter")) {
-        query.set("recruiter", `${a}`); // Giá trị recruiter mặc định
+        query.set("recruiter", `${roleIDs?.recruiter_id}`); // Giá trị recruiter mặc định
+        console.log(roleIDs);
       }
   
       const queryString = query.toString();
       console.log(queryString);
-
+  
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/jobs?${queryString}`
       );
       const result: ApiResponse = await response.json();
-
+  
+  
       if (!result.error) {
-        const formattedJobs = result.data.docs.map((job: any) => ({
-          id: job._id,
-          title: job.title,
-          company: job.company?.company_name || "",
-          location: job.location[0]?.name || "",
-          salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
-          techStack: job.technologies.map((tech: any) => tech.name).join(", "),
-          timePosted: new Date(job.postedDate).toLocaleDateString(),
-          avatar: job.company?.avatar || "",
-          isHot: job.isUrgent,
-          applicationDeadline: new Date(job.applicationDeadline),
-          isNew:
-            Date.now() - new Date(job.postedDate).getTime() <
-            7 * 24 * 60 * 60 * 1000,
-        }));
-
+        // Fetch avatar for each company
+        const formattedJobs = await Promise.all(
+          result.data.docs.map(async (job: any) => {
+            let avatar = job.company?.logo || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"; // Default to company logo if available
+            if (job.company?.user_id) {
+              const userData = await fetchUserData(job.company.user_id);
+              avatar = userData?.profilePicture || avatar; // Use user profile picture if available
+            }
+            return {
+              id: job._id,
+              title: job.title,
+              company: job.company?.company_name || "",
+              location: job.location[0]?.name || "",
+              salary: formatSalary(job.salaryRange?.min, job.salaryRange?.max),
+              techStack: job.technologies.map((tech: any) => tech.name).join(", "),
+              timePosted: new Date(job.postedDate).toLocaleDateString(),
+              applicationDeadline: new Date(job.applicationDeadline),
+              avatar, // Set the resolved avatar
+              isHot: job.isUrgent,
+              isNew:
+                Date.now() - new Date(job.postedDate).getTime() <
+                7 * 24 * 60 * 60 * 1000, // Check if the job is new
+            };
+          })
+        );
+  
         setJobs(formattedJobs);
         setTotalPagesJobs(result.data.totalPages);
       }
@@ -234,72 +284,12 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       setLoading(false);
     }
   };
+  
 
-
-  const fetchFaveritedJobs = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=67273fea96599e898e7bbd6c&page=${currentFavertiedPageJobs}&limit=${limit}`
-      );
-      const result: ApiResponse = await response.json();
-  
-      if (!result.error && Array.isArray(result.data?.docs)) {
-        const formattedJobs = result.data.docs.map((job: any) => {
-          const jobDetails = job.job_id; // Truy cập vào job_id để lấy thông tin
-  
-          // Log ra ID của favorite và job_id
-          console.log("Favorite ID:", job._id);
-          console.log("Job ID:", jobDetails?._id);
-  
-          return {
-            id_job: jobDetails?._id,
-            id: job._id,
-            title: jobDetails?.title || "",
-            company: jobDetails?.company?.company_name || "",
-            location: jobDetails?.location?.[0]?.name || "",
-            salary: jobDetails?.salaryRange
-              ? formatSalary(
-                  jobDetails.salaryRange.min,
-                  jobDetails.salaryRange.max
-                )
-              : "N/A",
-            techStack: Array.isArray(jobDetails?.technologies)
-              ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
-              : "",
-            timePosted: jobDetails?.postedDate
-              ? new Date(jobDetails.postedDate).toLocaleDateString()
-              : "N/A",
-            avatar: jobDetails?.company?.avatar || "",
-            isHot: jobDetails?.isUrgent || false,
-            isNew: jobDetails?.postedDate
-              ? Date.now() - new Date(jobDetails.postedDate).getTime() <
-                7 * 24 * 60 * 60 * 1000
-              : false,
-          };
-        });
-  
-        setFavertiedJobs(formattedJobs);
-        setTotalFavertiedPagesJobs(result.data.totalPages);
-      } else {
-        console.warn(
-          "No valid job data found or result.data.docs is not an array"
-        );
-        setFavertiedJobs([]); // Reset danh sách về mảng rỗng nếu không có dữ liệu
-      }
-    } catch (error) {
-      console.error("Failed to fetch jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   
 
   useEffect(() => {
-    // Re-fetch jobs and related data when searchParams, page or favorite page changes
-    fetchFaveritedJobs();
+
     fetchJobs();
 
     fetchTopCompanies();

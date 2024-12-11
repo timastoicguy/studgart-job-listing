@@ -2,7 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FiPlus, FiTrash } from "react-icons/fi";
 import clsx from "clsx";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -39,7 +45,6 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
     }
   };
 
-
   const removeTechnology = (tech: string) => {
     setTechnologies(technologies.filter((item) => item !== tech));
   };
@@ -74,29 +79,32 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
     >
       <h2 className="font-semibold text-lg mb-4 mt-6">Bộ lọc</h2>
 
-        {/* Sort Options */}
-        <div className="mb-4">
-          <RadioGroup onValueChange={setSort}>
-            <label className="block text-sm font-medium mb-1 text-slate-400">Sắp xếp</label>
-            <div className="flex flex-col gap-2">
-              {[
-                { value: "latest", label: "Mới nhất" },
-                { value: "highestSalary", label: "Lương cao nhất" },
-                { value: "urgent", label: " Tuyển gấp" },
-              ].map(({ value, label }) => (
-                <label key={value} className="flex items-center">
-                  <RadioGroupItem value={value} id={value} />
-                  <span className="ml-2">{label}</span>
-                </label>
-              ))}
-            </div>
-          </RadioGroup>
-        </div>
-
+      {/* Sort Options */}
+      <div className="mb-4">
+        <RadioGroup onValueChange={setSort}>
+          <label className="block text-sm font-medium mb-1 text-slate-400">
+            Sắp xếp
+          </label>
+          <div className="flex flex-col gap-2">
+            {[
+              { value: "latest", label: "Mới nhất" },
+              { value: "highestSalary", label: "Lương cao nhất" },
+              { value: "urgent", label: " Tuyển gấp" },
+            ].map(({ value, label }) => (
+              <label key={value} className="flex items-center">
+                <RadioGroupItem value={value} id={value} />
+                <span className="ml-2">{label}</span>
+              </label>
+            ))}
+          </div>
+        </RadioGroup>
+      </div>
 
       {/* Company Filter */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Tìm kiếm</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">
+          Tìm kiếm
+        </label>
         <input
           type="text"
           value={search}
@@ -106,34 +114,26 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
         />
       </div>
 
-      {/* Category Filter */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Ngành nghề</label>
-        <Select onValueChange={setCategory}>
-          <SelectTrigger>
-            <SelectValue placeholder="Chọn ngành nghề" />
-          </SelectTrigger>
-          <SelectContent>
-            {["all", "it", "marketing", "finance"].map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Experience Level Filter */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Kinh nghiệm</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">
+          Kinh nghiệm
+        </label>
         <Select onValueChange={setExperienceLevel}>
           <SelectTrigger>
             <SelectValue placeholder="Chọn kinh nghiệm" />
           </SelectTrigger>
           <SelectContent>
-            {["all", "mid", "senior", "lead"].map((exp) => (
-              <SelectItem key={exp} value={exp}>
-                {exp.charAt(0).toUpperCase() + exp.slice(1)}
+            {[
+              { label: "Tất cả", value: "all" },
+              { label: "Junior", value: "JR" },
+              { label: "Mid", value: "MID" },
+              { label: "Senior", value: "SR" },
+              { label: "Lead", value: "LEAD" },
+            ].map((exp) => (
+              <SelectItem key={exp.value} value={exp.value}>
+                {exp.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -142,7 +142,9 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Technologies Filter */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Công nghệ</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">
+          Công nghệ
+        </label>
         <div className="flex items-center">
           <input
             type="text"
@@ -157,9 +159,16 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
         </div>
         <div className="flex flex-wrap gap-1 mt-2">
           {technologies.map((tech) => (
-            <div key={tech} className="flex items-center bg-gray-200 p-1 rounded hover:bg-gray-300">
+            <div
+              key={tech}
+              className="flex items-center bg-gray-200 p-1 rounded hover:bg-gray-300"
+            >
               <span>{tech}</span>
-              <button type="button" onClick={() => removeTechnology(tech)} className="ml-2 text-red-500">
+              <button
+                type="button"
+                onClick={() => removeTechnology(tech)}
+                className="ml-2 text-red-500"
+              >
                 <FiTrash />
               </button>
             </div>
@@ -169,19 +178,25 @@ export default function Sidebar({ showSidebar }: SidebarProps) {
 
       {/* Salary Filters */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1 text-slate-400">Mức lương</label>
+        <label className="block text-sm font-medium mb-1 text-slate-400">
+          Mức lương
+        </label>
         <div className="flex gap-2">
           <input
             type="number"
             value={minSalary ?? ""}
-            onChange={(e) => setMinSalary(e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) =>
+              setMinSalary(e.target.value ? Number(e.target.value) : undefined)
+            }
             placeholder="Tối thiểu"
             className="w-full p-2 border rounded"
           />
           <input
             type="number"
             value={maxSalary ?? ""}
-            onChange={(e) => setMaxSalary(e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) =>
+              setMaxSalary(e.target.value ? Number(e.target.value) : undefined)
+            }
             placeholder="Tối đa"
             className="w-full p-2 border rounded"
           />

@@ -5,39 +5,38 @@ import { Suspense, useState, useEffect } from "react";
 import clsx from "clsx";
 import ChatBox from "./ChatBox"; // Import the ChatBox component
 import { FaRegCommentDots, FaMinus } from "react-icons/fa"; // Import the minimize icon
+import useAuthStore from "../store/auth/useAuthStore"; // Import Zustand store for auth
 
 export default function MainLayout() {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
-  const [userData, setUserData] = useState<{ name: string; role: string } | null>(null);
   const [chatVisible, setChatVisible] = useState<boolean>(false); // Initially set to false for hidden state
   const [isMinimized, setIsMinimized] = useState<boolean>(false); // State to manage minimize status
+  
+  // Get the userData from Zustand store
+  //const {userData} = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation(); // Get current route
 
-  useEffect(() => {
-    const encryptedData = localStorage.getItem("userData");
+  // Effect to redirect to login if user is not authenticated
+  // useEffect(() => {
+  //   console.log(userData);
+  //   if (!userData) {
+  //    // navigate("/login"); // Redirect to login if no user data is found in Zustand store
+  //   }
+  // }, [userData, navigate]);
 
-    if (!encryptedData) {
-      // Redirect to login if no user data is found
-      navigate("/login");
-    } else {
-      const decryptedData = JSON.parse(encryptedData);
-      setUserData(decryptedData);
-    }
-  }, [navigate]);
+
+  const { checkAuth1 ,userData} = useAuthStore();
+
+  useEffect(() => {
+    checkAuth1();
+  }, [checkAuth1, navigate]);
 
   // Wait until userData is loaded to render the layout
-  if (!userData) {
-    return null; // or a loading spinner, depending on your preference
-  }
 
   // Handle logout
-  const onLogout = () => {
-    localStorage.removeItem("userData");
-    navigate("/login"); // Redirect to login page after logout
-  };
 
-  // Determine if sidebar should be shown
+  // Determine if sidebar should be shown based on the current route
   const shouldShowSidebar = location.pathname === "/about" || location.pathname.startsWith("/jobseeker/jobs");
 
   // Toggle chat visibility (show or hide)
@@ -62,13 +61,17 @@ export default function MainLayout() {
     setIsMinimized(false); // Reset minimize state when closing the chat
   };
 
+
+  if (!userData) {
+    return null; // or a loading spinner, depending on your preference
+  }
+
+
   return (
     <div className="w-full min-h-screen bg-custom">
       <Header
         showSideBar={showSidebar}
         setShowSideBar={setShowSidebar}
-        userData={userData} // Pass userData to Header
-        onLogout={onLogout} // Pass onLogout function to Header
       />
 
       {/* Only render Sidebar when on specified pages like About or Jobs */}
@@ -84,10 +87,7 @@ export default function MainLayout() {
             visible: showSidebar,
           }
         )}
-      >
-
-        
-      </div>
+      />
 
       {/* Displays other views, adjusts layout based on sidebar visibility */}
       <div className={clsx("transition-all", { "ml-0": !shouldShowSidebar, "ml-[270px]": showSidebar })}>

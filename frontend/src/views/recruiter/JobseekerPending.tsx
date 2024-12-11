@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
@@ -21,8 +22,13 @@ import {
 } from "@/components/ui/tablechecked";
 import { useParams } from "react-router-dom";
 import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
+import Preview from "./Prevew";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 const JobseekerPending = () => {
+  const { userData } = useAuthStore(); // Truy cập thông tin người dùng từ store
+
+
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -32,7 +38,7 @@ const JobseekerPending = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [usernames, setUsernames] = useState<Record<string, string>>({});
-console.log("jobId: ", accounts);
+  const [emails, setEmails] = useState<Record<string, string>>({});
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -52,7 +58,6 @@ console.log("jobId: ", accounts);
         );
         setAccounts(response.data.data.docs);
 
-        console.log("##########: ", accounts);
         setTotalPages(response.data.data.totalPages);
         // Gửi thông báo
       } catch (error) {
@@ -73,12 +78,13 @@ console.log("jobId: ", accounts);
         `${import.meta.env.VITE_API_BASE_URL}/api/users/${userId}`
       );
       const username = response.data.data.username || "Unknown";
+      const email = response.data.data.email || "Unknown";
       setUsernames((prev) => ({ ...prev, [userId]: username })); // Cập nhật state với username mới
+      setEmails((prev) => ({ ...prev, [userId]: email })); // Cập nhật state với username mới
     } catch (error) {
       console.error(`Error fetching username for userId ${userId}:`, error);
     }
   };
-
   // Gọi API lấy username khi accounts thay đổi
   useEffect(() => {
     accounts.forEach((account) => {
@@ -91,17 +97,21 @@ console.log("jobId: ", accounts);
   const handleAccept = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/applications/${applicationId}`,
-        {
-          application_status: "accepted",
-        }
+        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
+        { application_status: "accepted" }
       );
-
-
+  
       if (response.status === 200) {
         console.log("Application accepted");
+        const jobId = response.data.data.job_id;
+  
+        // Fetch job details to get the company name
+        const jobResponse = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`
+        );
+        const companyName = jobResponse.data.data?.company?.company_name || "Công ty";
+  
+        // Update the UI
         setAccounts((prevAccounts) =>
           prevAccounts.map((account) =>
             account._id === applicationId
@@ -109,10 +119,12 @@ console.log("jobId: ", accounts);
               : account
           )
         );
+  
+        // Send notification with company name
         await sendNotification(
           userId,
           "application_status",
-          "Công ty XYZ đã chấp nhận hồ sơ của bạn."
+          `${userData.username},Công ty ${companyName} đã chấp nhận hồ sơ của bạn.`
         );
       } else {
         console.error("Error accepting application");
@@ -121,20 +133,26 @@ console.log("jobId: ", accounts);
       console.error("Error accepting application:", error);
     }
   };
-
+  
   const handleReject = async (applicationId: string, userId: string) => {
     try {
       const response = await axios.put(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/applications/${applicationId}`,
-        {
-          application_status: "rejected",
-        }
+        `${import.meta.env.VITE_API_BASE_URL}/api/applications/${applicationId}`,
+        { application_status: "rejected" }
       );
-
+  
       if (response.status === 200) {
         console.log("Application rejected");
+        const jobId = response.data.data.job_id;
+  
+        // Fetch job details to get the company name
+        const jobResponse = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/jobs/${jobId}`
+        );
+        console.log(jobResponse);
+        const companyName = jobResponse.data.data?.company?.company_name || "Công ty";
+  
+        // Update the UI
         setAccounts((prevAccounts) =>
           prevAccounts.map((account) =>
             account._id === applicationId
@@ -142,10 +160,12 @@ console.log("jobId: ", accounts);
               : account
           )
         );
+  
+        // Send notification with company name
         await sendNotification(
           userId,
           "application_status",
-          `Công ty XYZ đã từ chối hồ sơ của bạn.`
+           `${userData.username},Công ty ${companyName} đã từ chối hồ sơ của bạn.`
         );
       } else {
         console.error("Error rejecting application");
@@ -154,6 +174,7 @@ console.log("jobId: ", accounts);
       console.error("Error rejecting application:", error);
     }
   };
+  
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -319,7 +340,7 @@ console.log("jobId: ", accounts);
                     <TableCell>
                       {userId ? usernames[userId] || "Đang tải..." : "null"}
                     </TableCell>
-                    <TableCell>{account.role || "null"}</TableCell>
+                    <TableCell> {userId ? emails[userId] || "Đang tải..." : "null"}</TableCell>
                     <TableCell>
                       {account.applied_at
                         ? new Date(account.applied_at).toLocaleString("en-GB")
@@ -336,7 +357,7 @@ console.log("jobId: ", accounts);
                       {account.application_status || "null"}
                     </TableCell>
                     <TableCell>
-                      <button
+                      {/* <button
                         className={`text-blue-500 hover:text-blue-700 mx-1 ${
                           account.application_status === "reviewed"
                             ? "opacity-50 cursor-not-allowed"
@@ -346,7 +367,8 @@ console.log("jobId: ", accounts);
                         disabled={account.application_status === "reviewed"}
                       >
                         <FaEye title="Xem" size={18} />
-                      </button>
+                      </button> */}
+                      <Preview account={account} userId={userId}></Preview>
                       <button
                         className={`text-green-500 hover:text-green-700 mx-1 ${
                           account.application_status === "accepted"

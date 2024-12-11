@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSort, FaSearch, FaEye, FaCheck, FaTimes } from "react-icons/fa";
@@ -20,8 +22,8 @@ import {
   TableCell,
 } from "@/components/ui/tablechecked";
 import ConfirmationDialog from "../component/ConfirmationDialog";
-import { notification } from 'antd';
-
+import { notification } from "antd";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 // Định nghĩa kiểu dữ liệu cho User
 interface User {
@@ -34,30 +36,33 @@ interface User {
 }
 
 const AddCompanyIdentity = () => {
-  const [accounts, setAccounts] = useState<User[]>([]); // Định rõ kiểu dữ liệu cho accounts
-  const [loading, setLoading] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [limit, setLimit] = useState(10);
+  const { userData ,roleIDs} = useAuthStore(); // Lấy thông tin người dùng từ store
+  const [accounts, setAccounts] = useState<User[]>([]); // Danh sách tài khoản
+  const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const [page, setPage] = useState(1); // Trang hiện tại
+  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm
+  const [limit, setLimit] = useState(10); // Số lượng tài khoản mỗi trang
 
-  // Trạng thái cho hộp thoại xác nhận
+  // Trạng thái và dữ liệu liên quan đến hộp thoại xác nhận
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  
+
+  // Xử lý thay đổi từ khóa tìm kiếm
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-    setPage(1); // Reset to first page on new search
+    setPage(1); // Reset về trang đầu tiên khi tìm kiếm
   };
-  
+
+  // Xử lý chuyển đổi trang
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
   };
 
-  // Fetch Accounts Data
+  // Hàm lấy danh sách tài khoản
   const fetchAccounts = async () => {
     try {
       setLoading(true);
@@ -69,11 +74,10 @@ const AddCompanyIdentity = () => {
       if (searchTerm) {
         params.email = searchTerm;
       }
+
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/users`,
-        {
-          params,
-        }
+        { params }
       );
       const { users, totalPages } = response.data.data;
       setAccounts(users);
@@ -86,78 +90,91 @@ const AddCompanyIdentity = () => {
     }
   };
 
+  // Gọi hàm fetchAccounts khi thay đổi trang, giới hạn hoặc từ khóa tìm kiếm
   useEffect(() => {
     fetchAccounts();
   }, [page, limit, searchTerm]);
 
+  // Xử lý khi người dùng nhấn nút phê duyệt
   const handleApprove = (userId: string) => {
-    setSelectedUserId(userId); // Lưu userId để xác nhận
-    setConfirmationMessage("Bạn có chắc chắn muốn thêm nhân sự này?");
-    setIsDialogOpen(true); // Mở hộp thoại xác nhận
+    setSelectedUserId(userId);
+    setConfirmationMessage("Bạn có chắc chắn muốn thêm người tuyển dụng này?");
+    setIsDialogOpen(true);
   };
 
+  // Xác nhận thêm người tuyển dụng vào công ty
   const handleConfirmApprove = async () => {
     if (!selectedUserId) return;
   
     try {
-      const userData = localStorage.getItem("userData");
-      const company_id = userData ? JSON.parse(userData).company_id : null;
+      const company_id = roleIDs?.company_id ?? null;
+      console.log("Company ID:", company_id);
   
       if (!company_id) {
-        console.error("Company ID not found in localStorage");
+        console.error("Company ID not found in user data");
         return;
       }
   
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters`,
-        {
-          params: { user_id: selectedUserId },
-        }
+        { params: { user_id: selectedUserId } }
       );
   
-      const recruiterId = response.data.data.length > 0 ? response.data.data[0]._id : null;
+      const recruiterId =
+        response.data.data.length > 0 ? response.data.data[0]._id : null;
+      console.log("Recruiter ID:", recruiterId);
   
       if (!recruiterId) {
         console.error("Recruiter not found for this user.");
         return;
       }
   
+      // Dữ liệu PATCH sẽ được log ra để kiểm tra
+      const patchData = {
+        user_id: selectedUserId,
+        company_id: company_id,
+        status: "unlock",
+      };
+  
+      console.log("Data to be patched:", patchData);
+  
       await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/recruiters/${recruiterId}`,
-        { user_id: selectedUserId, company_id },
+        patchData
       );
   
       // Hiển thị thông báo thành công
       notification.success({
-        message: 'Thành công',
-        description: 'Nhân sự đã được thêm vào công ty.',
-        placement: 'topRight', // Vị trí hiển thị thông báo
+        message: "Thành công",
+        description: "Nhân sự đã được thêm vào công ty.",
+        placement: "topRight",
       });
   
-      setIsDialogOpen(false); // Đóng hộp thoại xác nhận
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error approving employee:", error);
   
-      // Hiển thị thông báo lỗi nếu có
+      // Hiển thị thông báo lỗi
       notification.error({
-        message: 'Lỗi',
-        description: 'Có lỗi xảy ra khi thêm nhân sự.',
-        placement: 'topRight', // Vị trí hiển thị thông báo
+        message: "Lỗi",
+        description: "Có lỗi xảy ra khi thêm người tuyển dụng.",
+        placement: "topRight",
       });
     }
   };
   
+  // Hủy phê duyệt
   const handleCancelApprove = () => {
-    setIsDialogOpen(false); // Đóng hộp thoại xác nhận nếu người dùng từ chối
+    setIsDialogOpen(false);
   };
 
   return (
     <div className="px-2 py-4 md:px-4 rounded bg-white shadow-lg max-w-6xl mx-auto">
       <div className="mb-4 text-black">
         <h2 className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
-          Thông tin nhân sự
+          Thông tin người tuyển dụng
         </h2>
-        <p className="mb-2">Đây là danh sách nhân sự</p>
+        <p className="mb-2">Đây là danh sách người tuyển dụng</p>
         <div className="flex flex-col md:flex-row items-start mb-4">
           <div className="flex flex-row md:flex-row items-center">
             <div className="relative flex-grow">
@@ -199,12 +216,8 @@ const AddCompanyIdentity = () => {
                   Số điện thoại <FaSort />
                 </div>
               </TableHead>
-              <TableHead className="w-[100px] text-black">
-                <div className="flex justify-between items-center">
-                  Địa chỉ <FaSort />
-                </div>
-              </TableHead>
-              <TableHead className="w-[60px] text-black">
+
+              <TableHead className="w-[160px] text-black">
                 <div className="flex justify-between items-center">
                   Giới thiệu <FaSort />
                 </div>
@@ -237,12 +250,11 @@ const AddCompanyIdentity = () => {
                   <TableCell>{account.username || "N/A"}</TableCell>
                   <TableCell>{account.email || "N/A"}</TableCell>
                   <TableCell>{account.phone || "N/A"}</TableCell>
-                  <TableCell>{account.address || "N/A"}</TableCell>
                   <TableCell>{account.bio || "N/A"}</TableCell>
                   <TableCell>
                     <button className="text-green-500 hover:text-green-700 mx-1"
                       onClick={() => handleApprove(account._id)}>
-                      <FaCheck title="Thêm nhân sự" size={18} />
+                      <FaCheck title="Thêm người tuyển dụng" size={18} />
                     </button>
                   </TableCell>
                 </TableRow>

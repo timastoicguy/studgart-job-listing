@@ -23,12 +23,23 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog"; // Importing Dialog components
-import { fetchDetailJobData, fetchUserData } from "@/lib/reducers/jobseeker/jobDetail";
+import {
+  fetchDetailJobData,
+  fetchUserData,
+} from "@/lib/reducers/jobseeker/jobDetail";
 import { useNavigate, useParams } from "react-router-dom";
-import { Upload, Button, UploadFile, UploadProps, message } from "antd"; // Importing UploadFile
+import {
+  Upload,
+  Button,
+  UploadFile,
+  UploadProps,
+  message,
+  notification,
+} from "antd"; // Importing UploadFile
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane, FaSpinner } from "react-icons/fa";
+import useAuthStore from "@/store/auth/useAuthStore";
 
 const getJobSeekerIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem("userData");
@@ -39,7 +50,7 @@ const getJobSeekerIdFromLocalStorage = (): string | null => {
   return null; // Return null if no userData in localStorage
 };
 const DetailJob: React.FC = () => {
-  const jobSeekerId = getJobSeekerIdFromLocalStorage();
+  const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
   const [title, setTitle] = useState("");
   const [salaryMin, setSalaryMin] = useState(0);
@@ -107,7 +118,7 @@ const DetailJob: React.FC = () => {
       // Gửi yêu cầu ứng tuyển
       const applicationData = {
         job_id: jobId,
-        job_seeker_id: jobSeekerId,
+        job_seeker_id: roleIDs?.job_seeker_id,
         cover_letter: coverLetter, // Lấy giá trị từ textarea
         resume: resumeUrl, // Đường dẫn đã upload
         job_reviewer_id: "67273fea96599e898e7bbd6c",
@@ -152,7 +163,7 @@ const DetailJob: React.FC = () => {
       console.log(jobId);
       if (!jobId) return; // Check if jobId is available
       const response = await fetchDetailJobData(jobId);
-      const response2 = await fetchUserData(response?.company.user_id||"");
+      const response2 = await fetchUserData(response?.company.user_id || "");
 
       // Check if response contains data
       if (response) {
@@ -203,17 +214,17 @@ const DetailJob: React.FC = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_API_BASE_URL
-          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${jobSeekerId}`
+          }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${
+            userData.job_seeker_id
+          }`
         );
 
         // Log full response to check structure
         console.log("Application status response:", response.data);
-        console.log("SSSS",response.data.data.docs);
+        console.log("SSSS", response.data.data.docs);
 
         // Kiểm tra trong trường 'docs' thay vì toàn bộ 'response.data'
         if (response.data.data.docs && response.data.data.docs.length > 0) {
-
-
           console.log("response.data.data.docs[0]");
           setIsApplied(true);
           setLastAppliedTime(
@@ -259,6 +270,37 @@ const DetailJob: React.FC = () => {
 
   const [fileList, setFileList] = useState<any[]>([]); // Thay đổi kiểu dữ liệu nếu cần
 
+  const genCoverLetter = async () => {
+    try {
+      setLoading(true);
+      if (fileList.length > 0) {
+        const formData = new FormData();
+        formData.append("file", fileList[0].originFileObj);
+
+        const apiResponse = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/gen-cover-letter`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        setCoverLetter(apiResponse?.data?.data);
+      } else {
+        notification.warning({
+          message: "Tạo thư ngỏ",
+          description: "Vui lòng đính kèm cv để có thể gen thử ngỏ từ cv.", // Mô tả thông báo
+          placement: "topRight", // Vị trí hiển thị
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading PDF:", error);
+    } finally {
+      setLoading(false); // Set loading to false when done
+    }
+  };
   const uploadProps = {
     onChange: (info: any) => {
       // Cập nhật fileList khi có thay đổi
@@ -391,7 +433,9 @@ const DetailJob: React.FC = () => {
             <button className="hidden" />
           </DialogTrigger>
           <DialogContent>
-            <DialogTitle>Đơn Ứng Tuyển</DialogTitle>
+            <DialogTitle className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
+              Đơn Ứng Tuyển
+            </DialogTitle>
             <DialogDescription>
               <label className="block text-sm font-medium text-gray-700">
                 Thư xin việc
@@ -400,20 +444,34 @@ const DetailJob: React.FC = () => {
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
                 placeholder="Viết thư xin việc của bạn ở đây"
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                className="mt-1 block w-full border border-green-300 rounded-md p-2 min-h-40"
               />
 
-              <label className="block text-sm font-medium text-gray-700 mt-4">
+              <label className="block text-sm font-medium text-green-700 mt-4">
                 Tải lên tài liệu
               </label>
               <div>
-                <Upload
-                  {...uploadProps}
-                  accept=".pdf" // Chỉ cho phép chọn tệp PDF
-                  onChange={({ fileList }) => setFileList(fileList)} // Cập nhật danh sách tệp
-                >
-                  <Button icon={<UploadOutlined />}>Tải lên CV</Button>
-                </Upload>
+                <div className="flex justify-start gap-2">
+                  <Upload
+                    {...uploadProps}
+                    accept=".pdf" // Chỉ cho phép chọn tệp PDF
+                    onChange={({ fileList }) => setFileList(fileList)} // Cập nhật danh sách tệp
+                  >
+                    <Button icon={<UploadOutlined />}>Tải lên CV</Button>
+                  </Upload>
+
+                  <Button
+                    icon={<UploadOutlined />}
+                    onClick={genCoverLetter}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <FaSpinner className="animate-spin" />
+                    ) : (
+                      "Tạo thư ngỏ"
+                    )}
+                  </Button>
+                </div>
                 {fileList.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">Tệp đã chọn:</p>
