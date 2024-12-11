@@ -28,10 +28,17 @@ import {
   fetchUserData,
 } from "@/lib/reducers/jobseeker/jobDetail";
 import { useNavigate, useParams } from "react-router-dom";
-import { Upload, Button, UploadFile, UploadProps, message } from "antd"; // Importing UploadFile
+import {
+  Upload,
+  Button,
+  UploadFile,
+  UploadProps,
+  message,
+  notification,
+} from "antd"; // Importing UploadFile
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane, FaSpinner } from "react-icons/fa";
 import useAuthStore from "@/store/auth/useAuthStore";
 
 const getJobSeekerIdFromLocalStorage = (): string | null => {
@@ -263,6 +270,37 @@ const DetailJob: React.FC = () => {
 
   const [fileList, setFileList] = useState<any[]>([]); // Thay đổi kiểu dữ liệu nếu cần
 
+  const genCoverLetter = async () => {
+    try {
+      setLoading(true);
+      if (fileList.length > 0) {
+        const formData = new FormData();
+        formData.append("file", fileList[0].originFileObj);
+
+        const apiResponse = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/gen-cover-letter`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        setCoverLetter(apiResponse?.data?.data);
+      } else {
+        notification.warning({
+          message: "Tạo thư ngỏ",
+          description: "Vui lòng đính kèm cv để có thể gen thử ngỏ từ cv.", // Mô tả thông báo
+          placement: "topRight", // Vị trí hiển thị
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading PDF:", error);
+    } finally {
+      setLoading(false); // Set loading to false when done
+    }
+  };
   const uploadProps = {
     onChange: (info: any) => {
       // Cập nhật fileList khi có thay đổi
@@ -421,6 +459,18 @@ const DetailJob: React.FC = () => {
                   >
                     <Button icon={<UploadOutlined />}>Tải lên CV</Button>
                   </Upload>
+
+                  <Button
+                    icon={<UploadOutlined />}
+                    onClick={genCoverLetter}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <FaSpinner className="animate-spin" />
+                    ) : (
+                      "Tạo thư ngỏ"
+                    )}
+                  </Button>
                 </div>
                 {fileList.length > 0 && (
                   <div className="mt-2">

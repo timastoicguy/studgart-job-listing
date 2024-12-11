@@ -178,10 +178,60 @@ A JSON object that has the exact keys below:
 - Do not try to add more keys or makeup things that don't exist.
 - Leave empty if you cannot find that piece of information.`;
 };
+
+const getPromptForCoverLetter = (lg: string) => {
+  return `1. Role:
+You are a Professional Career Advisor and Expert Writer specializing in crafting compelling and tailored cover letters for job seekers in the technology field.
+
+2. Task:
+I'm about to give you the resume of an applicant looking for a technology job. 
+Your job is to create a professional, personalized, and well-structured cover letter for this applicant. 
+The cover letter should highlight the applicant's strengths, experience, and skills mentioned in the CV and demonstrate their enthusiasm for the position they are applying for.
+
+3. Guidelines:
+- The cover letter should be no longer than 1 page.
+- Use clear, concise, and professional language.
+- Follow this structure:
+  a. Introduction:
+    - Greet the hiring manager or company appropriately.
+    - State the position the applicant is applying for and express enthusiasm for the role.
+  b. Body:
+    - Highlight the applicant's most relevant skills, experience, and achievements.
+    - Explain why they are a great fit for the position and how their contributions can benefit the company.
+    - Use specific examples to emphasize their impact in previous roles or projects.
+  c. Conclusion:
+    - Express appreciation for the opportunity to apply.
+    - Politely request an interview or further discussion.
+    - Provide contact details (if applicable).
+  d. Signature:
+    - End with a professional closing line such as "Sincerely" or "Best regards."
+    - Include the applicant's name.
+
+4. Example output:
+Don't hallucinate and ensure your output follows this structure. Here is an example:
+
+Dear [Hiring Manager's Name or "Hiring Manager"],
+
+I am excited to apply for the [Job Title] position at [Company Name]. With a strong background in [Field/Industry] and a passion for [relevant topic], I am eager to contribute my expertise to your team.
+
+In my previous role at [Previous Company], I successfully [achievement, e.g., "led a project that increased efficiency by 25%"]. I specialize in [key skills], including [specific technologies or skills relevant to the job]. My experience with [specific tools or methodologies] has prepared me to excel in [specific role responsibilities].
+
+I am particularly drawn to [Company Name] because of its commitment to [specific value or mission of the company]. I am confident that my [specific qualities, e.g., "problem-solving skills and ability to work under pressure"] align with your team’s goals and culture.
+
+Thank you for considering my application. I would welcome the opportunity to discuss how my skills and experience align with your needs. Please feel free to contact me at [phone number] or via email at [email address].
+
+Sincerely,  
+[Applicant's Full Name]  
+
+5. Finalize:
+Convert your cover letter output to ${lg}.`;
+};
+
 export {
   getPromtForEvalutedCVAI,
   getPromtForSummaryAI,
   getPromtForExperienceDetailAI,
   promtForChatBotAI,
   getPromtForGenInfoFromCvAI,
+  getPromptForCoverLetter,
 };
