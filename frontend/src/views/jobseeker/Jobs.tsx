@@ -26,10 +26,11 @@ import axios from "axios";
 import ConfirmationDialog from "../component/ConfirmationDialog";
 import { notification } from "antd"; // Import notification from Ant Design
 import useAuthStore from "../../store/auth/useAuthStore";
+import Footer from "@/components/Footer";
 
 const Jobs: React.FC = () => {
   const { userData,roleIDs } = useAuthStore(); // Truy cập accessToken từ store
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const jobSeekerId = roleIDs?.job_seeker_id ?? ""; // Replace with dynamic ID
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -148,7 +149,7 @@ const Jobs: React.FC = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/applications?job_id=${
             job.id
-          }&job_seeker_id=${userData?.job_seeker_id}`
+          }&job_seeker_id=${roleIDs?.job_seeker_id}`
         );
         setAppliedJobs((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -165,7 +166,7 @@ const Jobs: React.FC = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/favorites?job_id=${
             job.id
-          }&job_seeker_id=${userData.job_seeker_id}`
+          }&job_seeker_id=${roleIDs?.job_seeker_id}`
         );
         setFavorites((prev) =>
           new Map(prev).set(job.id, response.data.data.docs.length > 0)
@@ -314,7 +315,7 @@ const Jobs: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <div className="text-center text-gray-600 mt-4">
+                <div className="text-center text-gray-600 mt-4 h-screen flex flex-col ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -440,7 +441,9 @@ const Jobs: React.FC = () => {
           </div>
         </aside>
       </div>
+      <Footer />
     </TooltipProvider>
+    
   );
 };
 

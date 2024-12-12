@@ -30,6 +30,8 @@ export default function JobListing() {
   const [applicationDeadline, setApplicationDeadline] = useState(
     new Date("2025-12-14")
   );
+  const [isUrgent, setIsUrgent] = useState(false);
+
   const [jobDescription, setJobDescription] = useState(`
     - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
     - Participate in the maintenance and upgrade of the website's features.
@@ -47,7 +49,7 @@ export default function JobListing() {
     - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
     - Periodic and regular evaluations for salary raises in accordance with performances.`);
   const [location, setLocation] = useState("HCM");
-  const [companyId, setCompanyId] = useState("60df7992fc13ae1af000006c"); // Update with actual ObjectId
+  const [companyId, setCompanyId] = useState("60df7992fc13cc1af000006c"); // Update with actual ObjectId
   const [jobCategoryId, setJobCategoryId] = useState(
     "60df7992fc13ae1af000006d"
   ); // Update with actual ObjectId
@@ -91,7 +93,7 @@ export default function JobListing() {
       salaryRange: { min: salaryMin, max: salaryMax },
       currency,
       applicationDeadline,
-      isUrgent: true,
+      isUrgent, // Sử dụng giá trị từ state
       description: jobDescription,
       responsibilities: jobDescription
         .split("\n")
@@ -104,14 +106,18 @@ export default function JobListing() {
       skills: ["skillsToSend"],
       employmentType: [{ name: "full-time", code: "FT" }],
       experienceLevel: [{ name: "entry", code: "JR" }],
-      company: selectedCompany,
+      company: selectedCompany || companyId,
       jobCategory: jobCategoryId,
       recruiter: recruiterId,
       technologies: skillsToSend,
     };
 
     try {
-      const result = await postJob(jobData, userData._id || "");
+      const result = await postJob(
+        jobData,
+        selectedCompany,
+        userData._id || ""
+      );
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error message:", error.message);
@@ -135,7 +141,7 @@ export default function JobListing() {
   const [employeeType, setEmployeeType] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("");
 
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [recommendedCompanies, setRecommendedCompanies] = useState<Company[]>(
     []
   ); // Array of companies
@@ -174,11 +180,9 @@ export default function JobListing() {
         </div>
 
         {/* Salary Range */}
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-semibold mb-1">
-              Khoảng lương từ
-            </label>
+            <label className="block text-sm font-semibold mb-1">Lương từ</label>
             <input
               type="number"
               value={salaryMin}
@@ -215,6 +219,21 @@ export default function JobListing() {
               )}
             </select>
           </div>
+
+          <div>
+  <label className="block text-sm font-semibold mb-1">
+    Nhu cầu tuyển
+  </label>
+  <select
+    className="w-full p-3 border rounded-md"
+    value={isUrgent ? "urgent" : "normal"}
+    onChange={(e) => setIsUrgent(e.target.value === "urgent")}
+  >
+    <option value="normal">Tuyển bình thường</option>
+    <option value="urgent">Tuyển gấp</option>
+  </select>
+</div>
+
         </div>
 
         {/* Deadline */}

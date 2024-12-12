@@ -207,7 +207,7 @@ export default function Header({
 
   return (
     <div className="sticky w-full left-0 top-0 z-50">
-      <div className="flex flex-row px-2 py-2.5 ml-0 bg-header justify-between items-center shadow-md">
+      <div className=" fixed w-full flex flex-row px-2 py-2.5 ml-0 bg-header justify-between items-center shadow-md">
         {/* Logo and Sidebar Toggle */}
         <div className="flex items-center gap-4">
           <button

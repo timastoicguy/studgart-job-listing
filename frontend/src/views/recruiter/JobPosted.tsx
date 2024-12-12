@@ -25,6 +25,7 @@ import axios from "axios";
 
 import { notification } from 'antd';  // Import notification from Ant Design
 import ConfirmationDialog from "../component/ConfirmationDialog";
+import Footer from "@/components/Footer";
 
 
 const JobPosted: React.FC = () => {
@@ -294,6 +295,8 @@ useEffect(() => {
           </div>
         </aside>
       </div>
+      <Footer/>
+
     </TooltipProvider>
   );
 };

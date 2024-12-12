@@ -89,14 +89,17 @@ export default function MainLayout() {
         )}
       />
 
-      {/* Displays other views, adjusts layout based on sidebar visibility */}
-      <div className={clsx("transition-all", { "ml-0": !shouldShowSidebar, "ml-[270px]": showSidebar })}>
-        <Suspense>
-          <Outlet />
-        </Suspense>
-      </div>
+        {/* Displays other views, adjusts layout based on sidebar visibility */}
+        <div className={clsx("transition-all", { "ml-0": !shouldShowSidebar, "ml-[270px]": showSidebar })}>
+          <Suspense>
+            <div className="pt-[50px]">
+            <Outlet />
+            </div>
 
-      {/* ChatBox Component */}
+          </Suspense>
+        </div>
+
+      {/* ChatBox Component */} 
       {chatVisible && !isMinimized && (
         <div className="fixed bottom-20 right-4 z-50">
           <ChatBox onClose={closeChat} /> {/* Pass the closeChat function */}
