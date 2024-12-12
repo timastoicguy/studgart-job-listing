@@ -18,6 +18,7 @@ import ConfirmationDialog from '../component/ConfirmationDialog';
 import useAuthStore from '@/store/auth/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import Footer from '@/components/Footer';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const FavoriteJobs: React.FC = () => {
@@ -132,7 +133,7 @@ const FavoriteJobs: React.FC = () => {
               Danh sách công việc đã lưu
             </div>
 
-            <div className="space-y-4 overflow-y-auto">
+            <div className="space-y-4 overflow-y-auto h-screen">
               {updatedJobs.slice(0, itemsPerPage).map((job) => (
                 <div
                   key={job.id}
@@ -237,31 +238,48 @@ const FavoriteJobs: React.FC = () => {
           </div>
         </main>
 
-        <aside className="space-y-6">
-          <div className="bg-white p-6 rounded-md shadow-md border">
+        <aside className="space-y-6 ">
+          <div className="bg-white p-6 rounded-md shadow-md border ">
             <h2 className="text-lg font-bold mb-4">Các công việc có thể bạn quan tâm</h2>
             <div className="space-y-4">
-              {recommendedJobs.map((job, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-4 p-2 border rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  <img
-                    src={job.avatar}
-                    alt="company logo"
-                    className="w-12 h-12 object-cover rounded-full"
-                  />
-                  <div>
-                    <h3 className="font-bold text-sm">{job.title}</h3>
-                    <p className="text-gray-600">{job.techStack}</p>
-                    <p className="text-gray-600 flex items-center w-[100px] truncate">
-                        <FiMapPin className="mr-1" /> {job.location}
-                      </p>
-                    <span className="text-sm text-red-500">{job.salary}</span>
-                  </div>
-                </div>
-              ))}
+    {loading
+      ? // Render Skeletons while loading
+        Array.from({ length: 5 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-center space-x-4 p-2 border rounded-md hover:bg-gray-100 transition-colors"
+          >
+            <Skeleton className="w-12 h-12 rounded-full" />
+            <div className="flex-1">
+              <Skeleton className="w-3/4 h-4 mb-1" />
+              <Skeleton className="w-1/2 h-4 mb-1" />
+              <Skeleton className="w-1/3 h-4 mb-1" />
+              <Skeleton className="w-1/4 h-4" />
             </div>
+          </div>
+        ))
+      : // Render actual jobs when data is available
+        recommendedJobs.map((job, index) => (
+          <div
+            key={index}
+            className="flex items-center space-x-4 p-2 border rounded-md hover:bg-gray-100 transition-colors"
+          >
+            <img
+              src={job.avatar || "https://via.placeholder.com/48"}
+              alt="company logo"
+              className="w-12 h-12 object-cover rounded-full"
+            />
+            <div>
+              <h3 className="font-bold text-sm">{job.title}</h3>
+              <p className="text-gray-600">{job.techStack}</p>
+              <p className="text-gray-600 flex items-center w-[100px] truncate">
+                <FiMapPin className="mr-1" /> {job.location}
+              </p>
+              <span className="text-sm text-red-500">{job.salary}</span>
+            </div>
+          </div>
+        ))}
+  </div>
             <hr className="col-span-3 border-t border-gray-300 my-4" />
             <h2 className="text-lg font-bold mt-6 mb-4">Các công ty hàng đầu</h2>
             <div className="space-y-4">

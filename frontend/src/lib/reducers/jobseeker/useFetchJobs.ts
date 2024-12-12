@@ -296,56 +296,58 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       const response = await fetch(
         `${
           import.meta.env.VITE_API_BASE_URL
-        }/api/favorites?job_seeker_id=${roleIDs?.job_seeker_id}&page=${currentFavertiedPageJobs}&limit=${limit}`
+        }/api/favorites?job_seeker_id=${roleIDs?.job_seeker_id}&page=${currentFavertiedPageJobs}&limit=300`
       );
       const result: ApiResponse = await response.json();
   
       if (!result.error && Array.isArray(result.data?.docs)) {
         // Fetch avatar for each favorite job
         const formattedJobs = await Promise.all(
-          result.data.docs.map(async (favorite: any) => {
-            const jobDetails = favorite.job_id;
+          result.data.docs
+            .filter((favorite: any) => favorite.job_id?._id) // Chỉ giữ các job có id_job khác rỗng
+            .map(async (favorite: any) => {
+              const jobDetails = favorite.job_id;
   
-            // Default avatar
-            let avatar = jobDetails?.company?.logo || 
-                         "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
+              // Default avatar
+              let avatar = jobDetails?.company?.logo || 
+                           "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png";
   
-            // Fetch user profile picture if company user_id exists
-            if (jobDetails?.company) {
-              const companyData = await fetchCompanyData(jobDetails.company);
-              //console.log("Company Data: ", companyData);
-              avatar = companyData?.user_id?.profilePicture || avatar;
-            }
+              // Fetch user profile picture if company user_id exists
+              if (jobDetails?.company) {
+                const companyData = await fetchCompanyData(jobDetails.company);
+                avatar = companyData?.user_id?.profilePicture || avatar;
+              }
   
-            return {
-              id_job: jobDetails?._id || "",
-              id: favorite._id || "",
-              title: jobDetails?.title || "N/A",
-              company: jobDetails?.company?.company_name || "Unknown",
-              location: jobDetails?.location?.[0]?.name || "Unknown",
-              salary: jobDetails?.salaryRange
-                ? formatSalary(
-                    jobDetails.salaryRange.min,
-                    jobDetails.salaryRange.max
-                  )
-                : "N/A",
-              techStack: Array.isArray(jobDetails?.technologies)
-                ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
-                : "N/A",
-              timePosted: jobDetails?.postedDate
-                ? new Date(jobDetails.postedDate).toLocaleDateString()
-                : "Unknown",
-              avatar, // Resolved avatar
-              isHot: jobDetails?.isUrgent || false,
-              isNew: jobDetails?.postedDate
-                ? Date.now() - new Date(jobDetails.postedDate).getTime() <
-                  7 * 24 * 60 * 60 * 1000
-                : false,
-            };
-          })
+              return {
+                id_job: jobDetails?._id || "",
+                id: favorite._id || "",
+                title: jobDetails?.title || "N/A",
+                company: jobDetails?.company?.company_name || "Unknown",
+                location: jobDetails?.location?.[0]?.name || "Unknown",
+                salary: jobDetails?.salaryRange
+                  ? formatSalary(
+                      jobDetails.salaryRange.min,
+                      jobDetails.salaryRange.max
+                    )
+                  : "N/A",
+                techStack: Array.isArray(jobDetails?.technologies)
+                  ? jobDetails.technologies.map((tech: any) => tech.name).join(", ")
+                  : "N/A",
+                timePosted: jobDetails?.postedDate
+                  ? new Date(jobDetails.postedDate).toLocaleDateString()
+                  : "Unknown",
+                avatar, // Resolved avatar
+                isHot: jobDetails?.isUrgent || false,
+                isNew: jobDetails?.postedDate
+                  ? Date.now() - new Date(jobDetails.postedDate).getTime() <
+                    7 * 24 * 60 * 60 * 1000
+                  : false,
+              };
+            })
         );
   
         setFavertiedJobs(formattedJobs);
+        console.log("formattedJobs:", formattedJobs);
         setTotalFavertiedPagesJobs(result.data.totalPages);
       } else {
         console.warn("No valid job data found or result.data.docs is not an array");
