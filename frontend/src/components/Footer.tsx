@@ -20,22 +20,22 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Useful Links</h3>
             <ul className="text-sm space-y-2">
               <li>
-                <a href="/about" className="hover:underline">
+                <a href="#" className="hover:underline">
                   About Us
                 </a>
               </li>
               <li>
-                <a href="/jobs" className="hover:underline">
+                <a href="#" className="hover:underline">
                   Job Listings
                 </a>
               </li>
               <li>
-                <a href="/contact" className="hover:underline">
+                <a href="#" className="hover:underline">
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="/privacy" className="hover:underline">
+                <a href="#" className="hover:underline">
                   Privacy Policy
                 </a>
               </li>

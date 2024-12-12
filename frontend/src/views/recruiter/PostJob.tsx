@@ -24,8 +24,8 @@ export default function JobListing() {
   const recruiterId = roleIDs?.recruiter_id || ""; // Lấy recruiter_id từ userData
   console.log("User Data:", userData);
   const [title, setTitle] = useState("FRONT-END DEVELOPER");
-  const [salaryMin, setSalaryMin] = useState(750);
-  const [salaryMax, setSalaryMax] = useState(1200);
+  const [salaryMin, setSalaryMin] = useState(3000000);
+  const [salaryMax, setSalaryMax] = useState(6000000);
   const [currency, setCurrency] = useState("VNĐ");
   const [applicationDeadline, setApplicationDeadline] = useState(
     new Date("2025-12-14")
