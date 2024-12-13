@@ -20,7 +20,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ isOpen, message
 
       {/* Dialog Content */}
       <div className="relative bg-white p-6 rounded-lg shadow-lg w-96 ">
-        <h2 className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">Confirm Action</h2>
+        <h2 className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">Xác nhận</h2>
         
         {/* Message Box with Rounded Corners */}
         <div className="bg-white p-4 rounded-md border border-gray-300 my-2">

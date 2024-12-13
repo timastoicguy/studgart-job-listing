@@ -141,16 +141,27 @@ const DetailJob: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCompanyClick = (companyId: any) => {
-    // Navigate to the job detail page, passing the job data as state
-    navigate(`/jobseeker/detailCompany/${companyId}`, { state: { companyId } });
+    console.log("Company ID:", companyId);
+    
+    // Kiểm tra nếu companyId là "N/A"
+    if (companyId === "N/A") {
+      // Hiển thị thông báo lỗi khi companyId là "N/A"
+      notification.error({
+        message: 'Thông báo',
+        description: 'Công ty hiện tại đang chưa xác thực.',
+        placement: 'topRight',
+      });
+    } else {
+      // Điều hướng đến trang chi tiết công ty
+      navigate(`/jobseeker/detailCompany/${companyId}`, { state: { companyId } });
+    }
   };
-
   useEffect(() => {
     const loadJobData = async () => {
       console.log(jobId);
       if (!jobId) return; // Check if jobId is available
       const response = await fetchDetailJobData(jobId);
-      const response2 = await fetchUserData(response?.company.user_id || "");
+      const response2 = await fetchUserData(response?.company?.user_id || "");
 
       // Check if response contains data
       if (response) {
@@ -180,7 +191,7 @@ const DetailJob: React.FC = () => {
 
         setCompanyName(response.company?.company_name || "N/A"); // Match the API structure
         setCompanyLogo(
-          response2?.profilePicture || "https://via.placeholder.com/48"
+          response2?.profilePicture || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"
         ); // Ensure logo is handled properly
         setCompanyAddress(response.company?.company_address || "N/A");
         setIndustry(response.company?.industry || "N/A"); // Ensure to match the API field if exists

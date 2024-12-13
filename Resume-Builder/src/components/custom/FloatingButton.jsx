@@ -23,7 +23,7 @@ const FloatingButton = () => {
         <div className="fixed bottom-4 right-4">
             <button
                 onClick={toggleChat}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg focus:outline-none"
+                className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg focus:outline-none"
             >
                 <MessageCircleCode className="w-6 h-6" />
             </button>

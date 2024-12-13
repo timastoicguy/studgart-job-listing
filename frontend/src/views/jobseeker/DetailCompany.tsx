@@ -210,7 +210,7 @@ const DetailCompany: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {/* Icons */}
+              {/* Icons
               <div className="flex space-x-4">
                 <Tooltip>
                   <TooltipTrigger>
@@ -218,7 +218,7 @@ const DetailCompany: React.FC = () => {
                   </TooltipTrigger>
                   <TooltipContent>Yêu thích</TooltipContent>
                 </Tooltip>
-              </div>
+              </div> */}
             </div>
             <div className="pl-24">
               <div className="grid grid-cols-3 gap-4 mt-4">
@@ -320,12 +320,12 @@ const DetailCompany: React.FC = () => {
                     <button className="bg-green-500 text-white px-4 py-2 rounded-md">
                       Ứng tuyển
                     </button>
-                    <Tooltip>
+                    {/* <Tooltip>
                       <TooltipTrigger>
                         <FiHeart className="text-gray-500 hover:text-red-500 cursor-pointer" />
                       </TooltipTrigger>
                       <TooltipContent>Yêu thích</TooltipContent>
-                    </Tooltip>
+                    </Tooltip> */}
                   </div>
                 </div>
               ))}

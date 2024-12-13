@@ -27,7 +27,7 @@ const ChatBot = ({ onClose }) => {
             setDefaultQuestions(response.data?.data);
         };
         fetchDefaultQuestions();
-        socket.emit('joinConversation', { userId: user?._id });
+        socket.emit('joinConversation', { userId: user?._id  });
         socket.on('newMessage', (content) => {
 
             setChatMessages((prevMessages) => [...prevMessages,
@@ -323,7 +323,7 @@ const ChatBot = ({ onClose }) => {
                                 <img
                                     src={attachmentPreview.src}
                                     alt="preview"
-                                    className="max-h-15 rounded-lg"
+                                    className="max-h-10 rounded-lg"
                                 />
                             </div>
                         )}

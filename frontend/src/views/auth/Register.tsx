@@ -47,7 +47,7 @@ const Register: React.FC = () => {
       };
       console.log("Data being sent:", registerData);
       const response = await register(registerData);
-      toast.success("Registration successful!");
+      toast.success("Đăng ký thành công!");
       localStorage.setItem("userEmail", email);
       setTimeout(() => {
         navigate("/login");
@@ -56,10 +56,10 @@ const Register: React.FC = () => {
     } catch (error) {
       if (error instanceof Error) {
         console.error("Registration failed:", error.message);
-        toast.error("Error during registration.");
+        toast.error("Có lỗi xảy ra khi đăng ký.");
       } else {
         console.error("Unexpected error during registration:", error);
-        toast.error("An unexpected error occurred.");
+        toast.error("Có một lỗi không mong muốn đang xảy ra.");
       }
     } finally {
       setLoading(false);

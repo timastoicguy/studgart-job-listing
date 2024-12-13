@@ -209,8 +209,8 @@ const Jobs: React.FC = () => {
           isOpen={isDialogOpen}
           message={
             favorites.get(selectedJobId || "")
-              ? "Do you want to remove this job from favorites?"
-              : "Do you want to favorite this job?"
+              ? "Bạn muốn xóa công việc ra khỏi danh sách yêu thích?"
+              : "Bạn muốn thêm công việc vào mục yêu thích?"
           }
           onConfirm={confirmFavoriteJob}
           onCancel={cancelFavoriteJob}
