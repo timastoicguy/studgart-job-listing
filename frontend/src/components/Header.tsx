@@ -218,8 +218,8 @@ export default function Header({
               <FiSidebar />
             </span>
           </button>
-          <div className="flex items-center">
-            <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
+          <div className="flex items-center"> 
+            <img src="..\images\logo.png" alt="Logo" className="h-8" />
 
             <span className="ml-2 text-lg font-semibold text-green-500">
               STUDGART
