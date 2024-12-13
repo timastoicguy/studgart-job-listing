@@ -354,7 +354,7 @@ const JobseekerPending = () => {
                         : "null"}
                     </TableCell>
                     <TableCell>
-                      {account.application_status || "null"}
+                      {account.application_status=="accepted"?"Xác nhận":(account.application_status=="pending"?"Chưa xem":"Từ chối")}
                     </TableCell>
                     <TableCell>
                       {/* <button

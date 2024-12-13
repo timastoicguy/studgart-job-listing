@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import { Input } from '@/components/ui/input'
 import React, { useContext, useEffect, useState } from 'react'
 import { Rating } from '@smastrom/react-rating'
@@ -69,8 +70,8 @@ function Skills() {
     }, [skillsList])
     return (
         <div className='p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10'>
-            <h2 className='font-bold text-lg'>Skills</h2>
-            <p>Add Your top professional key skills</p>
+            <h2 className='font-bold text-lg'>Về kỹ năng</h2>
+            <p>Thêm các kỹ năng cơ bản của bạn</p>
 
             <div>
                 {skillsList.map((item, index) => (

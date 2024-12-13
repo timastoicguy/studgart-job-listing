@@ -26,6 +26,7 @@ const useAuthStore = create((set, get) => ({
         try {
             const response = await apiClient.post('/login', { email, password });
             const { accessToken, refreshToken } = response.data.data;
+            console.log('Login successful:', response);
 
             // Lưu token vào local storage và thiết lập trạng thái
             localStorage.setItem('accessToken', accessToken);

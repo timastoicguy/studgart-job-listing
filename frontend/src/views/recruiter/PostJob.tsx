@@ -55,7 +55,6 @@ export default function JobListing() {
   ); // Update with actual ObjectId
 
   const [companyName, setCompanyName] = useState("CA Advance");
-  const [companyLogo, setCompanyLogo] = useState("/path/to/company-logo.png");
   const [companyAddress, setCompanyAddress] = useState(
     "Lầu 21, Centec Tower, 72-74 đường Nguyễn Thị Minh Khai, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh"
   );
@@ -206,7 +205,7 @@ export default function JobListing() {
               onChange={(e) => setSelectedCompany(e.target.value)}
               className="w-full p-3 border rounded-md"
             >
-              <option value="">Chọn công ty</option>
+              <option value="">Cá nhân</option>
               {recommendedCompanies
                 .filter((item) => item) // Filter out null or undefined `company`
                 .map((item) => (
@@ -394,7 +393,7 @@ export default function JobListing() {
             {/* Company Logo */}
             <div className="flex items-center">
               <img
-                src={companyLogo}
+                src={ "/images/logo.png"}
                 alt="Company Logo"
                 className="w-16 h-16 mr-4"
               />

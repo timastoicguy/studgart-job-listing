@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios, { AxiosError } from "axios";
-import { Upload, Button, UploadFile, UploadProps, message, Modal } from "antd"; // Import Ant Design components
+import { Upload, UploadFile, UploadProps, message, Modal } from "antd"; // Import Ant Design components
 import { UploadOutlined } from "@ant-design/icons";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { Button } from "@/components/ui/button";
 
 const InfoForm = () => {
   const { userId } = useParams();
@@ -204,7 +205,7 @@ const InfoForm = () => {
           <div className="flex flex-col items-center">
             {/* Avatar with clickable popup */}
             <img
-              src={formData.profilePicture || "/images/Right_Side_Image.webp"} // Use avatar or default image
+              src={formData.profilePicture || "/images/default_avatar.png"} // Use avatar or default image
               alt="User Avatar"
               className="w-28 h-28 rounded-full object-cover mb-4 cursor-pointer"
               onClick={handleAvatarClick} // Show modal on avatar click
@@ -214,7 +215,7 @@ const InfoForm = () => {
               {/* Đoạn mã bố cục mới */}
               {/* Trường Rank */}
               <div>
-                <label className="block font-medium">Rank</label>
+                <label className="block font-medium">Hạng</label>
                 <div className="flex items-center border rounded-md p-2 bg-gray-100">
                   {currentRank ? (
                     <>
@@ -229,7 +230,7 @@ const InfoForm = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Trường Balance */}
                 <div>
-                  <label className="block font-medium">Balance</label>
+                  <label className="block font-medium">Số dư</label>
                   <input
                     type="text"
                     className="border rounded-md p-2 w-full bg-gray-100"
@@ -240,7 +241,7 @@ const InfoForm = () => {
 
                 {/* Trường Diamonds */}
                 <div>
-                  <label className="block font-medium">Diamonds</label>
+                  <label className="block font-medium">Kim cương</label>
                   <input
                     type="text"
                     className="border rounded-md p-2 w-full bg-gray-100"
@@ -251,7 +252,7 @@ const InfoForm = () => {
 
                 {/* Trường Total Spent */}
                 <div>
-                  <label className="block font-medium">Total Spent</label>
+                  <label className="block font-medium">Tổng tiền chi</label>
                   <input
                     type="text"
                     className="border rounded-md p-2 w-full bg-gray-100"
@@ -262,7 +263,7 @@ const InfoForm = () => {
 
                 {/* Trường Free Diamonds */}
                 <div>
-                  <label className="block font-medium">Free Diamonds</label>
+                  <label className="block font-medium">Kim cương tặng</label>
                   <input
                     type="text"
                     className="border rounded-md p-2 w-full bg-gray-100"
@@ -272,7 +273,7 @@ const InfoForm = () => {
                 </div>
               </div>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 ">
               {/* Avatar Modal */}
               {isModalVisible && (
                 <Modal
@@ -291,40 +292,39 @@ const InfoForm = () => {
                       className="w-28 h-28 rounded-full object-cover"
                     />
                   </div>
-                  <div className="flex justify-between mt-4">
+                  <div className="flex justify-center gap-3 mt-4">
                     {/* Upload Avatar */}
                     {isAvatarUploadVisible && (
                       <Upload {...uploadProps}>
-                        <Button icon={<UploadOutlined />}>Upload Avatar</Button>
+                        <Button ><UploadOutlined /> Tải ảnh đại diện</Button>
                       </Upload>
                     )}
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                    <Button
+                      variant={"outline"}
                       onClick={toggleAvatarUpload}
                     >
-                      Change Avatar
-                    </button>
-                    <button className="bg-red-500 text-white px-4 py-2 rounded-md">
-                      Delete Avatar
-                    </button>
+                      Đổi ảnh đại diện
+                    </Button>
+
                   </div>
                 </Modal>
               )}
             </div>
-            <div className="flex space-x-4">
-              <button
-                className="bg-green-500 text-white px-4 py-2 rounded-md mt-4"
+            <div className="flex gap-4 justify-between mt-10 w-full">
+              <Button
+              className="flex-1"
                 onClick={() => setIsModalOpen(true)}
               >
                 Đổi mật khẩu
-              </button>
+              </Button>
 
-              <button
-                className="bg-yellow-500 text-white px-4 py-2 rounded-md mt-4"
+              <Button
+              variant={"outline"}
+              className="flex-1"
                 onClick={handleRechargeClick}
               >
                 Nạp Tiền
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -338,7 +338,7 @@ const InfoForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block font-medium">
-                  User ID <span className="text-red-500">*</span>
+                  Mã định danh <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -413,19 +413,19 @@ const InfoForm = () => {
               </div>
             </div>
             <div className="flex justify-end mt-4 space-x-4">
-              <button
-                className="bg-blue-500 text-white px-6 py-2 rounded-md"
+              <Button
+                variant={isEditing ? "destructive" : "default"}
                 onClick={handleEdit}
               >
                 {isEditing ? "Hủy" : "Chỉnh sửa"}
-              </button>
+              </Button>
               {isEditing && (
-                <button
+                <Button
                   className="bg-green-500 text-white px-6 py-2 rounded-md"
                   onClick={handleSave}
                 >
                   Lưu
-                </button>
+                </Button>
               )}
             </div>
           </div>

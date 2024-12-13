@@ -27,6 +27,7 @@ class ChatGPTService {
     userMessage: string,
     url?: string
   ) {
+    try{
     let conversation = await Conversation.findOne({ user_id });
 
     if (!conversation) {
@@ -82,7 +83,13 @@ class ChatGPTService {
     await conversation.save();
 
     return { error: null, data: responseContent };
+  
   }
+  catch (error) {
+    return { error: "null", data: null };
+
+  }
+}
 
   private async getChatGPTReply(messages: any[]) {
     try {

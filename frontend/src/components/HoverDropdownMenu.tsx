@@ -4,7 +4,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuItem
 } from "./ui/dropdown-menu"; // Adjust the import path as necessary
 import { NavLink } from "react-router-dom";
@@ -37,7 +36,7 @@ const HoverDropdownMenu: React.FC<HoverDropdownMenuProps> = ({ link, dropdownIte
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>{link.label}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+
           {dropdownItems.map((item) => (
             <DropdownMenuItem
               key={item.label}

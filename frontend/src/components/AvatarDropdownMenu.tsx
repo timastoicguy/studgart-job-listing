@@ -52,7 +52,7 @@ const AvatarDropdownMenu: React.FC = () => {
         .then((response) => {
           if (response.data.data) {
             setFormData({
-              profilePicture: response.data.data.profilePicture || "",
+              profilePicture: response.data.data.profilePicture || "/images/default_avatar.png",
               email: response.data.data.email || "",
               name: response.data.data.username || "",
               phone: response.data.data.phone || "",
@@ -100,7 +100,7 @@ const AvatarDropdownMenu: React.FC = () => {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <span className="text-sm px-2">
-      Rank: {userRank ? `${userRank.symbol} ${userRank.name}` : "Unknown"}
+      Rank: {userRank ? `${userRank.symbol} ${userRank.name}` : "Sắt"}
     </span>
           <br />
 

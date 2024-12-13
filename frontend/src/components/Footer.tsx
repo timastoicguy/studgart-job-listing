@@ -8,42 +8,40 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">About Us</h3>
+            <h3 className="text-lg font-semibold mb-4">Về chúng tôi</h3>
             <p className="text-sm">
-              We connect top talent with amazing opportunities. Whether you're
-              looking for your dream job or the perfect candidate, we've got
-              you covered.
+            Chúng tôi kết nối những tài năng hàng đầu với những cơ hội tuyệt vời. Dù bạn đang tìm kiếm công việc mơ ước hay ứng viên hoàn hảo, chúng tôi đều sẵn sàng hỗ trợ bạn.
             </p>
           </div>
           {/* Useful Links Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Useful Links</h3>
+            <h3 className="text-lg font-semibold mb-4">Liên kết</h3>
             <ul className="text-sm space-y-2">
               <li>
                 <a href="#" className="hover:underline">
-                  About Us
+                  Về chúng tôi
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Job Listings
+                  Danh sách công việc
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Contact Us
+                  Liên hệ
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Privacy Policy
+                  Chính sách bảo mật
                 </a>
               </li>
             </ul>
           </div>
           {/* Social Media Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
+            <h3 className="text-lg font-semibold mb-4">Theo dõi tại</h3>
             <div className="flex space-x-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                 <FaFacebook className="text-xl hover:text-blue-500" />

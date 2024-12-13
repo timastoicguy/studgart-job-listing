@@ -238,7 +238,7 @@ const CompanyIdentity = () => {
               <TableHead className="w-[180px] text-black">Tên người dùng</TableHead>
               <TableHead className="w-[180px] text-black">Email</TableHead>
               <TableHead className="w-[180px] text-black">SĐT</TableHead>
-              <TableHead className="w-[180px] text-black">Trạng thái</TableHead>
+              {/* <TableHead className="w-[180px] text-black">Trạng thái</TableHead> */}
               <TableHead className="w-[100px] text-black">Xóa tài khoản</TableHead>
             </TableRow>
           </TableHeader>
@@ -263,7 +263,7 @@ const CompanyIdentity = () => {
                   <TableCell>{account.user.username || "N/A"}</TableCell>
                   <TableCell>{account.user.email || "N/A"}</TableCell>
                   <TableCell>{account.user.phone || "N/A"}</TableCell>
-                  <TableCell>{account.status || "N/A"}</TableCell>
+                  {/* <TableCell>{account.status || "N/A"}</TableCell> */}
                   <TableCell>
                     <button
                       className="text-red-500 hover:text-red-700 mx-1"

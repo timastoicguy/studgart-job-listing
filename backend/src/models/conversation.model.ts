@@ -38,7 +38,7 @@ conversationSchema.pre("save", function (next) {
   next();
 });
 
-conversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 600 });
+// conversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 600 });
 
 const Conversation = mongoose.model<ConversationDocument>(
   "Conversation",
