@@ -14,3 +14,13 @@ module "storage_account" {
   default_tags = var.default_tags
   depends_on   = [azurerm_resource_group.rg]
 }
+
+module "acr" {
+  source        = "../../modules/acr"
+  prefix        = "joblisting"
+  rg_name       = azurerm_resource_group.rg.name
+  location      = var.location
+  sku           = "Basic"
+  admin_enabled = false
+  tags          = var.default_tags
+}
