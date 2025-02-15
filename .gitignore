@@ -1,2 +1,5 @@
 .vscode
 *.zip
+# Terraform
+.terraform*
+terraform.tfstate*
