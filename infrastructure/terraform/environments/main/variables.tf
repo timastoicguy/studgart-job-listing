@@ -5,3 +5,9 @@ variable "default_tags" {
     "CREATED_BY" = "terraform"
   }
 }
+
+variable "location" {
+  description = "The location of the resource group"
+  type        = string
+  default     = "southeastasia"
+}
