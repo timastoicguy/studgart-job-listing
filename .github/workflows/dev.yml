@@ -3,7 +3,7 @@ name: "Dev pipeline"
 on:
   push:
     branches:
-      - dev
+      - develop
       - features/cicd
 
 permissions:
