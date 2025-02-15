@@ -17,10 +17,19 @@ module "storage_account" {
 
 module "acr" {
   source        = "../../modules/acr"
-  prefix        = "joblisting"
+  prefix        = var.prefix
   rg_name       = azurerm_resource_group.rg.name
   location      = var.location
   sku           = "Basic"
   admin_enabled = false
   tags          = var.default_tags
+  depends_on    = [azurerm_resource_group.rg]
+}
+
+module "network" {
+  source   = "../../modules/network"
+  prefix   = var.prefix
+  location = var.location
+  rg_name  = azurerm_resource_group.rg.name
+  tags     = var.default_tags
 }

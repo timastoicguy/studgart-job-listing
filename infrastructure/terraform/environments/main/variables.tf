@@ -11,3 +11,9 @@ variable "location" {
   type        = string
   default     = "southeastasia"
 }
+
+variable "prefix" {
+  description = "The prefix for the resource group"
+  type        = string
+  default = "joblisting"
+}
