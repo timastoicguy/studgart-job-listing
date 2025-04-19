@@ -10,6 +10,18 @@ resource "helm_release" "cert_manager" {
     name  = "crds.enabled"
     value = "true"
   }
+  set {
+    name = "config.apiVersion"
+    value = "controller.config.cert-manager.io/v1alpha1"
+  }
+  set {
+    name = "config.kind"
+    value = "ControllerConfiguration"
+  }
+  set {
+    name = "config.enableGatewayAPI"
+    value = "true"
+  }
 
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
@@ -24,7 +36,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     spec = {
       acme = {
         email  = "khangthinh2401@gmail.com"
-        server = "https://acme-staging-v02.api.letsencrypt.org/directory"
+        server = "https://acme-v02.api.letsencrypt.org/directory"
         privateKeySecretRef = {
           name = "cluster-issuer-account-key"
         }
