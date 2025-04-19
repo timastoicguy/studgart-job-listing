@@ -33,17 +33,3 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
   tags = var.tags
 }
-
-// AGENT POOL IDENTITY CREATED BY AKS
-data "azurerm_user_assigned_identity" "agentpool_identity" {
-  depends_on          = [azurerm_kubernetes_cluster.aks]
-  name                = "${azurerm_kubernetes_cluster.aks.name}-agentpool"
-  resource_group_name = "MC_${var.rg_name}_${azurerm_kubernetes_cluster.aks.name}_${var.location}"
-}
-
-// ASSIGN PERMISSIONS TO AGENT POOL IDENTITY
-resource "azurerm_role_assignment" "role_acr_pull" {
-  scope                = var.acr_id
-  role_definition_name = "AcrPull"
-  principal_id         = data.azurerm_user_assigned_identity.agentpool_identity.principal_id
-}

@@ -35,6 +35,14 @@ module "network" {
   depends_on = [azurerm_resource_group.rg]
 }
 
+module "dns" {
+  source   = "../../modules/dns"
+  prefix   = var.prefix
+  rg_name  = azurerm_resource_group.rg.name
+  location = var.location
+  tags     = var.default_tags
+}
+
 module "aks" {
   source            = "../../modules/aks"
   prefix            = var.prefix
@@ -47,5 +55,7 @@ module "aks" {
   vnet_id           = module.network.vnet.id
   aks_subnet_id     = module.network.aks_subnet.id
   acr_id            = module.acr.acr.id
-  depends_on        = [module.acr, module.network]
+  dns_zone_name     = module.dns.studgart.name
+  subscription_id   = "7d67acf6-4ec1-42ba-8d14-c091b698b305"
+  depends_on        = [module.acr, module.network, module.dns]
 }

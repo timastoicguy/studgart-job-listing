@@ -15,3 +15,7 @@ variable "aks_subnet_id" { type = string }
 
 // ACR
 variable "acr_id" { type = string }
+
+// CERT MANAGER VARIABLES ---------------------------------
+variable "subscription_id" { type = string }
+variable "dns_zone_name" { type = string }
