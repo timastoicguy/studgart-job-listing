@@ -16,12 +16,6 @@ spec:
   parentRefs:
   - name: {{ .Values.httproute.parentRef.name | default "traefik-gateway" }}
     namespace: {{ .Values.httproute.parentRef.namespace | default "traefik" }}
-    {{- if .Values.httproute.parentRef.sectionName }}
-    sectionName: {{ .Values.httproute.parentRef.sectionName }}
-    {{- end }}
-    {{- if .Values.httproute.parentRef.port }}
-    port: {{ .Values.httproute.parentRef.port }}
-    {{- end }}
   hostnames:
   {{- range .Values.httproute.hostnames }}
   - {{ . }}
