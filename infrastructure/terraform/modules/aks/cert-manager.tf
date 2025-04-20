@@ -5,24 +5,16 @@ resource "helm_release" "cert_manager" {
   version          = "v1.17.0"
   namespace        = "cert-manager"
   create_namespace = true
-
-  set {
-    name  = "crds.enabled"
-    value = "true"
-  }
-  set {
-    name = "config.apiVersion"
-    value = "controller.config.cert-manager.io/v1alpha1"
-  }
-  set {
-    name = "config.kind"
-    value = "ControllerConfiguration"
-  }
-  set {
-    name = "config.enableGatewayAPI"
-    value = "true"
-  }
-
+  values = [
+    <<-EOT
+      crds:
+        enabled: true
+      config:
+        apiVersion: controller.config.cert-manager.io/v1alpha1
+        kind: ControllerConfiguration
+        enableGatewayAPI: true
+    EOT
+  ]
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
