@@ -1,0 +1,35 @@
+name: "Open PR into branch dev"
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/typescript-build-test
+        with:
+          working-directory: frontend
+          env-file-content: ${{ vars.FRONTEND_ENV }}
+  build-backend:
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/typescript-build-test
+        with:
+          working-directory: backend
+          env-file-content: ${{ vars.BACKEND_ENV }}

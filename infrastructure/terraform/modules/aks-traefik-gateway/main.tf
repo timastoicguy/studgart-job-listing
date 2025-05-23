@@ -38,5 +38,4 @@ resource "helm_release" "traefik" {
               - name: api-studgart-com-tls
     EOT
   ]
-  depends_on = [azurerm_kubernetes_cluster.aks, kubernetes_manifest.cluster_issuer]
 }

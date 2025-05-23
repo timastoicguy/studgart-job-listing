@@ -15,5 +15,10 @@ variable "location" {
 variable "prefix" {
   description = "The prefix for the resource group"
   type        = string
-  default = "joblisting"
+  default = "job-listing"
+}
+
+variable "subscription_id" {
+  description = "The subscription ID for the Azure resources"
+  type        = string
 }

@@ -13,11 +13,3 @@ data "azurerm_dns_zone" "studgart" {
   name                = "studgart.com"
   resource_group_name = var.rg_name
 }
-
-data "kubernetes_service" "traefik" {
-  metadata {
-    name      = "traefik"
-    namespace = "traefik"
-  }
-  depends_on = [helm_release.traefik]
-}

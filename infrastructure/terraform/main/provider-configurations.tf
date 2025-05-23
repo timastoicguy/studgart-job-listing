@@ -20,10 +20,5 @@ provider "helm" {
 
 ## TERRAFORM BACKEND CONFIG
 terraform {
-  backend "azurerm" {
-    resource_group_name  = "job-listing-tfstate-rg"
-    storage_account_name = "studgarttfstate"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-  }
+  backend "azurerm" {}
 }
