@@ -11,7 +11,8 @@ permissions:
   actions: read
 
 jobs:
-  build-frontend:
+  build-typescript-frontend:
+    name: '[Frontend] Build TypeScript'
     runs-on: ubuntu-latest
     environment: Development
     steps:
@@ -22,7 +23,28 @@ jobs:
         with:
           working-directory: frontend
           env-file-content: ${{ vars.FRONTEND_ENV }}
-  build-backend:
+  build-docker-frontend:
+    name: '[Frontend] Build Docker'
+    needs: build-typescript-frontend
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdXCei4iLQUet
+          context: frontend
+          dockerfile: frontend/Dockerfile
+          image-name: frontend
+  backend-build-typescript:
+    name: '[Backend] Build TypeScript'
     runs-on: ubuntu-latest
     environment: Development
     steps:
@@ -33,3 +55,23 @@ jobs:
         with:
           working-directory: backend
           env-file-content: ${{ vars.BACKEND_ENV }}
+  backend-build-docker:
+    name: '[Backend] Build Docker'
+    needs: backend-build-typescript
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdXCei4iLQUet
+          context: backend
+          dockerfile: backend/Dockerfile
+          image-name: backend
