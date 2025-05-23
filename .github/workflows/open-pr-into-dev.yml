@@ -3,7 +3,7 @@ name: "Open PR into branch dev"
 on:
   pull_request:
     branches:
-      - dev
+      - develop
 
 permissions:
   id-token: write
