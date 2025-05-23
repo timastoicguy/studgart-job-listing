@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Build frontend
-        uses: ./.github/actions/typescript-build-test
+        uses: ./.github/actions/build-typescript
         with:
           working-directory: frontend
           env-file-content: ${{ vars.FRONTEND_ENV }}
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Build frontend
-        uses: ./.github/actions/typescript-build-test
+        uses: ./.github/actions/build-typescript
         with:
           working-directory: backend
           env-file-content: ${{ vars.BACKEND_ENV }}

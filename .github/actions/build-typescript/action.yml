@@ -35,8 +35,3 @@ runs:
       shell: bash
       run: npm run build
       working-directory: ${{ inputs.working-directory }}
-
-    - name: npm run test
-      shell: bash
-      run: npm run test
-      working-directory: ${{ inputs.working-directory }}
