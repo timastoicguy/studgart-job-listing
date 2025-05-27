@@ -22,7 +22,6 @@ jobs:
         uses: ./.github/actions/build-typescript
         with:
           working-directory: frontend
-          env-file-content: ${{ vars.FRONTEND_ENV }}
   build-docker-frontend:
     name: '[Frontend] Build Docker'
     needs: build-typescript-frontend
@@ -59,7 +58,6 @@ jobs:
         uses: ./.github/actions/build-typescript
         with:
           working-directory: backend
-          env-file-content: ${{ vars.BACKEND_ENV }}
   backend-build-docker:
     name: '[Backend] Build Docker'
     needs: backend-build-typescript
