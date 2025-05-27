@@ -23,13 +23,6 @@ runs:
       run: npm install
       working-directory: ${{ inputs.working-directory }}
 
-    - name: Set up .env file
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        cat <<EOF > .env
-        ${{ inputs.env-file-content }}
-        EOF
 
     - name: npm run build
       shell: bash

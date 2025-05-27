@@ -31,6 +31,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > .env
+          ${{ vars.FRONTEND_ENV }}
+          EOF
       - name: Build frontend
         uses: ./.github/actions/build-docker
         with:
@@ -63,6 +68,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > .env
+          ${{ vars.BACKEND_ENV }}
+          EOF
       - name: Build frontend
         uses: ./.github/actions/build-docker
         with:
