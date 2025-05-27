@@ -117,7 +117,7 @@ router.post(
  *         required: false
  *         schema:
  *           type: string
- *           format: uuid
+
  *     responses:
  *       200:
  *         description: A list of job seekers

@@ -36,17 +36,26 @@ const server = http.createServer(app);
 initSocket(server);
 // Middleware
 
+// app.use(
+//   cors({
+//     origin: [
+//       process.env.FRONTEND_URL || "http://localhost:5173",
+//       process.env.FRONTEND_URL2 || "http://localhost:5174",
+//       process.env.BASE_URL || "http://localhost:3000",
+//        "http://localhost:8081",
+//        "exp://192.168.1.12:8081",
+//     ],
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      process.env.FRONTEND_URL2 || "http://localhost:5174",
-      process.env.BASE_URL || "http://localhost:3000",
-    ],
+    origin: "*", // Cho phép mọi origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
   })
 );
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -114,7 +123,8 @@ connectDB().then((res) => {
   //   console.log(`Server running on port ${process.env.PORT || 3000}`);
   // });
 
-  server.listen(process.env.PORT || 3000, () => {
-    console.log(`Server running on port ${process.env.PORT || 3000}`);
-  });
+server.listen(3000, "0.0.0.0", () => {
+  console.log(`Server running on port 3000`);
+});
+
 });

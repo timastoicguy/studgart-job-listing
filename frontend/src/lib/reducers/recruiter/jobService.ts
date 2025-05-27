@@ -59,7 +59,7 @@ export const postJob = async (jobData: JobData, company: any, userId: string): P
       );
 
       const companyUserId = companyResponse.data.data.user_id._id;
-      console.log("Company User ID:", companyUserId);
+      console.log("Company User ID:", companyResponse);
       if (!companyUserId) {
         throw new Error('Company userId not found');
       }
