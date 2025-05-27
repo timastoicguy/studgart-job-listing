@@ -79,7 +79,8 @@ runs:
         build-args: ${{ inputs.build-args }}
         context: ${{ inputs.context }}
         file: ${{ inputs.dockerfile }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         platforms: ${{ inputs.platform }}
         push: ${{ inputs.push }}
-        tags: |
-          ${{env.REGISTRY_NAME}}.azurecr.io/${{ inputs.image-name }}:${{ inputs.tag }}
+        tags: ${{env.REGISTRY_NAME}}.azurecr.io/${{ inputs.image-name }}:${{ inputs.tag }}
