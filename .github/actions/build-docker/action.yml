@@ -79,8 +79,8 @@ runs:
         build-args: ${{ inputs.build-args }}
         context: ${{ inputs.context }}
         file: ${{ inputs.dockerfile }}
-        # cache-from: type=registry,ref=${{env.REGISTRY_NAME}}.azurecr.io/${{ inputs.image-name }}:${{ inputs.tag }}
-        # cache-to: type=inline
+        cache-from: type=registry,ref=${{env.REGISTRY_NAME}}.azurecr.io/${{ inputs.image-name }}:${{ inputs.tag }}
+        cache-to: type=inline
         platforms: ${{ inputs.platform }}
         push: ${{ inputs.push }}
         tags: ${{env.REGISTRY_NAME}}.azurecr.io/${{ inputs.image-name }}:${{ inputs.tag }}

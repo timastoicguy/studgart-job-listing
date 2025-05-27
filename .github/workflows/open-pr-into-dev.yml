@@ -43,7 +43,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           # IMAGE DETAILS
-          azure-registry: 0g3fdXCei4iLQUet
+          azure-registry: 0g3fdxcei4ilquet
           context: frontend
           dockerfile: frontend/Dockerfile
           image-name: frontend
@@ -81,7 +81,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           # IMAGE DETAILS
-          azure-registry: 0g3fdXCei4iLQUet
+          azure-registry: 0g3fdxcei4ilquet
           context: backend
           dockerfile: backend/Dockerfile
           image-name: backend
