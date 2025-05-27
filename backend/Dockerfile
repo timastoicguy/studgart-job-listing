@@ -1,15 +1,15 @@
 ARG NODE_VERSION=20.18.0
 
-FROM node:${NODE_VERSION}-alpine as base
+FROM node:${NODE_VERSION}-alpine AS base
 WORKDIR /usr/src/app
 
-FROM base as deps
+FROM base AS deps
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
-FROM deps as build
+FROM deps AS build
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
@@ -17,8 +17,8 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 COPY . .
 RUN npm run build
 
-FROM base as final
-ENV NODE_ENV production
+FROM base AS final
+ENV NODE_ENV=production
 USER node
 COPY package.json .
 COPY --from=deps /usr/src/app/node_modules ./node_modules
@@ -26,4 +26,4 @@ COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/src ./src
 COPY .env .env
 EXPOSE 8080
-CMD npm start
+ENTRYPOINT [ "npm", "start" ]
