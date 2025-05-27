@@ -34,7 +34,8 @@ export const chatWithGPTUsingPDFFIle = async (req: Request, res: Response) => {
   try {
     const pdfData = await pdfParse(req.file.buffer);
     const pdfText = pdfData.text;
-    const combinedInput = `${message}\n\nPDF Content:\n${pdfText}`;
+    console.log(pdfText);
+    const combinedInput = `${message}\n\n Sau đây là nội dung file pdf đã được chuyển sang text:\n${pdfText}`;
     const result = await chatGPTService.getResponse(user_id, combinedInput);
     res.json(result);
   } catch (error: any) {
