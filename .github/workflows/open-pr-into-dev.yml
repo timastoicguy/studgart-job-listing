@@ -47,6 +47,8 @@ jobs:
           context: frontend
           dockerfile: frontend/Dockerfile
           image-name: frontend
+          push: true
+          tag: dev
   backend-build-typescript:
     name: '[Backend] Build TypeScript'
     runs-on: ubuntu-latest
@@ -83,3 +85,5 @@ jobs:
           context: backend
           dockerfile: backend/Dockerfile
           image-name: backend
+          push: true
+          tag: dev
