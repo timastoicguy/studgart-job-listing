@@ -1,30 +1,22 @@
-name: "Deploy"
-description: "Deploy with Terraform and Helm"
+name: 'Deploy'
+description: 'Deploy with Terraform and Helm'
 
 inputs:
   app-name:
-    description: "Application name"
-    required: true
-  image-repository:
-    description: "ACR image repository"
-    required: true
-  image-tag:
-    description: "ACR image tag"
-    required: true
-  environment:
-    description: "Environment to deploy"
+    description: 'Application name'
     required: true
   tf-vars:
-    description: "Terraform variables"
+    description: 'Terraform variables'
     required: true
+    default: ''
   subscription-id:
-    description: "Azure subscription ID"
+    description: 'Azure subscription ID'
     required: true
   client-id:
-    description: "Azure client ID"
+    description: 'Azure client ID'
     required: true
   tenant-id:
-    description: "Azure tenant ID"
+    description: 'Azure tenant ID'
     required: true
 
 runs:
@@ -45,45 +37,34 @@ runs:
       with:
         terraform_wrapper: false
 
-    # In the tf-vars, we are using double quote
-    # So in the echo command, we need to use single quote to avoid unexpected quote trimming - Known error!
+    - name: Export environment variables
+      shell: bash
+      run: |
+        echo "ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }}" >> $GITHUB_ENV
+
     - name: Export Terraform variables to terraform.tfvars
       shell: bash
-      working-directory: ./infrastructure/terraform/deployments/${{ inputs.app-name }}
-      run: | 
-        echo '${{ inputs.tf-vars }}' > terraform.tfvars
-        echo 'app_name="${{ inputs.app-name }}"' >> terraform.tfvars
-        echo 'image_repository="${{ inputs.image-repository }}"' >> terraform.tfvars
-        echo 'image_tag="${{ inputs.image-tag }}"' >> terraform.tfvars
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        cat <<EOF > terraform.tfvars
+        ${{ inputs.tf-vars }}
+        EOF
 
     - name: Terraform init
       shell: bash
-      working-directory: ./infrastructure/terraform/deployments/${{ inputs.app-name }}
-      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform init
-      env:
-        ARM_CLIENT_ID: ${{ inputs.client-id }}
-        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
-        ARM_TENANT_ID: ${{ inputs.tenant-id }}
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: terraform init
 
-    - name: Terraform validate
+    - name: Terraform destroy old deployment
       shell: bash
-      working-directory: ./infrastructure/terraform/deployments/${{ inputs.app-name }}
-      run: terraform validate
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        terraform plan -out destroy.plan -destroy
+        terraform apply destroy.plan
 
-    - name: Terraform plan
+    - name: Terraform plan and apply new deployment
       shell: bash
-      working-directory: ./infrastructure/terraform/deployments/${{ inputs.app-name }}
-      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform plan
-      env:
-        ARM_CLIENT_ID: ${{ inputs.client-id }}
-        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
-        ARM_TENANT_ID: ${{ inputs.tenant-id }}
-
-    - name: Terraform apply
-      shell: bash
-      working-directory: ./infrastructure/terraform/deployments/${{ inputs.app-name }}
-      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform apply -auto-approve
-      env:
-        ARM_CLIENT_ID: ${{ inputs.client-id }}
-        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
-        ARM_TENANT_ID: ${{ inputs.tenant-id }}
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        terraform plan -out deployment.plan
+        terraform apply deployment.plan
