@@ -1,7 +1,7 @@
-name: "Open PR into branch develop"
+name: "Merge PR into branch develop"
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
 
@@ -11,20 +11,8 @@ permissions:
   actions: read
 
 jobs:
-  build-typescript-frontend:
-    name: '[Frontend] Build TypeScript'
-    runs-on: ubuntu-latest
-    environment: Development
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Build frontend
-        uses: ./.github/actions/build-typescript
-        with:
-          working-directory: frontend
   build-docker-frontend:
     name: '[Frontend] Build Docker'
-    needs: build-typescript-frontend
     runs-on: ubuntu-latest
     environment: Development
     steps:
@@ -48,21 +36,9 @@ jobs:
           dockerfile: frontend/Dockerfile
           image-name: frontend
           push: true
-          tag: alpha
-  backend-build-typescript:
-    name: '[Backend] Build TypeScript'
-    runs-on: ubuntu-latest
-    environment: Development
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Build frontend
-        uses: ./.github/actions/build-typescript
-        with:
-          working-directory: backend
+          tag: beta
   backend-build-docker:
     name: '[Backend] Build Docker'
-    needs: backend-build-typescript
     runs-on: ubuntu-latest
     environment: Development
     steps:
@@ -86,4 +62,4 @@ jobs:
           dockerfile: backend/Dockerfile
           image-name: backend
           push: true
-          tag: alpha
+          tag: beta

@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: mcr.microsoft.com/azuredocs/aks-helloworld
-  pullPolicy: IfNotPresent
+  repository: 0g3fdxcei4ilquet.azurecr.io/frontend
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "release"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -77,9 +77,9 @@ httproute:
       type: "PathPrefix"
       value: "/"
     backendRefs:
-    - name: "aks-hello-world"
-      namespace: "aks-hello-world"
-      port: 80
+    - name: "frontend"
+      namespace: "frontend"
+      port: 5173
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -93,14 +93,14 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
 
 autoscaling:
   enabled: false

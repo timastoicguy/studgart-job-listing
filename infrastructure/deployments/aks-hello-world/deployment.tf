@@ -4,6 +4,9 @@ resource "helm_release" "aks_hello_world" {
   create_namespace = true
   chart            = "../../helm-charts/aks-hello-world"
   values = [
-    "${file("../../helm-charts/aks-hello-world/values.yaml")}"
+    <<-EOT
+      image:
+        tag: v1
+    EOT
   ]
 }
