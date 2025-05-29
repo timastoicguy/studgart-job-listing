@@ -60,6 +60,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
 
     // Tìm kiếm chung
     if (search) {
+      console.log("search", search);
       const regexSearch = new RegExp(search, "i");
       filter.$or = [
         { title: { $regex: regexSearch } },
@@ -198,28 +199,42 @@ export const getAllJobs = async (req: Request, res: Response) => {
 
     // Lọc theo khoảng lương
     if (minSalary || maxSalary) {
-      filter.salaryRange = {};
-      if (minSalary) filter.salaryRange.min = { $lte: Number(minSalary) };
-      if (maxSalary) filter.salaryRange.max = { $gte: Number(maxSalary) };
+      filter.$or = filter.$or || [];
+      if (minSalary)
+        filter.$or = [
+          ...filter.$or,
+          { "salaryRange.min": { $gte: Number(minSalary) } },
+        ];
+      if (maxSalary)
+        filter.$or = [
+          ...filter.$or,
+          { "salaryRange.max": { $lte: Number(maxSalary) } },
+        ];
     }
 
     // Tìm kiếm theo tên công ty, loại công việc, và nhà tuyển dụng
     if (search) {
-      if (mongoose.Types.ObjectId.isValid(search)) {
-        const regexSearch = new RegExp(search, "i");
-        const companyIds = await Company.find({
-          company_name: { $regex: regexSearch },
-        }).select("_id");
-        const categoryIds = await JobCategory.find({
-          name: { $regex: regexSearch },
-        }).select("_id");
+      const regexSearch = new RegExp(search, "i");
+      const companyIds = await Company.find({
+        company_name: { $regex: regexSearch },
+      }).select("_id");
+      const categoryIds = await JobCategory.find({
+        name: { $regex: regexSearch },
+      }).select("_id");
 
-        if (companyIds.length > 0) {
-          filter.company = { $in: companyIds.map((c) => c._id) };
-        }
-        if (categoryIds.length > 0) {
-          filter.jobCategory = { $in: categoryIds.map((c) => c._id) };
-        }
+      console.log("companyIds", companyIds);
+      if (companyIds.length > 0) {
+        filter.$or = [
+          ...filter.$or,
+          { company: { $in: companyIds.map((c) => c._id) } },
+        ];
+        //filter.company = { $in: companyIds.map((c) => c._id) };
+      }
+      if (categoryIds.length > 0) {
+        filter.$or = [
+          ...filter.$or,
+          { jobCategory: { $in: categoryIds.map((c) => c._id) } },
+        ];
       }
     }
 
@@ -239,7 +254,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
     } else {
       sortCriteria.postedDate = -1; // Default to newest if no specific sort is chosen
     }
-
+    console.log("filter", filter);
     // @ts-ignoreW
     // Cuối cùng, gọi paginate
     const paginatedJobs = await Job.paginate(filter, {

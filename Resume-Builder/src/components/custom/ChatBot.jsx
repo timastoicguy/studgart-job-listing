@@ -23,7 +23,7 @@ const ChatBot = ({ onClose }) => {
 
     useEffect(() => {
         const fetchDefaultQuestions = async () => {
-            const response = await axios.get("http://localhost:3000/api/chatbot-api");
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/chatbot-api`);
             setDefaultQuestions(response.data?.data);
         };
         fetchDefaultQuestions();
@@ -63,7 +63,7 @@ const ChatBot = ({ onClose }) => {
         );
         setLoading(true);
         setIsTyping(true);
-        const response = await axios.post("http://localhost:3000/api/chatbot-api", {
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/chatbot-api`, {
             user_id: user?._id,
             message: question,
         });
@@ -88,7 +88,7 @@ const ChatBot = ({ onClose }) => {
                 if (attachmentPreview?.type === "image") {
                     formData.append("file", attachment);
                     const fileRespone = await axios.post(
-                        "http://localhost:3000/api/upload/upload-single",
+                        `${import.meta.env.VITE_BACKEND_API}/api/upload/upload-single`,
                         formData,
                         {
                             headers: { "Content-Type": "multipart/form-data" },
@@ -96,7 +96,7 @@ const ChatBot = ({ onClose }) => {
                     );
                     const url = fileRespone.data.data?.url;
                     fileUrl = url;
-                    // response = await axios.post("http://localhost:3000/api/chatbot-api", {
+                    // response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/chatbot-api`, {
                     //     user_id: user?._id,
                     //     message: userInput,
                     //     url: url,
@@ -114,7 +114,7 @@ const ChatBot = ({ onClose }) => {
                     formData.append('user_id', user?._id);
                     formData.append('message', userInput);
 
-                    const response = await axios.post('http://localhost:3000/api/chatbot-api-pdf', formData, {
+                    const response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/api/chatbot-api-pdf`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },

@@ -210,7 +210,7 @@ const DetailJob: React.FC = () => {
           `${
             import.meta.env.VITE_API_BASE_URL
           }/api/applications?page=1&job_id=${jobId}&job_seeker_id=${
-            userData.job_seeker_id
+            roleIDs?.job_seeker_id
           }`
         );
 
