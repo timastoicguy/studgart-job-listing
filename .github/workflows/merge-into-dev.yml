@@ -11,7 +11,7 @@ permissions:
   actions: read
 
 jobs:
-  build-docker-frontend:
+  frontend-build-docker:
     name: '[Frontend] Build Docker'
     runs-on: ubuntu-latest
     environment: Development
@@ -75,6 +75,25 @@ jobs:
         uses: ./.github/actions/terraform-deploy
         with:
           app-name: backend
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          tf-vars: |
+            aks_name  = "job-listing-aks"
+            rg_name   = "job-listing-rg"
+            image_tag = "beta"
+  deploy-frontend:
+    name: '[Frontend] Deploy'
+    runs-on: ubuntu-latest
+    environment: Development
+    needs: frontend-build-docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy backend
+        uses: ./.github/actions/terraform-deploy
+        with:
+          app-name: frontend
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}

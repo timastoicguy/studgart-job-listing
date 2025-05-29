@@ -24,6 +24,6 @@ terraform {
     resource_group_name  = "job-listing-tfstate-rg"
     storage_account_name = "studgarttfstate"
     container_name       = "tfstate"
-    key                  = "aks-hello-world-deployment.tfstate"
+    key                  = "frontend-deployment.tfstate"
   }
 }
