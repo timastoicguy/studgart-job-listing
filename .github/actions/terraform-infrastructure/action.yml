@@ -1,0 +1,76 @@
+name: "Terraform plan and apply to Azure"
+description: "Plan and apply Terraform changes to Azure"
+
+inputs:
+  environment:
+    description: "Environment to deploy"
+    required: true
+  tf-vars:
+    description: "Terraform variables"
+    required: true
+  subscription-id:
+    description: "Azure subscription ID"
+    required: true
+  client-id:
+    description: "Azure client ID"
+    required: true
+  tenant-id:
+    description: "Azure tenant ID"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4
+
+    - name: Set up Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    # In the tf-vars, we are using double quote
+    # So in the echo command, we need to use single quote to avoid unexpected quote trimming - Known error!
+    - name: Export Terraform variables to terraform.tfvars
+      shell: bash
+      working-directory: ./infrastructure/terraform/environments/${{ inputs.environment }}
+      run: echo '${{ inputs.tf-vars }}' > terraform.tfvars
+
+    - name: Terraform init
+      shell: bash
+      working-directory: ./infrastructure/terraform/environments/${{ inputs.environment }}
+      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform init
+      env:
+        ARM_CLIENT_ID: ${{ inputs.client-id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
+        ARM_TENANT_ID: ${{ inputs.tenant-id }}
+
+    - name: Terraform validate
+      shell: bash
+      working-directory: ./infrastructure/terraform/environments/${{ inputs.environment }}
+      run: terraform validate
+
+    - name: Terraform plan
+      shell: bash
+      working-directory: ./infrastructure/terraform/environments/${{ inputs.environment }}
+      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform plan
+      env:
+        ARM_CLIENT_ID: ${{ inputs.client-id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
+        ARM_TENANT_ID: ${{ inputs.tenant-id }}
+
+    - name: Terraform apply
+      shell: bash
+      working-directory: ./infrastructure/terraform/environments/${{ inputs.environment }}
+      run: ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }} terraform apply -auto-approve
+      env:
+        ARM_CLIENT_ID: ${{ inputs.client-id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription-id }}
+        ARM_TENANT_ID: ${{ inputs.tenant-id }}

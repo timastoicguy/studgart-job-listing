@@ -1,0 +1,43 @@
+name: "Tag SemVer"
+description: "Use Semantic Versioning to tag the commit"
+
+outputs:
+  version:
+    description: "Semantic version"
+    value: ${{ steps.version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v2.0.1
+      with:
+        versionSpec: "6.0.x"
+
+    - name: Show GitVersion
+      id: show-gitversion
+      uses: gittools/actions/gitversion/execute@v2.0.1
+      with:
+        useConfigFile: true
+        configFilePath: "gitversion.yml"
+
+    - name: Tag SemVer and define version
+      shell: bash
+      id: version
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions Bot"
+        if [ "${{ github.ref }}" == "refs/heads/prod" ]; then
+          echo "version=${{ steps.show-gitversion.outputs.majorMinorPatch }}" >> $GITHUB_OUTPUT
+          git tag -a ${{ steps.show-gitversion.outputs.majorMinorPatch }} -m "${{ github.event.head_commit.message }}"
+          git push origin ${{ steps.show-gitversion.outputs.majorMinorPatch }}
+        else
+          echo "version=${{ steps.show-gitversion.outputs.semVer }}" >> $GITHUB_OUTPUT
+          git tag -a ${{ steps.show-gitversion.outputs.semVer }} -m "${{ github.event.head_commit.message }}"
+          git push origin ${{ steps.show-gitversion.outputs.semVer }}
+        fi

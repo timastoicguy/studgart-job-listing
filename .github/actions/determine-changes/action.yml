@@ -1,0 +1,49 @@
+name: "Determine changes"
+description: "Determine which folder has changes to apply"
+
+outputs:
+  devops-changed:
+    description: "Changes in .github and infrastructure folder"
+    value: ${{ steps.filter.outputs.devops-changed }}
+  frontend-changed: 
+    description: "Changes in frontend folder"
+    value: ${{ steps.filter.outputs.frontend-changed }}
+  backend-changed: 
+    description: "Changes in backend folder"
+    value: ${{ steps.filter.outputs.backend-changed }}
+
+runs:
+  using: composite
+  steps:
+
+    - name: Checkout branch
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Determine base to compare changes
+      id: determine-base
+      shell: bash
+      run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "base=refs/heads/dev" >> $GITHUB_OUTPUT
+          else
+            echo "base=${{ github.ref }}" >> $GITHUB_OUTPUT
+          fi
+    - name: Validate base
+      shell: bash
+      run: |
+        echo 'Base: ${{ steps.determine-base.outputs.base }}'
+
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        base: '${{ steps.determine-base.outputs.base }}'
+        filters: |
+          devops-changed:
+            - '.github/**'
+            - 'infrastructure/**'
+          frontend-changed:
+            - 'frontend/**'
+          backend-changed:
+            - 'backend/**'
