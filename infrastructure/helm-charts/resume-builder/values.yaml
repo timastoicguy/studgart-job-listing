@@ -41,7 +41,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 5174
+  port: 5173
 
 ingress:
   enabled: false
@@ -79,7 +79,7 @@ httproute:
     backendRefs:
     - name: "resume-builder"
       namespace: "resume-builder"
-      port: 5174
+      port: 5173
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
