@@ -1,8 +1,7 @@
 resource "helm_release" "traefik" {
-  name       = "traefik"
-  repository = "https://traefik.github.io/charts"
-  chart      = "traefik"
-  # version          = "0.29.1"
+  name             = "traefik"
+  repository       = "https://traefik.github.io/charts"
+  chart            = "traefik"
   namespace        = "traefik"
   create_namespace = true
   values = [
@@ -25,17 +24,17 @@ resource "helm_release" "traefik" {
             namespacePolicy: All
             protocol: HTTPS
             mode: Terminate
-            hostname: studgart.com
+            hostname: 'studgart.com'
             certificateRefs:
               - name: studgart-com-tls
-          apisecure:
+          wildcardwebsecure:
             port: 8443
             namespacePolicy: All
             protocol: HTTPS
             mode: Terminate
-            hostname: api.studgart.com
+            hostname: '*.studgart.com'
             certificateRefs:
-              - name: api-studgart-com-tls
+              - name: wildcard-studgart-com-tls
     EOT
   ]
 }
