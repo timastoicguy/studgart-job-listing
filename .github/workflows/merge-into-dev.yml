@@ -98,7 +98,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Deploy backend
+      - name: Deploy frontend
         uses: ./.github/actions/terraform-deploy
         with:
           app-name: frontend
@@ -136,7 +136,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Deploy backend
+      - name: Deploy resume builder
         uses: ./.github/actions/terraform-deploy
         with:
           app-name: resume-builder
