@@ -15,7 +15,7 @@ variable "location" {
 variable "prefix" {
   description = "The prefix for the resource group"
   type        = string
-  default = "job-listing"
+  default     = "job-listing"
 }
 
 variable "subscription_id" {

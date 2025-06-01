@@ -23,5 +23,5 @@ data "kubernetes_service" "traefik" {
     name      = "traefik"
     namespace = "traefik"
   }
-  depends_on = [ helm_release.traefik ]
+  depends_on = [helm_release.traefik]
 }
