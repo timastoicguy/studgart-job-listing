@@ -11,7 +11,7 @@ permissions:
   actions: read
 
 jobs:
-  frontend-build-docker:
+  build-docker-frontend:
     name: '[Frontend] Build Docker'
     runs-on: ubuntu-latest
     environment: Development
@@ -37,7 +37,7 @@ jobs:
           image-name: frontend
           push: true
           tag: beta
-  backend-build-docker:
+  build-docker-backend:
     name: '[Backend] Build Docker'
     runs-on: ubuntu-latest
     environment: Development
@@ -63,11 +63,57 @@ jobs:
           image-name: backend
           push: true
           tag: beta
+  build-docker-resume-builder:
+    name: '[Resume Builder] Build Docker'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > ./Resume-Builder/.env
+          ${{ vars.BACKEND_ENV }}
+          EOF
+      - name: Build frontend
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdxcei4ilquet
+          context: Resume-Builder
+          dockerfile: Resume-Builder/Dockerfile
+          image-name: resume-builder
+          push: true
+          tag: beta
+  
+  deploy-frontend:
+    name: '[Frontend] Deploy'
+    runs-on: ubuntu-latest
+    environment: Development
+    needs: build-docker-frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy backend
+        uses: ./.github/actions/terraform-deploy
+        with:
+          app-name: frontend
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          tf-vars: |
+            aks_name  = "job-listing-aks"
+            rg_name   = "job-listing-rg"
+            image_tag = "beta"
   deploy-backend:
     name: '[Backend] Deploy'
     runs-on: ubuntu-latest
     environment: Development
-    needs: backend-build-docker
+    needs: build-docker-backend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,18 +128,18 @@ jobs:
             aks_name  = "job-listing-aks"
             rg_name   = "job-listing-rg"
             image_tag = "beta"
-  deploy-frontend:
-    name: '[Frontend] Deploy'
+  deploy-resume-builder:
+    name: '[Resume Builder] Deploy'
     runs-on: ubuntu-latest
     environment: Development
-    needs: frontend-build-docker
+    needs: build-docker-resume-builder
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Deploy backend
         uses: ./.github/actions/terraform-deploy
         with:
-          app-name: frontend
+          app-name: resume-builder
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
