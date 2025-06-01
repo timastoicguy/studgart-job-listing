@@ -1,4 +1,4 @@
-name: "Open PR into branch develop"
+name: 'Open PR into branch develop'
 
 on:
   pull_request:
@@ -95,7 +95,7 @@ jobs:
       - name: Build Resume-Builder application
         uses: ./.github/actions/build-typescript
         with:
-          working-directory: resume-builder
+          working-directory: Resume-Builder
   build-docker-resume-builder:
     name: '[Resume Builder] Build Docker'
     runs-on: ubuntu-latest
