@@ -5,6 +5,15 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   tags                     = var.default_tags
+  blob_properties {
+    cors_rule {
+      allowed_origins = [ "*" ]
+      allowed_headers = [ "*" ]
+      allowed_methods = [ "GET", "PUT", "POST", "DELETE", "PATCH" ]
+      exposed_headers = [ "*" ]
+      max_age_in_seconds = 3600
+    }
+  }
   lifecycle {
     prevent_destroy = true
   }
