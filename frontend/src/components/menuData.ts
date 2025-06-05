@@ -40,7 +40,7 @@ export const roleOptions: Record<string, MenuItem[]> = {
     { 
       name: "Tạo CV tự động", 
       label: `Tạo CV tự động`, 
-      href: `http://${import.meta.env.VITE_REACT_BASE_URL2}`,
+      href: `${import.meta.env.VITE_REACT_BASE_URL2}`,
       target: "_blank", // Mở trong tab mới
       rel: "noopener noreferrer", // Bảo mật
     },
