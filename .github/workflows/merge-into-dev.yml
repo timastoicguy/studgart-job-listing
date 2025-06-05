@@ -73,7 +73,7 @@ jobs:
       - name: Set up .env file
         run: |
           cat <<EOF > ./Resume-Builder/.env
-          ${{ vars.BACKEND_ENV }}
+          ${{ vars.RESUME_BUILDER_ENV }}
           EOF
       - name: Build frontend
         uses: ./.github/actions/build-docker
