@@ -201,7 +201,7 @@ const handleConfirmPayment = async () => {
       );
   
       if (response.status === 200) {
-        const redirectUrl = response.data.data.shortLink || response.data.data.payUrl;
+        const redirectUrl = response.data.data.payUrl || response.data.data.shortLink ;
   
         if (redirectUrl) {
           window.open(redirectUrl, "_blank"); // Mở tab mới với URL trả về
@@ -253,7 +253,7 @@ const handleConfirmPayment = async () => {
             </label>
             <div className="flex items-center mb-4">
               <img
-                src={userData.profilePicture}
+                src={userData.profilePicture|| "https://joblisting2024a.blob.core.windows.net/imgs/12f3d72b-7025-494b-b695-72cac092417b.jfif"}
                 alt="Profile"
                 className="w-12 h-12 rounded-full mr-4"
               />
