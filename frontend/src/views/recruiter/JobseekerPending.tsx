@@ -226,7 +226,7 @@ const JobseekerPending = () => {
         await sendNotification(
           userId,
           "application_status",
-          "Công ty XYZ đã xem xét hồ sơ của bạn."
+          "Công ty đã xem xét hồ sơ của bạn."
         );
       } else {
         console.error("Error reviewing application");
@@ -334,6 +334,7 @@ const JobseekerPending = () => {
             ) : (
               accounts.map((account, index) => {
                 const userId = account.job_seeker_id?.user_id;
+                const companyName = account.job_id?.company?.company_name || "Công ty";
                 return (
                   <TableRow key={account._id}>
                     <TableCell>{(page - 1) * limit + index + 1}</TableCell>
@@ -368,7 +369,7 @@ const JobseekerPending = () => {
                       >
                         <FaEye title="Xem" size={18} />
                       </button> */}
-                      <Preview account={account} userId={userId}></Preview>
+                      <Preview account={account} userId={userId} companyName={companyName} ></Preview>
                       <button
                         className={`text-green-500 hover:text-green-700 mx-1 ${
                           account.application_status === "accepted"

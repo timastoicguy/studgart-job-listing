@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import PDFReviewModal from "./PDFReviewModal";
@@ -5,7 +6,7 @@ import { FaEye } from "react-icons/fa";
 import { sendNotification } from "@/lib/reducers/recruiter/sendNotification";
 import axios from "axios";
 
-const Preview = ({ account, userId }: { account: any; userId: any }) => {
+const Preview = ({ account, userId,companyName }: { account: any; userId: any,companyName:any }) => {
   
   const [isModalOpen, setModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
@@ -41,7 +42,7 @@ const Preview = ({ account, userId }: { account: any; userId: any }) => {
           await sendNotification(
             userId,
             "application_status",
-            `Công ty XYZ đã xem xét hồ sơ của bạn.`
+            `Công ty ${companyName} đã xem xét hồ sơ của bạn.`
           );
         }
       } else {
