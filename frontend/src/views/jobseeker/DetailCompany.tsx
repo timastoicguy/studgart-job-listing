@@ -54,10 +54,8 @@ const DetailCompany: React.FC = () => {
     applicationDeadline: string;
     benefits: string[];
   }
-  
-  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
-  
 
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
 
   const [companyData, setCompanyData] = useState<any>(null);
   const fetchUserData = async (userId: string) => {
@@ -74,30 +72,52 @@ const DetailCompany: React.FC = () => {
   };
   useEffect(() => {
     const fetchJobs = async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/group/jobs/suggestions/?page=1&limit=5`);
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/group/jobs/suggestions/?page=1&limit=5`
+      );
       const data = await response.json();
-      
-      const jobsWithCompanyLogo = await Promise.all(data.data.jobs.map(async (job: Job) => {
-     console.log("Job:", job.company);
-        const companyResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/companies/${job.company._id}`);
-        console.log("Job111:", companyResponse.data.data.user_id.profilePicture);
-        const logo = companyResponse.data.data.user_id.profilePicture; // Profile picture URL from the user_id
-  
-        return {
-          ...job,
-          company: {
-            ...job.company,
-            logo,
-          },
-        };
-      }));
-  
+
+      const jobsWithCompanyLogo = await Promise.all(
+        data.data.jobs.map(async (job: Job) => {
+          if (job.company === null) {
+            return {
+              ...job,
+              company: {
+                logo: "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png", // Default logo if company is null
+                company_name: "Unknown Company",
+                contact_email: "N/A",
+                contact_phone: "N/A",
+                _id: "unknown-company-id",
+              },
+              logo: "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png",
+            };
+          }
+          console.log("Job:", job.company);
+          const companyResponse = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/api/companies/${
+              job?.company?._id ?? "615274cccd5f865b7ac0366v"
+            }`
+          );
+          const logo = companyResponse?.data?.data?.user_id?.profilePicture; // Profile picture URL from the user_id
+
+          return {
+            ...job,
+            company: {
+              ...job.company,
+              logo,
+            },
+          };
+        })
+      );
+
       setRelatedJobs(jobsWithCompanyLogo);
     };
-  
+
     fetchJobs();
   }, []);
-  
+
   useEffect(() => {
     const fetchCompanyAndUser = async () => {
       try {
@@ -108,6 +128,7 @@ const DetailCompany: React.FC = () => {
           const companyData = companyResponse.data.data;
 
           setCompanyData({
+            bio: companyData?.user_id?.bio || "N/A",
             name: companyData.company_name,
             address: companyData.company_address || "N/A",
             industry: companyData.industry || "N/A",
@@ -118,12 +139,7 @@ const DetailCompany: React.FC = () => {
             logo:
               companyData.user_id.profilePicture ||
               "https://via.placeholder.com/48",
-          }
-        
-        
-        );
-          
-          
+          });
         }
       } catch (error) {
         console.error("Error fetching company or user data:", error);
@@ -379,6 +395,7 @@ const DetailCompany: React.FC = () => {
             <ul className="space-y-4">
               {relatedJobs.map((job, index) => (
                 <li
+                  onClick={() => handleJobClick(job._id)}
                   key={index}
                   className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md shadow-sm"
                 >
@@ -389,9 +406,11 @@ const DetailCompany: React.FC = () => {
                   />
                   <div>
                     <h3 className="font-bold">{job.title}</h3>
-                    <p className="text-gray-500 text-sm">{job.company.contact_email}</p>
+                    <p className="text-gray-500 text-sm">
+                      {job.company.contact_email}
+                    </p>
                     <p className="text-red-500 text-sm font-semibold">
-                    {job.salaryRange.min} - {job.salaryRange.max} VNĐ
+                      {job.salaryRange.min} - {job.salaryRange.max} VNĐ
                     </p>
                   </div>
                 </li>
