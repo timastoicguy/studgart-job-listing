@@ -93,16 +93,11 @@ const Jobs: React.FC = () => {
   }, [location]);
   return (
     <TooltipProvider>
-             {/* Header Section */}
-             <header className="bg-header text-green-500 p-2 flex justify-between items-center fixed top-0 w-full z-10">
-             
+      {/* Header Section */}
+      <header className="bg-header text-green-500 p-2 flex justify-between items-center fixed top-0 w-full z-10">
         {/* Logo and Sidebar Toggle */}
         <div className="flex items-center gap-4">
-          <button
-            className="flex w-8 h-8 lg:hidden rounded-md bg-white hover:bg-gray-100 hover:shadow-md justify-center items-center transition-all"
-          >
-
-          </button>
+          <button className="flex w-8 h-8 lg:hidden rounded-md bg-white hover:bg-gray-100 hover:shadow-md justify-center items-center transition-all"></button>
           <div className="flex items-center">
             <img src="..\public\images\logo.png" alt="Logo" className="h-8" />
 
@@ -112,20 +107,30 @@ const Jobs: React.FC = () => {
           </div>
         </div>
 
-        
-          <div className="space-x-4">
-            <button className="bg-green-500 px-4 py-2 rounded-md text-white" onClick={() => navigate("/login")}>Đăng nhập</button>
-            <button className="bg-gray-500 px-4 py-2 rounded-md text-white" onClick={() => navigate("/register")}>Đăng ký</button>
-            <button 
-  className="bg-white border border-green-500 px-4 py-2 rounded-md text-green-500" 
-  onClick={() => window.open(`${import.meta.env.VITE_REACT_BASE_URL2}`, "_blank")}
->
-  Tạo CV
-</button>          </div>
-        </header>
+        <div className="space-x-4">
+          <button
+            className="bg-green-500 px-4 py-2 rounded-md text-white"
+            onClick={() => navigate("/login")}
+          >
+            Đăng nhập
+          </button>
+          <button
+            className="bg-gray-500 px-4 py-2 rounded-md text-white"
+            onClick={() => navigate("/register")}
+          >
+            Đăng ký
+          </button>
+          <button
+            className="bg-white border border-green-500 px-4 py-2 rounded-md text-green-500"
+            onClick={() =>
+              window.open(`${import.meta.env.VITE_REACT_BASE_URL2}`, "_blank")
+            }
+          >
+            Tạo CV
+          </button>{" "}
+        </div>
+      </header>
       <div className="lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
-        
-        
         <ConfirmationDialog
           isOpen={isDialogOpen}
           message={
@@ -136,15 +141,12 @@ const Jobs: React.FC = () => {
           onConfirm={confirmFavoriteJob}
           onCancel={cancelFavoriteJob}
         />
-        
 
         <main className="flex-1 p-10">
-          
           <div className="bg-white p-6 rounded-md shadow-md">
             <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
               Danh sách công việc
             </div>
-
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4"></div>
 
@@ -329,7 +331,7 @@ const Jobs: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <p>No recommended jobs available.</p>
+                <p>Chưa có các công việc phù hợp nào.</p>
               )}
             </div>
             <hr className="col-span-3 border-t border-gray-300 my-4" />

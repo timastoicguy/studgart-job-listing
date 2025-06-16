@@ -10,6 +10,7 @@ import {
 } from "@/lib/reducers/recruiter/postJobs";
 import useAuthStore from "@/store/auth/useAuthStore";
 import ConfirmationDialog from "../component/ConfirmationDialog";
+import { min } from "date-fns";
 
 const getRecruiterIdFromLocalStorage = (): string | null => {
   const userData = localStorage.getItem("userData");
@@ -19,6 +20,50 @@ const getRecruiterIdFromLocalStorage = (): string | null => {
   }
   return null; // Return null if no userData in localStorage
 };
+
+const FormattedNumberInput = ({ value, onChange, className }: any) => {
+  const [display, setDisplay] = useState("");
+
+  // Cập nhật khi value bên ngoài thay đổi
+  useEffect(() => {
+    if (value === null || value === undefined) setDisplay("");
+    else setDisplay(format(value));
+  }, [value]);
+
+  const format = (num: any) =>
+    num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  const handleChange = (e: any) => {
+    const raw = e.target.value.replace(/,/g, "").replace(/\D/g, "");
+    const number = raw === "" ? 0 : parseInt(raw, 10);
+    setDisplay(format(raw));
+    onChange(number); // gửi số thật
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (
+      !(
+        (e.key >= "0" && e.key <= "9") ||
+        ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+          e.key
+        )
+      )
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      value={display}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      className={className}
+    />
+  );
+};
+
 export default function JobListing() {
   const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const recruiterId = roleIDs?.recruiter_id || ""; // Lấy recruiter_id từ userData
@@ -33,21 +78,21 @@ export default function JobListing() {
   const [isUrgent, setIsUrgent] = useState(false);
 
   const [jobDescription, setJobDescription] = useState(`
-    - Understand requirements, analyze - design, build and optimize E-commerce products for the company.
-    - Participate in the maintenance and upgrade of the website's features.
-    - Write well designed, testable, efficient code; Create website layout/user interface by using standard HTML/CSS/JS practices.
-    - Perform work as requested by the manager.`);
+  - Hiểu yêu cầu, phân tích - thiết kế, xây dựng và tối ưu hóa các sản phẩm thương mại điện tử cho công ty.
+- Tham gia bảo trì và nâng cấp các tính năng của website.
+- Viết code được thiết kế tốt, có thể kiểm thử, hiệu quả; Tạo giao diện người dùng/bố cục website bằng cách sử dụng các chuẩn HTML/CSS/JS.
+- Thực hiện công việc theo yêu cầu của quản lý.`);
   const [requirements, setRequirements] = useState(`
-    - Good command in English
-    - Bachelor's degree in related field
-    - Experience with PHP (Laravel, WordPress, CodeIgniter), knowledge of Bootstrap, Sass, ReactJS / NodeJS...is an advantage
-    - Proficient in using MySQL/PostgreSQL/MariaDB for database administration
-    - Master the knowledge and experience of HTML 5, CSS 3, JS`);
+    - Tiếng Anh tốt
+- Bằng cử nhân chuyên ngành liên quan
+- Có kinh nghiệm với PHP (Laravel, WordPress, CodeIgniter), hiểu biết về Bootstrap, Sass, ReactJS/NodeJS...là một lợi thế
+- Thành thạo sử dụng MySQL/PostgreSQL/MariaDB để quản trị cơ sở dữ liệu
+- Nắm vững kiến thức và kinh nghiệm về HTML 5, CSS 3, JS`);
   const [benefits, setBenefits] = useState(`
-    - Salary: Negotiable based on experience and track records
-    - A friendly, dynamic and professional environment with great chances to learn new skills and gain valuable experience
-    - Annual leave, insurance following Vietnam Law and company’s regulation (social insurance and health care insurance, etc.)
-    - Periodic and regular evaluations for salary raises in accordance with performances.`);
+    - Mức lương: Thỏa thuận dựa trên kinh nghiệm và thành tích
+- Môi trường làm việc thân thiện, năng động và chuyên nghiệp với nhiều cơ hội học hỏi các kỹ năng mới và tích lũy kinh nghiệm quý báu
+- Nghỉ phép hằng năm, bảo hiểm theo Luật Việt Nam và quy định của công ty (bảo hiểm xã hội, bảo hiểm y tế, v.v.)
+- Đánh giá định kỳ và thường xuyên để tăng lương theo hiệu suất làm việc.`);
   const [location, setLocation] = useState("HCM");
   const [companyId, setCompanyId] = useState("60df7992fc13cc1af000006c"); // Update with actual ObjectId
   const [jobCategoryId, setJobCategoryId] = useState(
@@ -182,20 +227,18 @@ export default function JobListing() {
         <div className="mb-6 grid grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-semibold mb-1">Lương từ</label>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={salaryMin}
-              onChange={(e) => setSalaryMin(Number(e.target.value))}
-              className="w-full p-3 border rounded-md"
+              onChange={setSalaryMin}
+              className={"w-full p-3 border rounded-md"}
             />
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1">đến</label>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={salaryMax}
-              onChange={(e) => setSalaryMax(Number(e.target.value))}
-              className="w-full p-3 border rounded-md"
+              onChange={setSalaryMin}
+              className={"w-full p-3 border rounded-md"}
             />
           </div>
           <div>
@@ -220,19 +263,18 @@ export default function JobListing() {
           </div>
 
           <div>
-  <label className="block text-sm font-semibold mb-1">
-    Nhu cầu tuyển
-  </label>
-  <select
-    className="w-full p-3 border rounded-md"
-    value={isUrgent ? "urgent" : "normal"}
-    onChange={(e) => setIsUrgent(e.target.value === "urgent")}
-  >
-    <option value="normal">Tuyển bình thường</option>
-    <option value="urgent">Tuyển gấp</option>
-  </select>
-</div>
-
+            <label className="block text-sm font-semibold mb-1">
+              Nhu cầu tuyển
+            </label>
+            <select
+              className="w-full p-3 border rounded-md"
+              value={isUrgent ? "urgent" : "normal"}
+              onChange={(e) => setIsUrgent(e.target.value === "urgent")}
+            >
+              <option value="normal">Tuyển bình thường</option>
+              <option value="urgent">Tuyển gấp</option>
+            </select>
+          </div>
         </div>
 
         {/* Deadline */}
@@ -393,7 +435,7 @@ export default function JobListing() {
             {/* Company Logo */}
             <div className="flex items-center">
               <img
-                src={ "/images/logo.png"}
+                src={"/images/logo.png"}
                 alt="Company Logo"
                 className="w-16 h-16 mr-4"
               />
@@ -412,7 +454,8 @@ export default function JobListing() {
             </div>
           </div>
           <p className="text-red-500 text-lg font-bold">
-            {salaryMin} {currency} - {salaryMax} {currency}
+            {Number(salaryMin).toLocaleString()} {currency} -{" "}
+            {Number(salaryMax).toLocaleString()} {currency}
           </p>
           <p className="text-gray-400 mt-1">10 minutes ago</p>
           <p className="text-gray-500 mt-2">

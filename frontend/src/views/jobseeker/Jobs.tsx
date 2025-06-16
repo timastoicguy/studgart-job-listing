@@ -29,7 +29,7 @@ import useAuthStore from "../../store/auth/useAuthStore";
 import Footer from "@/components/Footer";
 
 const Jobs: React.FC = () => {
-  const { userData,roleIDs } = useAuthStore(); // Truy cập accessToken từ store
+  const { userData, roleIDs } = useAuthStore(); // Truy cập accessToken từ store
   const itemsPerPage = 10;
   const jobSeekerId = roleIDs?.job_seeker_id ?? ""; // Replace with dynamic ID
 
@@ -405,7 +405,7 @@ const Jobs: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <p>No recommended jobs available.</p>
+                <p>Chưa có công việc phù hợp nào.</p>
               )}
             </div>
             <hr className="col-span-3 border-t border-gray-300 my-4" />
@@ -443,7 +443,6 @@ const Jobs: React.FC = () => {
       </div>
       <Footer />
     </TooltipProvider>
-    
   );
 };
 
