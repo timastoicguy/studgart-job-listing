@@ -41,7 +41,6 @@ import axios from "axios";
 import { FaPaperPlane, FaSpinner } from "react-icons/fa";
 import useAuthStore from "@/store/auth/useAuthStore";
 
-
 const DetailJob: React.FC = () => {
   const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const { jobId } = useParams<{ jobId: string }>(); // Get jobId from URL
@@ -134,7 +133,7 @@ const DetailJob: React.FC = () => {
       handleCloseDialog();
     } catch (error) {
       console.error("Error submitting application:", error);
-      message.error(`Bạn ứng tuyển không thành công! ${error}`);
+      message.error(`Bạn ứng tuyển không thành công!`);
     }
   };
 
@@ -142,18 +141,20 @@ const DetailJob: React.FC = () => {
 
   const handleCompanyClick = (companyId: any) => {
     console.log("Company ID:", companyId);
-    
+
     // Kiểm tra nếu companyId là "N/A"
     if (companyId === "N/A") {
       // Hiển thị thông báo lỗi khi companyId là "N/A"
       notification.error({
-        message: 'Thông báo',
-        description: 'Công ty hiện tại đang chưa xác thực.',
-        placement: 'topRight',
+        message: "Thông báo",
+        description: "Công ty hiện tại đang chưa xác thực.",
+        placement: "topRight",
       });
     } else {
       // Điều hướng đến trang chi tiết công ty
-      navigate(`/jobseeker/detailCompany/${companyId}`, { state: { companyId } });
+      navigate(`/jobseeker/detailCompany/${companyId}`, {
+        state: { companyId },
+      });
     }
   };
   useEffect(() => {
@@ -165,7 +166,6 @@ const DetailJob: React.FC = () => {
 
       // Check if response contains data
       if (response) {
-
         // Set state with values from fetched data
         setTitle(response.title || "N/A");
         setSalaryMin(response.salaryRange?.min ?? 0);
@@ -188,10 +188,10 @@ const DetailJob: React.FC = () => {
         setLocation(response.location?.[0]?.name || "N/A");
         setCompanyId(response.company?.["_id"] || "N/A");
 
-
         setCompanyName(response.company?.company_name || "N/A"); // Match the API structure
         setCompanyLogo(
-          response2?.profilePicture || "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"
+          response2?.profilePicture ||
+            "https://joblisting2024a.blob.core.windows.net/imgs/09c6a2fb-a3fc-40f6-aa3a-51a5221c0573.png"
         ); // Ensure logo is handled properly
         setCompanyAddress(response.company?.company_address || "N/A");
         setIndustry(response.company?.industry || "N/A"); // Ensure to match the API field if exists
@@ -213,7 +213,6 @@ const DetailJob: React.FC = () => {
             roleIDs?.job_seeker_id
           }`
         );
-
 
         // Kiểm tra trong trường 'docs' thay vì toàn bộ 'response.data'
         if (response.data.data.docs && response.data.data.docs.length > 0) {
@@ -248,13 +247,15 @@ const DetailJob: React.FC = () => {
           }/api/group/jobs/suggestions/?page=1&limit=3`
         );
         const jobs = response.data.data.jobs;
-  
+
         // Fetch logos for each job
         const jobsWithLogos = await Promise.all(
           jobs.map(async (job: any) => {
             try {
               const companyResponse = await axios.get(
-                `${import.meta.env.VITE_API_BASE_URL}/api/companies/${job.company._id}`
+                `${import.meta.env.VITE_API_BASE_URL}/api/companies/${
+                  job.company._id
+                }`
               );
               const userId = companyResponse.data.data.user_id._id;
 
@@ -275,7 +276,7 @@ const DetailJob: React.FC = () => {
             }
           })
         );
-  
+
         setRelatedJobs(jobsWithLogos); // Update state with jobs including logos
         setLoading(false);
       } catch (err) {
@@ -283,7 +284,7 @@ const DetailJob: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchRelatedJobs();
   }, []);
 
@@ -330,11 +331,11 @@ const DetailJob: React.FC = () => {
       return false;
     },
   };
-interface Favorite {
-  job_id: {
-    _id: string; // or the appropriate type for jobId
-  };
-}
+  interface Favorite {
+    job_id: {
+      _id: string; // or the appropriate type for jobId
+    };
+  }
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
@@ -343,7 +344,7 @@ interface Favorite {
         if (!jobSeekerId || !jobId) return;
         console.log("jobSeekerId", jobSeekerId);
         console.log("jobId", jobId);
-  
+
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/favorites`,
           {
@@ -351,31 +352,34 @@ interface Favorite {
           }
         );
         console.log("response.data?.data?.docs", response.data?.data?.docs);
-  
+
         // Kiểm tra nếu jobId có trong danh sách các công việc yêu thích
         const isJobFavorite = response.data?.data?.docs.some(
           (favorite: Favorite) => favorite.job_id._id === jobId
         );
-  
+
         setIsFavorite(isJobFavorite);
       } catch (error) {
         console.error("Error checking favorite status:", error);
       }
     };
-  
+
     checkFavoriteStatus();
   }, [jobId, roleIDs?.job_seeker_id]);
-  
 
   const toggleFavorite = async () => {
     try {
       console.log("isFavorite", isFavorite);
       const jobSeekerId = roleIDs?.job_seeker_id;
       if (!jobSeekerId || !jobId) return;
-  
+
       if (isFavorite) {
-        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/favorites/${jobId}/${jobSeekerId}`, {
-        });
+        await axios.delete(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/favorites/${jobId}/${jobSeekerId}`,
+          {}
+        );
         message.success("Đã xóa khỏi danh sách yêu thích.");
       } else {
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/favorites`, {
@@ -385,14 +389,14 @@ interface Favorite {
         });
         message.success("Đã thêm vào danh sách yêu thích.");
       }
-  
+
       setIsFavorite(!isFavorite);
     } catch (error) {
       console.error("Error toggling favorite status:", error);
       message.error("Không thể thực hiện thao tác yêu thích.");
     }
   };
-  
+
   // Function to handle application button click
   return (
     <TooltipProvider>
@@ -423,19 +427,19 @@ interface Favorite {
               </div>
               {/* Icons */}
               <div className="flex space-x-4">
-              <Tooltip>
-    <TooltipTrigger>
-      <FiHeart
-        size={24}
-        color={isFavorite ? "red" : "gray"}
-        onClick={toggleFavorite}
-        style={{ cursor: "pointer" }}
-      />
-    </TooltipTrigger>
-    <TooltipContent>
-      {isFavorite ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-    </TooltipContent>
-  </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <FiHeart
+                      size={24}
+                      color={isFavorite ? "red" : "gray"}
+                      onClick={toggleFavorite}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isFavorite ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
             <div className="pl-24">
@@ -443,7 +447,6 @@ interface Favorite {
                 {salaryMin.toLocaleString()} {currency} -{" "}
                 {salaryMax.toLocaleString()} {currency}
               </p>
-
 
               <p className="text-gray-500 mt-2">
                 Hết hạn: {new Date(deadline).toLocaleDateString()}
@@ -640,46 +643,47 @@ interface Favorite {
 
           {/* Related Jobs */}
           <div className="bg-white p-6 rounded-md shadow-md border">
-    <h2 className="text-lg font-bold mb-4">Công việc liên quan</h2>
-    <ul className="space-y-4">
-      {relatedJobs.map((job, index) => (
-        <li
-          key={index}
-          className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md shadow-sm"
-          onClick={() => handleJobClick(job)}
-        >
-          <img
-            src={job.company?.logo || "https://via.placeholder.com/48"}
-            alt={`${job.company?.company_name || "Company"} logo`}
-            className="w-12 h-12 object-cover"
-          />
+            <h2 className="text-lg font-bold mb-4">Công việc liên quan</h2>
+            <ul className="space-y-4">
+              {relatedJobs.map((job, index) => (
+                <li
+                  key={index}
+                  className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md shadow-sm"
+                  onClick={() => handleJobClick(job)}
+                >
+                  <img
+                    src={job.company?.logo || "https://via.placeholder.com/48"}
+                    alt={`${job.company?.company_name || "Company"} logo`}
+                    className="w-12 h-12 object-cover"
+                  />
 
-          <div>
-            <h3 className="font-bold">{job.title}</h3>
-            <p className="text-gray-500 text-sm">
-              {job.company?.company_name || "Company name not available"}
-            </p>
-            <p className="text-gray-500 text-sm">
-              {job.location
-                .map((loc: { name: string }) => loc.name)
-                .join(", ")}
-            </p>
-            <p className="text-gray-500 text-sm">
-              {job.technologies
-                .map((tech: { name: string }) => tech.name)
-                .join(", ")}
-            </p>
+                  <div>
+                    <h3 className="font-bold">{job.title}</h3>
+                    <p className="text-gray-500 text-sm">
+                      {job.company?.company_name ||
+                        "Company name not available"}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      {job.location
+                        .map((loc: { name: string }) => loc.name)
+                        .join(", ")}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      {job.technologies
+                        .map((tech: { name: string }) => tech.name)
+                        .join(", ")}
+                    </p>
 
-            <p className="text-red-500 text-sm font-medium">
-              {job.salaryRange
-                ? `${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()} VND`
-                : "Salary not disclosed"}
-            </p>
+                    <p className="text-red-500 text-sm font-medium">
+                      {job.salaryRange
+                        ? `${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()} VND`
+                        : "Salary not disclosed"}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </li>
-      ))}
-    </ul>
-  </div>
         </aside>
       </div>
     </TooltipProvider>

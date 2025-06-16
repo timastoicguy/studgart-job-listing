@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
-import {  FiMapPin,FiRefreshCcw } from "react-icons/fi";
+import { FiMapPin, FiRefreshCcw } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import {
   Tooltip,
@@ -23,10 +23,9 @@ import { useFetchJobs } from "@/lib/reducers/recruiter/useFetchJobs";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { notification } from 'antd';  // Import notification from Ant Design
+import { notification } from "antd"; // Import notification from Ant Design
 import ConfirmationDialog from "../component/ConfirmationDialog";
 import Footer from "@/components/Footer";
-
 
 const JobPosted: React.FC = () => {
   const itemsPerPage = 3;
@@ -35,7 +34,9 @@ const JobPosted: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
   const [favorites, setFavorites] = useState(new Map<string, boolean>());
-  const [applicationDeadlineMap, setApplicationDeadlineMap] = useState<Map<string, boolean>>(new Map());
+  const [applicationDeadlineMap, setApplicationDeadlineMap] = useState<
+    Map<string, boolean>
+  >(new Map());
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Manage dialog open state
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null); // Store selected job ID for favoriting
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ const JobPosted: React.FC = () => {
     topCompanies = [],
     totalPagesJobs,
     loading,
+    setJobs,
     handlePageChange,
   } = useFetchJobs(currentPageJobs);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
@@ -55,15 +57,41 @@ const JobPosted: React.FC = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSearchQuery(e.target.value);
 
-
   const handleJobClick = (job: any) =>
     navigate(`/recruiter/jobseekerpending/${job.id}`, { state: { job } });
+
+  const handleToggelJob = (job: any) => {
+    const updateJobStatus = async () => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/jobs/${job.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: job.status == "pending" ? "cancel" : "pending",
+          }),
+        }
+      );
+      const result = await response.json();
+      if (!result.error) {
+        const jobUpdated = {
+          ...job,
+          status: job.status == "pending" ? "cancel" : "pending",
+        };
+        const updatedJobs = jobListings.map((j) =>
+          j.id === job.id ? jobUpdated : j
+        );
+        setJobs(updatedJobs);
+      }
+    };
+
+    updateJobStatus();
+  };
   const handleCompanyClick = (company: any) =>
     navigate(`/jobseeker/detailCompany/${company.id}`, { state: { company } });
 
-
-
-  
   useEffect(() => {
     const filtered = jobListings.filter(
       (job) =>
@@ -73,115 +101,124 @@ const JobPosted: React.FC = () => {
     setFilteredJobs(filtered);
   }, [jobListings, searchQuery]);
 
- // Function to handle page change and update URL
- const handlePageUrlChange = (page: number) => {
-  setCurrentPageJobs(page);
-  const searchParams = new URLSearchParams(location.search);
-  searchParams.set("page", page.toString()); // Update page in the URL
-  navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
-};
+  // Function to handle page change and update URL
+  const handlePageUrlChange = (page: number) => {
+    setCurrentPageJobs(page);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("page", page.toString()); // Update page in the URL
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
 
-useEffect(() => {
-  // Parse the page number from the URL when component mounts
-  const params = new URLSearchParams(location.search);
-  const pageFromUrl = parseInt(params.get("page") || "1", 10);
-  setCurrentPageJobs(pageFromUrl);
-}, [location]);
+  useEffect(() => {
+    // Parse the page number from the URL when component mounts
+    const params = new URLSearchParams(location.search);
+    const pageFromUrl = parseInt(params.get("page") || "1", 10);
+    setCurrentPageJobs(pageFromUrl);
+  }, [location]);
   return (
-    
     <TooltipProvider>
       <div className="lg:pl-[250px] flex flex-col lg:flex-row bg-gray-100">
-
         <main className="flex-1 p-6">
           <div className="bg-white p-6 rounded-md shadow-md">
             <div className="bg-custom-gradient text-white p-4 rounded-t-md text-lg font-bold">
               Danh sách công việc đã đăng
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4">
-
-            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-4 sm:space-y-0 mb-4"></div>
 
             <div className="space-y-4 overflow-y-auto">
-            {loading
-        ? Array.from({ length: itemsPerPage }).map((_, index) => (
-            <div
-              key={index}
-              className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
-            >
-              <Skeleton className="w-20 h-20 rounded-full" />
-              <Skeleton className="w-20 h-8 rounded-md" />
-            </div>
-          ))
-        : jobListings.map((job, index) => {
-            // Chuyển đổi applicationDeadline sang Date và so sánh với ngày hiện tại
-            const jobDeadline = new Date(job.applicationDeadline);
-            const isExpired = jobDeadline < new Date();
-            console.log("isExpired:", isExpired);
+              {loading
+                ? Array.from({ length: itemsPerPage }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm"
+                    >
+                      <Skeleton className="w-20 h-20 rounded-full" />
+                      <Skeleton className="w-20 h-8 rounded-md" />
+                    </div>
+                  ))
+                : jobListings.map((job, index) => {
+                    // Chuyển đổi applicationDeadline sang Date và so sánh với ngày hiện tại
+                    const jobDeadline = new Date(job.applicationDeadline);
+                    const isExpired = jobDeadline < new Date();
+                    console.log("isExpired:", isExpired);
 
-            return (
-              <div
-                key={index}
-                className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex space-x-4 flex-1">
-                  <img
-                    src={job.avatar || "https://via.placeholder.com/48"}
-                    alt="company logo"
-                    className="w-20 h-20 object-cover rounded-full"
-                  />
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div className="flex items-center space-x-2 mb-1">
-                      {job.isHot && (
-                        <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
-                          Tuyển gấp
-                        </span>
-                      )}
-                      {job.isNew && (
-                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
-                          Mới
-                        </span>
-                      )}
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <h3
-                          className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
-                          onClick={() => handleJobClick(job)} // Navigate on click
-                        >
-                          {job.title}
-                        </h3>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <span>{job.title}</span>
-                      </TooltipContent>
-                    </Tooltip>
-                    <p className="text-gray-600">{job.techStack}</p>
-                    <div className="text-sm text-gray-500 flex items-center space-x-2">
-                      <FiMapPin className="text-gray-500" />
-                      <span>{job.location}</span>
-                    </div>
-                    <span className="text-sm text-red-500">Exp: {job.applicationDeadline.toLocaleDateString()}</span>
-                    <div className="text-red-500 font-semibold mt-1">
-                      {job.salary}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-row md:flex-col items-center max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
-                  <button
-                    onClick={() => handleJobClick(job)} // Navigate on click
-                    className={`${
-                      isExpired ? "bg-gray-400" : "bg-green-500"
-                    } text-white px-4 py-2 rounded-md`}
-                  >
-                    {isExpired ? "Đã hết hạn" : "Còn hạn"}
-                  </button>
-
-                </div>
-                
-              </div>
-            );
-          })}
+                    return (
+                      <div
+                        key={index}
+                        className="p-4 border rounded-md flex flex-col md:flex-row sm:min-w-[500px] justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex space-x-4 flex-1">
+                          <img
+                            src={job.avatar || "https://via.placeholder.com/48"}
+                            alt="company logo"
+                            className="w-20 h-20 object-cover rounded-full"
+                          />
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div className="flex items-center space-x-2 mb-1">
+                              {job.isHot && (
+                                <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">
+                                  Tuyển gấp
+                                </span>
+                              )}
+                              {job.isNew && (
+                                <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
+                                  Mới
+                                </span>
+                              )}
+                            </div>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <h3
+                                  className="font-bold text-lg truncate max-sm:max-w-[150px] max-w-full flex items-center cursor-pointer"
+                                  onClick={() => handleJobClick(job)} // Navigate on click
+                                >
+                                  {job.title}
+                                </h3>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <span>{job.title}</span>
+                              </TooltipContent>
+                            </Tooltip>
+                            <p className="text-gray-600">{job.techStack}</p>
+                            <div className="text-sm text-gray-500 flex items-center space-x-2">
+                              <FiMapPin className="text-gray-500" />
+                              <span>{job.location}</span>
+                            </div>
+                            <span className="text-sm text-red-500">
+                              Exp:{" "}
+                              {job.applicationDeadline.toLocaleDateString()}
+                            </span>
+                            <div className="text-red-500 font-semibold mt-1">
+                              {job.salary}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-row md:flex-col  max-md:w-full space-x-2 md:space-y-2 mt-4 md:mt-0 justify-end">
+                          <button
+                            onClick={() => handleJobClick(job)} // Navigate on click
+                            className={`${
+                              isExpired ? "bg-gray-400" : "bg-green-500"
+                            } text-white px-4 py-2 rounded-md`}
+                          >
+                            {isExpired ? "Đã hết hạn" : "Còn hạn"}
+                          </button>
+                          <button
+                            onClick={() => handleToggelJob(job)} // Navigate on click
+                            className={`${
+                              job.status == "cancel"
+                                ? "bg-green-600"
+                                : "bg-green-400"
+                            } text-white px-4 py-2 rounded-md`}
+                          >
+                            {job.status == "cancel" ? "Mở" : "Đóng"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
 
             <div className="mt-6 flex justify-between items-center">
@@ -259,7 +296,7 @@ useEffect(() => {
                   </div>
                 ))
               ) : (
-                <p>No recommended jobs available.</p>
+                <p>Chưa có công việc phù hợp nào.</p>
               )}
             </div>
             <hr className="col-span-3 border-t border-gray-300 my-4" />
@@ -283,8 +320,8 @@ useEffect(() => {
                   <div>
                     <h3 className="font-bold text-sm">{company.name}</h3>
                     <p className="text-gray-600 flex items-center w-[100px] truncate">
-                        <FiMapPin className="mr-1" /> {company.location}
-                      </p>
+                      <FiMapPin className="mr-1" /> {company.location}
+                    </p>
                     <span className="text-sm text-red-500">
                       {company.openings} công việc đang tuyển
                     </span>
@@ -295,8 +332,7 @@ useEffect(() => {
           </div>
         </aside>
       </div>
-      <Footer/>
-
+      <Footer />
     </TooltipProvider>
   );
 };
