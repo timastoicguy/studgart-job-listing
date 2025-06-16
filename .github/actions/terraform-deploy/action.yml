@@ -1,0 +1,70 @@
+name: 'Deploy'
+description: 'Deploy with Terraform and Helm'
+
+inputs:
+  app-name:
+    description: 'Application name'
+    required: true
+  tf-vars:
+    description: 'Terraform variables'
+    required: true
+    default: ''
+  subscription-id:
+    description: 'Azure subscription ID'
+    required: true
+  client-id:
+    description: 'Azure client ID'
+    required: true
+  tenant-id:
+    description: 'Azure tenant ID'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4
+
+    - name: Set up Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Export environment variables
+      shell: bash
+      run: |
+        echo "ARM_SUBSCRIPTION_ID=${{ inputs.subscription-id }}" >> $GITHUB_ENV
+
+    - name: Export Terraform variables to terraform.tfvars
+      shell: bash
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        cat <<EOF > terraform.tfvars
+        ${{ inputs.tf-vars }}
+        EOF
+
+    - name: Terraform init
+      shell: bash
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: terraform init
+
+    - name: Terraform destroy old deployment
+      shell: bash
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        terraform plan -out destroy.plan -destroy
+        terraform apply destroy.plan
+
+    - name: Terraform plan and apply new deployment
+      shell: bash
+      working-directory: ./infrastructure/deployments/${{ inputs.app-name }}
+      run: |
+        terraform plan -out deployment.plan
+        terraform apply deployment.plan

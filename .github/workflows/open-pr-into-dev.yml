@@ -1,0 +1,124 @@
+name: 'Open PR into branch develop'
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  build-typescript-frontend:
+    name: '[Frontend] Build TypeScript'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/build-typescript
+        with:
+          working-directory: frontend
+  build-docker-frontend:
+    name: '[Frontend] Build Docker'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > ./frontend/.env
+          ${{ vars.FRONTEND_ENV }}
+          EOF
+      - name: Build frontend
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdxcei4ilquet
+          context: frontend
+          dockerfile: frontend/Dockerfile
+          image-name: frontend
+          push: true
+          tag: alpha
+  build-typescript-backend:
+    name: '[Backend] Build TypeScript'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build frontend
+        uses: ./.github/actions/build-typescript
+        with:
+          working-directory: backend
+  build-docker-backend:
+    name: '[Backend] Build Docker'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > ./backend/.env
+          ${{ vars.BACKEND_ENV }}
+          EOF
+      - name: Build frontend
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdxcei4ilquet
+          context: backend
+          dockerfile: backend/Dockerfile
+          image-name: backend
+          push: true
+          tag: alpha
+  build-typescript-resume-builder:
+    name: '[Resume Builder] Build TypeScript'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Resume-Builder application
+        uses: ./.github/actions/build-typescript
+        with:
+          working-directory: Resume-Builder
+  build-docker-resume-builder:
+    name: '[Resume Builder] Build Docker'
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up .env file
+        run: |
+          cat <<EOF > ./Resume-Builder/.env
+          ${{ vars.RESUME_BUILDER_ENV }}
+          EOF
+      - name: Build Resume-Builder application
+        uses: ./.github/actions/build-docker
+        with:
+          # SERVICE PRINCIPAL
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # IMAGE DETAILS
+          azure-registry: 0g3fdxcei4ilquet
+          context: Resume-Builder
+          dockerfile: Resume-Builder/Dockerfile
+          image-name: resume-builder
+          push: true
+          tag: alpha
