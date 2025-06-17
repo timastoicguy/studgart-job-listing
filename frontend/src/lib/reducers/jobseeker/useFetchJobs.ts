@@ -17,6 +17,7 @@ interface Job {
   avatar: string;
   isHot?: boolean;
   isNew?: boolean;
+  status?: string;
 }
 export interface Favorite {
   id: string;
@@ -248,7 +249,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
       //console.log(queryString);
   
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/jobs?${queryString}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/jobs?${queryString}&status=pending`
       );
       const result: ApiResponse = await response.json();
   
@@ -347,7 +348,6 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
         );
   
         setFavertiedJobs(formattedJobs);
-        console.log("formattedJobs:", formattedJobs);
         setTotalFavertiedPagesJobs(result.data.totalPages);
       } else {
         console.warn("No valid job data found or result.data.docs is not an array");

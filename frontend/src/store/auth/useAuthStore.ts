@@ -145,6 +145,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         roleIDs.recruiter_id = recruiterResponse.data?.data[0]?._id;
+        console.log("Recruiter ID:", roleIDs.recruiter_id);
       } else if (user.role === "company") {
         const companyResponse = await apiUser.get("/companies", {
           params: { user_id: user._id },

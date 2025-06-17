@@ -54,6 +54,7 @@ export const getAllJobs = async (req: Request, res: Response) => {
       skills,
       technologies,
       employmentPosions,
+      status,
     }: any = req.query;
 
     const filter: any = {};
@@ -241,6 +242,11 @@ export const getAllJobs = async (req: Request, res: Response) => {
     // Check for urgent jobs filtering
     if (urgent) {
       filter.isUrgent = true; // Only include urgent jobs if this parameter is provided
+    }
+
+    // Lọc theo status, nếu được cung cấp
+    if (status) {
+      filter.status = status; 
     }
 
     // Modify sort criteria based on user input

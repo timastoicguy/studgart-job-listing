@@ -63,6 +63,7 @@ interface RecommendedApiResponse {
 }
 
 interface FetchJobsReturn {
+  roleIDs:any,
   jobs: Job[];
   favertiedJobs: Favorite[];
   recommendedJobs: Job[];
@@ -79,7 +80,10 @@ interface FetchJobsReturn {
   handleFavertiedPageChange: (page: number) => void;
 }
 
-export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
+export const useFetchJobs = (
+  page: number = 1,
+  recruiterId: string | null = null
+): FetchJobsReturn => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const { userData, roleIDs } = useAuthStore(); // Truy cập thông tin người dùng từ store
   const [favertiedJobs, setFavertiedJobs] = useState<Favorite[]>([]);
@@ -220,6 +224,12 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     }
   };
   const fetchJobs = async () => {
+    console.log("useFetchJobs - fetching jobs for recruiterId:", recruiterId);
+    if (!recruiterId) {
+      console.log("useFetchJobs - recruiterId is null, not fetching jobs.");
+      setLoading(false); // Set loading to false if not fetching
+      return;
+    }
     setLoading(true);
     try {
       const query = new URLSearchParams(searchParams);
@@ -236,8 +246,8 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
 
       // Add recruiter to query if not already present
       if (!query.has("recruiter")) {
-        query.set("recruiter", `${roleIDs?.recruiter_id}`); // Giá trị recruiter mặc định
-        console.log(roleIDs);
+        query.set("recruiter", recruiterId);
+        console.log(recruiterId);
       }
 
       const queryString = query.toString();
@@ -291,14 +301,12 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
   };
 
   useEffect(() => {
-    fetchJobs();
-
     fetchTopCompanies();
-  }, [searchParams, currentPageJobs, currentFavertiedPageJobs, limit]); // Include currentFavertiedPageJobs here
-
-  useEffect(() => {
-    fetchRecommendedJobs();
-  }, []);
+    fetchRecommendedJobs(); // Fetch recommended jobs when component mounts
+    if (recruiterId) {
+      fetchJobs();
+    }
+  }, [currentPageJobs, limit, recruiterId]);
 
   const updateSearchParams = (newParams: Record<string, string>) => {
     const updatedParams = new URLSearchParams(searchParams);
@@ -317,6 +325,7 @@ export const useFetchJobs = (page: number = 1): FetchJobsReturn => {
     setCurrentFavertiedPageJobs(newPage); // Update the current page
   };
   return {
+    roleIDs,
     setJobs,
     jobs,
     recommendedJobs,

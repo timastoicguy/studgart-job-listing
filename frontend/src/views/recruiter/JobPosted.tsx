@@ -26,9 +26,12 @@ import axios from "axios";
 import { notification } from "antd"; // Import notification from Ant Design
 import ConfirmationDialog from "../component/ConfirmationDialog";
 import Footer from "@/components/Footer";
+import useAuthStore from "@/store/auth/useAuthStore";
+
 
 const JobPosted: React.FC = () => {
   const itemsPerPage = 3;
+  const { userData, roleIDs } = useAuthStore(); // Get user data and roleIDs from auth store
   const jobSeekerId = "67273fea96599e898e7bbd6c"; // Replace with dynamic ID
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,7 +54,7 @@ const JobPosted: React.FC = () => {
     loading,
     setJobs,
     handlePageChange,
-  } = useFetchJobs(currentPageJobs);
+  } = useFetchJobs(currentPageJobs, roleIDs?.recruiter_id);
   const formatSalary = (salary: string) => Number(salary).toLocaleString();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
